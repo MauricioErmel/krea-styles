@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Krea Styles Prompt Builder - Assemble detailed AI image prompts with character, background, camera, and art style controls">
+    <title>Krea Styles — AI Image Prompt Builder</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header id="site-header">
+        <h1>KREA STYLES & PROMPT BUILDER</h1>
+        <p class="subtitle">Assemble detailed character prompts &amp; click style tags to build AI images</p>
+    </header>
+
+    <main class="main-layout">
+        <!-- Gallery Side -->
+        <section id="gallery-section">
+            <div class="section-header">
+                <h2>STYLE GALLERY</h2>
+                <span class="section-hint">Click any style tag to copy &amp; add to prompt</span>
+            </div>
+            <div id="gallery"></div>
+        </section>
+
+        <!-- Builder Side -->
+        <section id="builder-section">
+            <div class="builder-header">
+                <h2>PROMPT BUILDER</h2>
+                <div class="builder-actions">
+                    <button type="button" id="btn-copy-prompt-top" class="btn btn-accent">Copy Complete Prompt</button>
+                    <button type="button" id="btn-random-prompt" class="btn btn-secondary">Random Prompt</button>
+                    <button type="button" id="btn-clear-all" class="btn btn-danger">Clear All</button>
+                </div>
+            </div>
+
+            <!-- Style (top of builder) -->
+            <div class="form-card style-standalone-card">
+                <h3 class="card-section-title">STYLE <span class="tag-badge">Free text or click any style tag from the gallery</span></h3>
+                <div class="form-group">
+                    <label for="scene-style">
+                        <span>Style</span>
+                        <button type="button" class="btn-clear-field" data-clear-target="scene-style" title="Clear this field">Clear</button>
+                    </label>
+                    <div class="textarea-resize-wrapper">
+                        <textarea id="scene-style" rows="5" placeholder="e.g. An angular, 3d art style, with brush stroke color texture."></textarea>
+                        <div class="textarea-resize-handle" data-resize-target="scene-style"></div>
+                    </div>
+                    <div class="tags-container" data-field="scene-style"></div>
+                </div>
+            </div>
+
+            <!-- Scene & Environment -->
+            <div class="form-card global-scene-card">
+                <h3 class="card-section-title">
+                    <span>SCENE &amp; ENVIRONMENT</span>
+                    <div class="char-header-actions">
+                        <button type="button" id="btn-save-scene" class="btn btn-sm btn-accent" title="Save scene as JSON">Save</button>
+                        <label class="btn btn-sm btn-secondary" id="btn-load-scene-label" title="Load scene from JSON" style="cursor:pointer;">
+                            Load
+                            <input type="file" id="btn-load-scene-input" accept=".json" style="display:none;">
+                        </label>
+                    </div>
+                </h3>
+
+                <!-- Characters' Positioning (only shown when 2+ characters) -->
+                <div class="form-group hidden" id="scene-positioning-group">
+                    <label for="scene-positioning">
+                        <span>Characters' Positioning <span class="tag-badge">Relative positions between characters</span></span>
+                        <button type="button" class="btn-clear-field" data-clear-target="scene-positioning" title="Clear this field">Clear</button>
+                    </label>
+                    <div class="textarea-resize-wrapper">
+                        <textarea id="scene-positioning" rows="2" placeholder="e.g. Character 1 seated at the foreground left, Character 2 standing behind on the right..."></textarea>
+                        <div class="textarea-resize-handle" data-resize-target="scene-positioning"></div>
+                    </div>
+                    <div class="tags-container" data-field="scene-positioning"></div>
+                </div>
+
+                <!-- Other details on the scene -->
+                <div class="form-group">
+                    <label for="scene-other-details">
+                        <span>Other Details on the Scene</span>
+                        <button type="button" class="btn-clear-field" data-clear-target="scene-other-details" title="Clear this field">Clear</button>
+                    </label>
+                    <div class="textarea-resize-wrapper">
+                        <textarea id="scene-other-details" rows="4" placeholder="e.g. Behind character's shoulder, small demonic imp with dark red tint hovering..."></textarea>
+                        <div class="textarea-resize-handle" data-resize-target="scene-other-details"></div>
+                    </div>
+                    <div class="tags-container" data-field="scene-other-details"></div>
+                </div>
+
+                <!-- Background -->
+                <div class="form-group">
+                    <label for="scene-background">
+                        <span>Background</span>
+                        <button type="button" class="btn-clear-field" data-clear-target="scene-background" title="Clear this field">Clear</button>
+                    </label>
+                    <div class="textarea-resize-wrapper">
+                        <textarea id="scene-background" rows="4" placeholder="e.g. Busy atmospheric tavern, warm lantern light contrasting with cool shadows..."></textarea>
+                        <div class="textarea-resize-handle" data-resize-target="scene-background"></div>
+                    </div>
+                    <div class="tags-container" data-field="scene-background"></div>
+                </div>
+
+                <!-- Camera -->
+                <div class="form-group">
+                    <label for="scene-camera">
+                        <span>Camera</span>
+                        <button type="button" class="btn-clear-field" data-clear-target="scene-camera" title="Clear this field">Clear</button>
+                    </label>
+                    <div class="textarea-resize-wrapper">
+                        <textarea id="scene-camera" rows="3" placeholder="e.g. Shot from wrist up, character facing directly toward camera"></textarea>
+                        <div class="textarea-resize-handle" data-resize-target="scene-camera"></div>
+                    </div>
+                    <div class="tags-container" data-field="scene-camera"></div>
+                </div>
+            </div>
+
+            <!-- Multi-Character Trait Warning Summary -->
+            <div id="trait-conflict-summary" class="conflict-summary-bar hidden" role="alert">
+                <span class="warning-icon"></span>
+                <span id="conflict-summary-text">Missing character traits detected! Some characters have traits set while others are empty, which may cause AI model trait bleeding.</span>
+            </div>
+
+            <!-- Character Tabs -->
+            <div class="character-tabs-wrapper">
+                <div class="tabs-header">
+                    <label>CHARACTERS</label>
+                    <button type="button" id="btn-add-character" class="btn btn-sm btn-accent">+ Add Character</button>
+                </div>
+                <div id="character-tabs" class="character-tabs"></div>
+            </div>
+
+            <!-- Active Character Form Panel -->
+            <div id="character-form-container" class="form-card"></div>
+
+            <!-- Live Formatted Output Preview -->
+            <div class="prompt-output-card">
+                <div class="output-header">
+                    <h3>CONCATENATED PROMPT OUTPUT</h3>
+                    <div class="output-actions">
+                        <button type="button" id="btn-copy-prompt" class="btn btn-accent">Copy Complete Prompt</button>
+                    </div>
+                </div>
+                <pre id="prompt-output-preview" class="prompt-preview-box">Your generated prompt will appear here in real-time as you fill in details...</pre>
+            </div>
+
+        </section>
+    </main>
+
+    <div id="toast" class="toast" aria-live="polite"></div>
+
+    <footer id="site-footer">
+        <p>KREA STYLES &amp; PROMPT BUILDER &mdash; Click. Copy. Assemble. Create.</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
