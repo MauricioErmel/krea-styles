@@ -1,0 +1,15 @@
+Strength: 1.0 - 1.5.
+
+A bit tricky on Krea2 because of prompt adherence or god knows what:
+
+- If you try to use words that creates realism, you will absolutely need 1.5 strength
+
+- If you try to use known celebrity fanart words with specific styling like Disney Princesses then you will need 1.2+ strength.
+
+- If above two is False then 1.0 is enough in most cases.
+
+Trigger words: like comic, 2d, flat color
+
+
+Civit link:
+https://civitai.red/models/2694211/expressive-euro-cartoon?modelVersionId=3133709

@@ -1,0 +1,6 @@
+A comic book style LoRA inspired by the artwork of Frank Cho. Best results are usually achieved at strengths between 0.75 and 1.0. No trigger word is required.
+
+Trigger words: No trigger words needed.
+
+Civitai link:
+http://civitai.red/models/2788873/frank-cho-comic-book-style?modelVersionId=3142592

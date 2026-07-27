@@ -1,0 +1,18 @@
+Rusted Horizons
+Use the version of this LoRA made specifically for your chosen model. LoRA files are not always interchangeable between different model architectures.
+
+What It Does
+Rusted Horizons creates a painterly, lived-in science-fiction aesthetic filled with worn spacecraft, dusty settlements, industrial environments, and characters who feel like they are part of a working world rather than posing for a polished promotional image.
+
+The style emphasizes visible brushwork, weathered materials, practical clothing, aged machinery, and cinematic environmental storytelling. Its palette leans toward muted greys, blues, and earthy tones, often contrasted with yellow, amber, or orange accents.
+
+Recommended Prompt Starter
+For the best results, try placing this near the beginning of your prompt
+
+Cinematic narrative concept illustration, painterly semi-realistic editorial art, graphic novel style, visible brushwork,
+
+Triger words: horiz4k
+
+Civitai link:
+https://civitai.red/models/2344157/rusted-horizons?modelVersionId=3089427
+

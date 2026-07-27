@@ -1,0 +1,92 @@
+Style
+Inspired by the visual language of Simon Stålenhag’s Things from the Flood, this LoRA brings a moody, melancholic, near-future Scandinavian atmosphere to your generations. Expect muted skies, quiet roads, abandoned machinery, eerie suburban or rural environments, and a strong sense of isolation. It works especially well for landscapes, post-apocalyptic scenes, strange technology in everyday settings, and unsettling narrative imagery.
+
+Trigger
+Use YFG-SimonFlood style to reinforce the intended style.
+The trigger is not strictly required, but it can help strengthen the effect depending on the prompt.
+
+Strength
+Tested across a wide range:
+
+0.40 – 0.75 is the recommended range for most prompts
+
+0.65 is a very solid starting point
+
+Good results are possible up to 1.10 with the right prompt
+
+Above that becomes less reliable
+
+Even very low strengths around 0.10 can still leave a visible stylistic influence
+
+Key Characteristics
+Moody environmental tone – overcast skies, wet roads, winter fields, abandoned lots, and quiet urban edges.
+
+Near-future melancholy – strange machines, eerie structures, and advanced technology placed in otherwise ordinary landscapes.
+
+Cold muted palette – grays, blue-greens, pale winter light, dirty snow, and subdued industrial colors.
+
+Isolation & unease – deserted scenes, lone figures, abandoned vehicles, and a quiet apocalyptic feeling.
+
+Dark horror potential – can also lean into disturbing themes, blood, bloody ooze, and unsettling surreal imagery when prompted.
+
+Prompt Ideas
+“A snow-covered suburban road with an abandoned machine in the distance, YFG-SimonFlood style.”
+
+“A lonely figure standing in an overgrown field beside a giant rusted robot, overcast sky, muted winter light.”
+
+“A dystopian urban alley with eerie industrial structures and strange glowing architecture, melancholy Scandinavian atmosphere.”
+
+“Two abandoned insect-like machines lying in the snow near a rural road, pale sky, quiet dread.”
+
+“A rain-soaked road at dusk facing a towering humanoid machine with glowing eyes, post-apocalyptic realism.”
+
+Tips & Tricks
+Works very well with landscapes and infrastructure
+
+Roads, fields, forests, industrial outskirts, empty lots, apartment blocks, utility buildings, and suburban edges all fit naturally.
+
+Keep the mood subdued
+
+Terms like overcast, misty, rainy, snow-covered, abandoned, bleak, muted, and desolate help a lot.
+
+Use technology sparingly but meaningfully
+
+The style shines when strange machines or futuristic structures are inserted into otherwise grounded, realistic scenes.
+
+Strong for dystopian and horror themes
+
+If desired, the model can go darker with blood, gore-like ooze, unsettling figures, and ominous surrealism.
+
+Don’t over-prompt
+
+You usually do not need excessive style language. A grounded scene description plus the trigger word is often enough.
+
+Best starting point
+
+Try 0.65 strength first, then adjust up or down depending on how dominant you want the atmosphere to be.
+
+Example Prompt Themes
+The LoRA responds especially well to themes like:
+
+winter urban ruins
+
+lonely roads and fields
+
+abandoned machinery
+
+dystopian youth portraits
+
+wet concrete and snow
+
+rusted vehicles and industrial leftovers
+
+surreal towers and quiet suburbs
+
+post-apocalyptic Scandinavian landscapes
+
+YFG Simon Stålenhag – Things from the Flood is ideal when you want a scene to feel quiet, cold, strange, and emotionally heavy. It captures that specific blend of ordinary landscape + unsettling futuristic intrusion that makes the source material so memorable. Start around 0.65, keep the prompt grounded, and let the LoRA bring in the eerie atmosphere.
+
+Trigger words: YFG-SimonFlood style
+
+Civitai link:
+https://civitai.red/models/1026535/yfg-simon-stalenhag-things-from-the-flood-flux-or-krea?modelVersionId=3139340

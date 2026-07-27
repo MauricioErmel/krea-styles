@@ -1,0 +1,10 @@
+Krea 2 Release 06/27/2026
+
+Suggested strength: 0.8-1.2
+
+Been having fun with Krea 2, it works quite well and knows a lot of characters. If using multiple LoRas, lower strength to .8.
+
+Trigger words: Suggested tags: a watercolor illustration in the style of yoshitaka amano
+
+Civitai link:
+https://civitai.red/models/588789/yoshitaka-amano-final-fantasy-style-for-anima-pony-il-krea-2?modelVersionId=3076044

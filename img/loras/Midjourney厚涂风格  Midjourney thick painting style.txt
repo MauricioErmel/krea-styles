@@ -1,0 +1,18 @@
+这是一个偏向于厚涂油画风格的Lora
+This is a LoRA model leaning toward impasto oil painting style.
+触发词：MTP_style
+Krea2:
+推荐 LoRA 强度：0.95
+Recommended LoRA weight: 0.95
+推荐步数：8-10
+
+Recommended sampling steps: 8–10
+推荐 CFG：1.1
+Recommended CFG scale: 1.1
+推荐采样器: er_sde，Euler A
+Recommended samplers: er_sde, Euler A
+
+Trigger words: MTP_style
+
+Civitai link:
+https://civitai.red/models/2785232/midjourney-or-midjourney-thick-painting-style?modelVersionId=3138012

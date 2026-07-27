@@ -1,0 +1,37 @@
+
+Recommended Prompt
+Include the trigger naturally at the beginning of your prompt, for example:
+
+In the style of Dan Mora Chavez. A heroic knight standing atop ancient castle ruins at sunrise, flowing cape, intricate armor, cinematic backlighting, dynamic perspective, vibrant colors, crisp linework, highly detailed digital comic illustration.
+
+or
+
+In the style of Dan Mora Chavez. A futuristic superhero soaring above a neon-lit city skyline, dramatic foreshortening, expressive face, bold inks, dynamic action pose, cinematic lighting, polished digital painting.
+
+Style Characteristics
+Clean, confident comic-book linework
+
+Dynamic anatomy and expressive poses
+
+Cinematic composition and perspective
+
+Bold lighting with dramatic contrast
+
+Vibrant, saturated color palettes
+
+Detailed costumes, armor, and character designs
+
+Heroic fantasy and superhero aesthetics
+
+Crisp silhouettes and readable forms
+
+Polished digital painting over strong inks
+
+Action-focused visual storytelling
+
+This LoRA excels at fantasy, superheroes, science fiction, original characters, creatures, and action scenes, while also producing striking portraits and highly stylized illustrations with a polished modern comic-book finish.
+
+Trigger words: In the style of Dan Mora Chavez
+
+Civitai link:
+https://civitai.red/models/2793943/dan-mora-chavez-style?modelVersionId=3148918

@@ -17,10 +17,16 @@
         <!-- Gallery Side -->
         <section id="gallery-section">
             <div class="section-header">
-                <h2>STYLE GALLERY</h2>
-                <span class="section-hint">Click any style tag to copy &amp; add to prompt</span>
+                <div class="gallery-tabs">
+                    <button class="gallery-tab active" data-tab="styles" id="tab-styles">STYLE GALLERY</button>
+                    <button class="gallery-tab" data-tab="loras" id="tab-loras">LoRAs</button>
+                </div>
+                <span class="section-hint" id="gallery-hint">Click any style tag to copy &amp; add to prompt</span>
             </div>
-            <div id="gallery"></div>
+            <div id="gallery-panels">
+                <div id="gallery" class="gallery-panel active"></div>
+                <div id="lora-gallery" class="gallery-panel"></div>
+            </div>
         </section>
 
         <!-- Builder Side -->

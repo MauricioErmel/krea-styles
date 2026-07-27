@@ -1,0 +1,24 @@
+KREA 2
+Showcase images :
+
+Turbo model : 10 steps / CFG 1 & Euler simple
+
+944x1408
+
+x2 Hires (10 steps, 0.35 with 4x_NMKD_Siax)
+
+Lora strength 1.3
+
+IDEOGRAM 4
+Json caption style with :
+
+art_style : Naoki Urasawa style
+
+medium : manga
+
+aesthetics : black_and_white
+
+Trigger words: No trigger words needed
+
+Civitai link:
+https://civitai.red/models/690155/manga-style-naoki-urasawa?modelVersionId=3087718

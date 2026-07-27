@@ -1,0 +1,4 @@
+Trigger words: illustration
+
+Civitai link:
+https://civitai.red/models/2762376/krea-2-moebiusjean-giraud-lora?modelVersionId=3108904

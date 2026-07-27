@@ -617,7 +617,488 @@ async function copyToClipboard(text) {
 }
 
 
+// ==============================================
+// LoRA DATA & GALLERY
+// ==============================================
+
+const LORA_DATA = [
+    {
+        name: "@motocross saito Style",
+        file: "@motocross saito Style.webp",
+        triggerWords: "@motocross saito, pixel art",
+        description: `Trigger words: @motocross saito, pixel art
+
+Civitai link:
+https://civitai.red/models/2782223/motocross-saito-style?modelVersionId=3133600`,
+        civitaiLink: "https://civitai.red/models/2782223/motocross-saito-style?modelVersionId=3133600"
+    },
+    {
+        name: "Dan Mora Chavez Style",
+        file: "Dan Mora Chavez Style.webp",
+        triggerWords: "In the style of Dan Mora Chavez",
+        description: `Recommended Prompt
+Include the trigger naturally at the beginning of your prompt, for example:
+
+In the style of Dan Mora Chavez. A heroic knight standing atop ancient castle ruins at sunrise, flowing cape, intricate armor, cinematic backlighting, dynamic perspective, vibrant colors, crisp linework, highly detailed digital comic illustration.
+
+or
+
+In the style of Dan Mora Chavez. A futuristic superhero soaring above a neon-lit city skyline, dramatic foreshortening, expressive face, bold inks, dynamic action pose, cinematic lighting, polished digital painting.
+
+Style Characteristics
+Clean, confident comic-book linework
+Dynamic anatomy and expressive poses
+Cinematic composition and perspective
+Bold lighting with dramatic contrast
+Vibrant, saturated color palettes
+Detailed costumes, armor, and character designs
+Heroic fantasy and superhero aesthetics
+Crisp silhouettes and readable forms
+Polished digital painting over strong inks
+Action-focused visual storytelling
+
+This LoRA excels at fantasy, superheroes, science fiction, original characters, creatures, and action scenes, while also producing striking portraits and highly stylized illustrations with a polished modern comic-book finish.`,
+        civitaiLink: "https://civitai.red/models/2793943/dan-mora-chavez-style?modelVersionId=3148918"
+    },
+    {
+        name: "Dark Fantasy Dariusz Kieliszek style",
+        file: "Dark Fantasy Dariusz Kieliszek style.webp",
+        triggerWords: "Dark fantasy illustrations based on Dariusz Kieliszek fantastic art.",
+        description: `Trigger words: Dark fantasy illustrations based on Dariusz Kieliszek fantastic art.`,
+        civitaiLink: "https://civitai.red/models/2537062/dark-fantasy-dariusz-kieliszek-style?modelVersionId=3125351"
+    },
+    {
+        name: "Dark Fantasy KREA 2, SDXL",
+        file: "Dark Fantasy KREA 2, SDXL.webp",
+        triggerWords: "Dark Fantasy Art Style",
+        description: `Additional Element Tags:
+Muted Colors
+Grainy / Grainy Texture
+Painterly Texture
+Hellish
+Doom
+Gloomy
+Eerie Atmosphere
+Haunting Details
+Gothic
+Macabre
+Eldritch
+Otherworldly
+
+Example Prompt:
+Dark Fantasy Art Style, a painting/drawing/illustration of (your prompt), eerie atmosphere, grainy, painterly texture`,
+        civitaiLink: "https://civitai.red/models/1223108/dark-fantasy-or-krea-2-sdxl?modelVersionId=3162242"
+    },
+    {
+        name: "Expressive Euro Cartoon",
+        file: "Expressive Euro Cartoon.webp",
+        triggerWords: "like comic, 2d, flat color",
+        description: `Strength: 1.0 - 1.5.
+
+A bit tricky on Krea2 because of prompt adherence or god knows what:
+
+- If you try to use words that creates realism, you will absolutely need 1.5 strength
+- If you try to use known celebrity fanart words with specific styling like Disney Princesses then you will need 1.2+ strength.
+- If above two is False then 1.0 is enough in most cases.`,
+        civitaiLink: "https://civitai.red/models/2694211/expressive-euro-cartoon?modelVersionId=3133709"
+    },
+    {
+        name: "Frank Cho Comic Book Style",
+        file: "Frank Cho Comic Book Style.webp",
+        triggerWords: "No trigger words needed.",
+        description: `A comic book style LoRA inspired by the artwork of Frank Cho. Best results are usually achieved at strengths between 0.75 and 1.0. No trigger word is required.`,
+        civitaiLink: "http://civitai.red/models/2788873/frank-cho-comic-book-style?modelVersionId=3142592"
+    },
+    {
+        name: "IdontknowhowtonamethisArtStyle",
+        file: "IdontknowhowtonamethisArtStyle.webp",
+        triggerWords: "An angular, 3d art style, with brush stroke color texture",
+        description: `Trigger words: An angular, 3d art style, with brush stroke color texture`,
+        civitaiLink: "https://civitai.com/models/2781650/idontknowhowtonamethisartstyle"
+    },
+    {
+        name: "Jeff Easley Style - Krea 2",
+        file: "Jeff Easley Style - Krea 2.webp",
+        triggerWords: "vintage fantasy oil painting in the style of Jeff Easley",
+        description: `It perfectly replicates the legendary oil-painting aesthetic famous for Dungeons & Dragons (AD&D) rulebook covers, fierce dragons, gritty heroes, and atmospheric sword-and-sorcery illustrations.
+
+🚀 What's New in V2?
+Massive Dataset: 107 high-quality curated images.
+
+⚙️ Training Details & Dataset Info:
+Dataset Size: 107 Images (fully captioned and tagged)
+Training Resolution: 512 x 512 pixels
+Total Training Steps: 3,585 Steps
+Total Epochs: 67 Epochs (Batch Size 2 in OneTrainer)
+
+🔧 Recommended Generation Settings:
+LoRA Weight: 0.5 - 0.7
+Sweetspot: 0.6 (All showcase/example images were generated exactly at 0.6 weight for the perfect balance of style and flexibility!)
+CFG Scale: 3.5 - 5.5 (Keep it lower for that authentic, analog hand-painted texture)
+
+📝 Prompting Tips:
+To get the absolute best out of this V2, mix the trigger phrase with classic dark fantasy keywords:
+oil on canvas, cinematic chiaroscuro, heavy shadows, dramatic lighting, detailed armor, dynamic combat stance, retro fantasy book cover illustration.`,
+        civitaiLink: "https://civitai.red/models/2765523/jeff-easley-style-krea-2?modelVersionId=3118577"
+    },
+    {
+        name: "Katsuya Terada style",
+        file: "Katsuya Terada style.webp",
+        triggerWords: "katsuyak2style, Dynamic, highly detailed pen-and-ink linework with expressive brush strokes, intricate cross-hatching, fluid anatomy, cinematic composition, bold perspective, organic textures, and a fusion of manga-inspired energy with painterly fantasy realism; dramatic lighting, rich visual storytelling, and meticulous handcrafted detail.",
+        description: `Trigger words: katsuyak2style, Dynamic, highly detailed pen-and-ink linework with expressive brush strokes, intricate cross-hatching, fluid anatomy, cinematic composition, bold perspective, organic textures, and a fusion of manga-inspired energy with painterly fantasy realism; dramatic lighting, rich visual storytelling, and meticulous handcrafted detail.`,
+        civitaiLink: "https://civitai.red/models/2752263/katsuya-terada-style?modelVersionId=3096446"
+    },
+    {
+        name: "Krea 2 Moebius/Jean Giraud LoRA",
+        file: "Krea 2 MoebiusJean Giraud LoRA.webp",
+        triggerWords: "illustration",
+        description: `Trigger words: illustration`,
+        civitaiLink: "https://civitai.red/models/2762376/krea-2-moebiusjean-giraud-lora?modelVersionId=3108904"
+    },
+    {
+        name: "Manga style (Naoki Urasawa)",
+        file: "Manga style (Naoki Urasawa).webp",
+        triggerWords: "No trigger words needed",
+        description: `KREA 2
+Showcase images:
+
+Turbo model: 10 steps / CFG 1 & Euler simple
+944x1408
+x2 Hires (10 steps, 0.35 with 4x_NMKD_Siax)
+Lora strength 1.3
+
+IDEOGRAM 4
+Json caption style with:
+art_style: Naoki Urasawa style
+medium: manga
+aesthetics: black_and_white`,
+        civitaiLink: "https://civitai.red/models/690155/manga-style-naoki-urasawa?modelVersionId=3087718"
+    },
+    {
+        name: "Midjourney thick painting style",
+        file: "Midjourney\u539A\u6D82\u98CE\u683C  Midjourney thick painting style.webp",
+        triggerWords: "MTP_style",
+        description: `This is a LoRA model leaning toward impasto oil painting style.
+
+Krea2:
+Recommended LoRA weight: 0.95
+Recommended sampling steps: 8\u201310
+Recommended CFG scale: 1.1
+Recommended samplers: er_sde, Euler A`,
+        civitaiLink: "https://civitai.red/models/2785232/midjourney-or-midjourney-thick-painting-style?modelVersionId=3138012"
+    },
+    {
+        name: "ogipote\u837Bpote style",
+        file: "ogipote\u837Bpote style.webp",
+        triggerWords: "Ogipote style",
+        description: `Trigger words: Ogipote style`,
+        civitaiLink: "https://civitai.red/models/2529695/ogipotepote-style?modelVersionId=3094753"
+    },
+    {
+        name: "Pall Wash - A Versatile Dark Fantasy Anime Style",
+        file: "Pall Wash - A Versatile Dark Fantasy Anime Style.webp",
+        triggerWords: "pallwash",
+        description: `A versatile anime style LoRA with serious range. Confident linework, dramatic lighting, and color that swings from richly saturated to moody and muted depending on what you ask for. (Occult, ritual, and horror-adjacent imagery is where it's most confident and least effort, but it holds up just as well outside that lane: clean portraits, landscapes, dynamic action, multi-character scenes and NSFW).
+
+Trigger must come before quality tags (masterpiece, best quality, etc.), not after. I find that using LESS quality tags = better result. Usually I stick with masterpiece, absurdres and that's it.
+
+Heads up: left to its own devices on a sparse prompt, Pall Wash leans surreal and uncanny. Skulls, glowing eyes, unsettling accents show up even when you didn't ask. Want something cleaner? Be specific in your positive prompt and add a few exclusionary negatives (skull, flames, horror, undead). If you want the weird, it's as easy as hitting run.
+
+Suggested Settings:
+DPM++ 2M Karras, or Euler A / Beta 57/Karras (or experiment! It's a matter of preference)
+CFG 6\u20136.5, (if using DaSiWa Checkpoints, lower this to 5.0)`,
+        civitaiLink: "https://civitai.red/models/2719146/pall-wash-a-versatile-dark-fantasy-anime-style-illanimakrea-2?modelVersionId=3118088"
+    },
+    {
+        name: "Path of Exile 2 style",
+        file: "Path of Exile 2 style.webp",
+        triggerWords: "poe2k2style",
+        description: `Trigger words: poe2k2style`,
+        civitaiLink: "https://civitai.red/models/2208918/path-of-exile-2-style?modelVersionId=3099687"
+    },
+    {
+        name: "Rusted Horizons",
+        file: "Rusted Horizons.webp",
+        triggerWords: "horiz4k",
+        description: `Rusted Horizons
+Use the version of this LoRA made specifically for your chosen model. LoRA files are not always interchangeable between different model architectures.
+
+What It Does
+Rusted Horizons creates a painterly, lived-in science-fiction aesthetic filled with worn spacecraft, dusty settlements, industrial environments, and characters who feel like they are part of a working world rather than posing for a polished promotional image.
+
+The style emphasizes visible brushwork, weathered materials, practical clothing, aged machinery, and cinematic environmental storytelling. Its palette leans toward muted greys, blues, and earthy tones, often contrasted with yellow, amber, or orange accents.
+
+Recommended Prompt Starter
+For the best results, try placing this near the beginning of your prompt:
+Cinematic narrative concept illustration, painterly semi-realistic editorial art, graphic novel style, visible brushwork,`,
+        civitaiLink: "https://civitai.red/models/2344157/rusted-horizons?modelVersionId=3089427"
+    },
+    {
+        name: "YFG Simon St\u00E5lenhag - Things from the Flood",
+        file: "YFG Simon St\u00E5lenhag Things from the Flood Flux  Krea.webp",
+        triggerWords: "YFG-SimonFlood style",
+        description: `Style
+Inspired by the visual language of Simon St\u00E5lenhag\u2019s Things from the Flood, this LoRA brings a moody, melancholic, near-future Scandinavian atmosphere to your generations. Expect muted skies, quiet roads, abandoned machinery, eerie suburban or rural environments, and a strong sense of isolation. It works especially well for landscapes, post-apocalyptic scenes, strange technology in everyday settings, and unsettling narrative imagery.
+
+Trigger
+Use YFG-SimonFlood style to reinforce the intended style.
+The trigger is not strictly required, but it can help strengthen the effect depending on the prompt.
+
+Strength
+Tested across a wide range:
+0.40 \u2013 0.75 is the recommended range for most prompts
+0.65 is a very solid starting point
+Good results are possible up to 1.10 with the right prompt
+Above that becomes less reliable
+Even very low strengths around 0.10 can still leave a visible stylistic influence
+
+Key Characteristics
+Moody environmental tone \u2013 overcast skies, wet roads, winter fields, abandoned lots, and quiet urban edges.
+Near-future melancholy \u2013 strange machines, eerie structures, and advanced technology placed in otherwise ordinary landscapes.
+Cold muted palette \u2013 grays, blue-greens, pale winter light, dirty snow, and subdued industrial colors.
+Isolation & unease \u2013 deserted scenes, lone figures, abandoned vehicles, and a quiet apocalyptic feeling.
+Dark horror potential \u2013 can also lean into disturbing themes, blood, bloody ooze, and unsettling surreal imagery when prompted.
+
+Prompt Ideas
+\u201CA snow-covered suburban road with an abandoned machine in the distance, YFG-SimonFlood style.\u201D
+\u201CA lonely figure standing in an overgrown field beside a giant rusted robot, overcast sky, muted winter light.\u201D
+\u201CA dystopian urban alley with eerie industrial structures and strange glowing architecture, melancholy Scandinavian atmosphere.\u201D
+
+Tips & Tricks
+Works very well with landscapes and infrastructure.
+Keep the mood subdued \u2013 terms like overcast, misty, rainy, snow-covered, abandoned, bleak, muted, and desolate help a lot.
+Use technology sparingly but meaningfully.
+Don\u2019t over-prompt \u2013 a grounded scene description plus the trigger word is often enough.
+Best starting point: Try 0.65 strength first, then adjust up or down depending on how dominant you want the atmosphere to be.`,
+        civitaiLink: "https://civitai.red/models/1026535/yfg-simon-stalenhag-things-from-the-flood-flux-or-krea?modelVersionId=3139340"
+    },
+    {
+        name: "YOSHITAKA AMANO - Final Fantasy Style",
+        file: "YOSHITAKA AMANO - Final Fantasy Style.webp",
+        triggerWords: "a watercolor illustration in the style of yoshitaka amano",
+        description: `Krea 2 Release 06/27/2026
+
+Suggested strength: 0.8-1.2
+
+Been having fun with Krea 2, it works quite well and knows a lot of characters. If using multiple LoRas, lower strength to .8.
+
+Trigger words: Suggested tags: a watercolor illustration in the style of yoshitaka amano`,
+        civitaiLink: "https://civitai.red/models/588789/yoshitaka-amano-final-fantasy-style-for-anima-pony-il-krea-2?modelVersionId=3076044"
+    },
+    {
+        name: "Z3ZZ4 Krea 2",
+        file: "Z3ZZ4 Krea 2.webp",
+        triggerWords: "No trigger words needed",
+        description: `BASE Model: Krea 2 Raw
+Recommend using the 5000 version, with the 2000 version as a backup.
+
+Training on ModelsSope
+
+Trigger words: No trigger words needed`,
+        civitaiLink: "https://civitai.red/models/2771337/z3zz4-krea-2?modelVersionId=3120222"
+    }
+];
+
+
+// ---- Build LoRA Gallery ----
+let currentExpandedLora = null;
+
+function buildLoraGallery() {
+    const loraGallery = document.getElementById('lora-gallery');
+
+    LORA_DATA.forEach((lora, index) => {
+        const card = document.createElement('div');
+        card.className = 'lora-card';
+        card.id = `lora-card-${index}`;
+        card.dataset.loraIndex = index;
+
+        const img = document.createElement('img');
+        img.className = 'lora-card-image';
+        img.src = `img/loras/${lora.file}`;
+        img.alt = lora.name;
+        img.loading = 'lazy';
+        card.appendChild(img);
+
+        const title = document.createElement('div');
+        title.className = 'lora-card-title';
+        title.textContent = lora.name;
+        title.title = lora.name;
+        card.appendChild(title);
+
+        card.addEventListener('click', () => handleLoraCardClick(index));
+
+        loraGallery.appendChild(card);
+    });
+}
+
+function handleLoraCardClick(index) {
+    const loraGallery = document.getElementById('lora-gallery');
+    const lora = LORA_DATA[index];
+    const card = document.getElementById(`lora-card-${index}`);
+
+    // If clicking the same card that's already expanded, collapse it
+    if (currentExpandedLora === index) {
+        collapseLoraPanel();
+        return;
+    }
+
+    // Collapse any existing panel first
+    collapseLoraPanel(false);
+
+    // Mark selection state
+    currentExpandedLora = index;
+    loraGallery.classList.add('has-selection');
+
+    // Remove previous selection
+    loraGallery.querySelectorAll('.lora-card.lora-selected').forEach(c => c.classList.remove('lora-selected'));
+    card.classList.add('lora-selected');
+
+    // Copy trigger words to clipboard and replace style
+    copyToClipboard(lora.triggerWords).then(success => {
+        if (success) {
+            showToast(`COPIED & APPLIED: ${lora.name}`);
+        }
+    });
+    appendStyleToBuilder(lora.triggerWords);
+
+    // Create the info panel
+    const panel = createLoraInfoPanel(lora, index);
+
+    // Find the last card in the same row as the clicked card so no cards in the row shift position
+    const allCards = Array.from(loraGallery.querySelectorAll('.lora-card'));
+    const clickedCardTop = card.offsetTop;
+    const rowCards = allCards.filter(c => Math.abs(c.offsetTop - clickedCardTop) < 10);
+    const lastCardInRow = rowCards[rowCards.length - 1] || card;
+
+    // Insert the panel right after the last card in the row
+    lastCardInRow.insertAdjacentElement('afterend', panel);
+
+    // Scroll to the panel smoothly
+    setTimeout(() => {
+        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 50);
+}
+
+function createLoraInfoPanel(lora, index) {
+    const panel = document.createElement('div');
+    panel.className = 'lora-info-panel';
+    panel.id = 'lora-info-panel-active';
+
+    // Header with title and close button
+    const header = document.createElement('div');
+    header.className = 'lora-info-header';
+
+    const title = document.createElement('span');
+    title.className = 'lora-info-title';
+    title.textContent = lora.name;
+
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'lora-info-close';
+    closeBtn.textContent = '×';
+    closeBtn.title = 'Close';
+    closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        collapseLoraPanel();
+    });
+
+    header.appendChild(title);
+    header.appendChild(closeBtn);
+    panel.appendChild(header);
+
+    // Description
+    const desc = document.createElement('div');
+    desc.className = 'lora-info-description';
+    desc.textContent = lora.description;
+    panel.appendChild(desc);
+
+    // Trigger words section
+    const triggerSection = document.createElement('div');
+    triggerSection.className = 'lora-trigger-section';
+
+    const triggerLabel = document.createElement('span');
+    triggerLabel.className = 'lora-trigger-label';
+    triggerLabel.textContent = 'TRIGGER WORDS';
+    triggerSection.appendChild(triggerLabel);
+
+    const triggerWord = document.createElement('span');
+    triggerWord.className = 'lora-trigger-word';
+    triggerWord.textContent = lora.triggerWords;
+    triggerWord.title = 'Click to copy trigger words';
+    triggerWord.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const success = await copyToClipboard(lora.triggerWords);
+        if (success) {
+            showToast(`TRIGGER WORDS COPIED: ${lora.triggerWords.substring(0, 40)}${lora.triggerWords.length > 40 ? '...' : ''}`);
+        }
+        appendStyleToBuilder(lora.triggerWords);
+    });
+    triggerSection.appendChild(triggerWord);
+    panel.appendChild(triggerSection);
+
+    // Civitai button
+    if (lora.civitaiLink) {
+        const civitaiBtn = document.createElement('a');
+        civitaiBtn.className = 'lora-civitai-btn';
+        civitaiBtn.href = lora.civitaiLink;
+        civitaiBtn.target = '_blank';
+        civitaiBtn.rel = 'noopener noreferrer';
+        civitaiBtn.textContent = 'View on Civitai';
+        civitaiBtn.addEventListener('click', (e) => e.stopPropagation());
+        panel.appendChild(civitaiBtn);
+    }
+
+    // Prevent clicks inside the panel from collapsing it
+    panel.addEventListener('click', (e) => e.stopPropagation());
+
+    return panel;
+}
+
+function collapseLoraPanel(resetSelection = true) {
+    const existingPanel = document.getElementById('lora-info-panel-active');
+    if (existingPanel) {
+        existingPanel.remove();
+    }
+
+    if (resetSelection) {
+        currentExpandedLora = null;
+        const loraGallery = document.getElementById('lora-gallery');
+        loraGallery.classList.remove('has-selection');
+        loraGallery.querySelectorAll('.lora-card.lora-selected').forEach(c => c.classList.remove('lora-selected'));
+    }
+}
+
+// ---- Gallery Tab Switching ----
+function initGalleryTabs() {
+    const tabs = document.querySelectorAll('.gallery-tab');
+    const hint = document.getElementById('gallery-hint');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            // Collapse any open LoRA panel when switching tabs
+            collapseLoraPanel(true);
+
+            // Update active tab
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            // Switch panels
+            const targetTab = tab.dataset.tab;
+            document.querySelectorAll('.gallery-panel').forEach(p => p.classList.remove('active'));
+
+            if (targetTab === 'styles') {
+                document.getElementById('gallery').classList.add('active');
+                hint.textContent = 'Click any style tag to copy & add to prompt';
+            } else {
+                document.getElementById('lora-gallery').classList.add('active');
+                hint.textContent = 'Click any LoRA to copy trigger words & view details';
+            }
+        });
+    });
+}
+
+
 // ---- Build Gallery ----
+
 function buildGallery() {
     const gallery = document.getElementById('gallery');
 
@@ -1702,5 +2183,7 @@ function initPromptBuilder() {
 // ---- Init ----
 document.addEventListener('DOMContentLoaded', () => {
     buildGallery();
+    buildLoraGallery();
+    initGalleryTabs();
     initPromptBuilder();
 });

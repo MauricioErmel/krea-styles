@@ -1,0 +1,35 @@
+It perfectly replicates the legendary oil-painting aesthetic famous for Dungeons & Dragons (AD&D) rulebook covers, fierce dragons, gritty heroes, and atmospheric sword-and-sorcery illustrations.
+
+🚀 What's New in V2?
+
+Massive Dataset: 107 high-quality curated images.
+
+⚙️ Training Details & Dataset Info:
+
+Dataset Size: 107 Images (fully captioned and tagged)
+
+Training Resolution: 512 x 512 pixels
+
+Total Training Steps: 3,585 Steps
+
+Total Epochs: 67 Epochs (Batch Size 2 in OneTrainer)
+
+🔧 Recommended Generation Settings:
+
+LoRA Weight: 0.5 - 0.7
+
+Sweetspot: 0.6 (All showcase/example images were generated exactly at 0.6 weight for the perfect balance of style and flexibility!)
+
+CFG Scale: 3.5 - 5.5 (Keep it lower for that authentic, analog hand-painted texture)
+
+📝 Prompting Tips:
+
+To get the absolute best out of this V2, mix the trigger phrase with classic dark fantasy keywords:
+
+oil on canvas, cinematic chiaroscuro, heavy shadows, dramatic lighting, detailed armor, dynamic combat stance, retro fantasy book cover illustration.
+
+Trigger words: vintage fantasy oil painting in the style of Jeff Easley
+
+Civitai link:
+https://civitai.red/models/2765523/jeff-easley-style-krea-2?modelVersionId=3118577
+

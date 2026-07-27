@@ -1,0 +1,32 @@
+Additional Element Tags:
+Muted Colors
+
+Grainy / Grainy Texture
+
+Painterly Texture
+
+Hellish
+
+Doom
+
+Gloomy
+
+Eerie Atmosphere
+
+Haunting Details
+
+Gothic
+
+Macabre
+
+Eldritch
+
+Otherworldly
+
+Example Prompt:
+Dark Fantasy Art Style, a painting/drawing/illustration of (your prompt), eerie atmosphere, grainy, painterly texture
+
+Trigger words: Dark Fantasy Art Style
+
+Civitai link:
+https://civitai.red/models/1223108/dark-fantasy-or-krea-2-sdxl?modelVersionId=3162242

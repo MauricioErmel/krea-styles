@@ -1,0 +1,15 @@
+A versatile anime style LoRA with serious range. Confident linework, dramatic lighting, and color that swings from richly saturated to moody and muted depending on what you ask for. (Occult, ritual, and horror-adjacent imagery is where it's most confident and least effort, but it holds up just as well outside that lane: clean portraits, landscapes, dynamic action, multi-character scenes and NSFW).
+
+Trigger must come before quality tags (masterpiece, best quality, etc.), not after. I find that using LESS quality tags = better result. Usually I stick with masterpiece, absurdres and that's it.
+
+Heads up: left to its own devices on a sparse prompt, Pall Wash leans surreal and uncanny. Skulls, glowing eyes, unsettling accents show up even when you didn't ask. Want something cleaner? Be specific in your positive prompt and add a few exclusionary negatives (skull, flames, horror, undead). If you want the weird, it's as easy as hitting run.
+
+Suggested Settings:
+
+DPM++ 2M Karras, or Euler A / Beta 57/Karras (or experiment! It's a matter of preference)
+CFG 6–6.5, (if using DaSiWa Checkpoints, lower this to 5.0)
+
+Trigger words: pallwash
+
+Civitai link:
+https://civitai.red/models/2719146/pall-wash-a-versatile-dark-fantasy-anime-style-illanimakrea-2?modelVersionId=3118088

@@ -267,6 +267,306 @@ body {
 }
 
 
+/* --- Gallery Tab Navigation --- */
+.gallery-tabs {
+    display: flex;
+    gap: 4px;
+}
+
+.gallery-tab {
+    font-family: var(--font-retro);
+    font-size: 20px;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-bottom: 2px solid transparent;
+    padding: 6px 16px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-transform: uppercase;
+}
+
+.gallery-tab:hover {
+    color: var(--text-bright);
+    border-bottom-color: var(--border-highlight);
+}
+
+.gallery-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    text-shadow: 0 0 10px var(--accent-glow);
+}
+
+/* --- Gallery Panels --- */
+.gallery-panel {
+    display: none !important;
+}
+
+.gallery-panel.active {
+    display: flex !important;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* --- LoRA Gallery Grid --- */
+#lora-gallery.gallery-panel.active {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+/* --- LoRA Card --- */
+.lora-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, opacity 0.35s ease;
+    position: relative;
+}
+
+.lora-card:hover {
+    border-color: var(--border-highlight);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.lora-card-image {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    display: block;
+    transition: filter 0.3s ease;
+}
+
+.lora-card:hover .lora-card-image {
+    filter: brightness(1.1);
+}
+
+.lora-card-title {
+    padding: 10px 12px;
+    font-family: var(--font-retro);
+    font-size: 15px;
+    color: var(--text-bright);
+    letter-spacing: 1px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --- LoRA Selection / Dimming States --- */
+#lora-gallery.has-selection .lora-card {
+    opacity: 0.25;
+    filter: grayscale(0.5);
+    pointer-events: auto;
+}
+
+#lora-gallery.has-selection .lora-card:hover {
+    opacity: 0.5;
+    filter: grayscale(0.2);
+}
+
+#lora-gallery.has-selection .lora-card.lora-selected {
+    opacity: 1;
+    filter: none;
+    border-color: var(--accent-dim);
+    box-shadow: 0 0 25px var(--accent-glow), 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* --- LoRA Expanded Info Panel --- */
+.lora-info-panel {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, var(--bg-card) 0%, #0e1a1e 100%);
+    border: 1px solid var(--accent-dim);
+    border-radius: 4px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: loraInfoSlideIn 0.35s ease forwards;
+    box-shadow: 0 0 30px var(--accent-glow), 0 8px 40px rgba(0, 0, 0, 0.6);
+    position: relative;
+    overflow: hidden;
+}
+
+.lora-info-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent-glow);
+}
+
+@keyframes loraInfoSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+        padding: 0 24px;
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 2000px;
+        padding: 24px;
+    }
+}
+
+.lora-info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed var(--border);
+    padding-bottom: 12px;
+}
+
+.lora-info-title {
+    font-family: var(--font-retro);
+    font-size: 22px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px var(--accent-glow);
+}
+
+.lora-info-close {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: var(--font-retro);
+    font-size: 20px;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.lora-info-close:hover {
+    color: var(--danger);
+    border-color: rgba(255, 68, 68, 0.5);
+    background: var(--danger-bg);
+}
+
+.lora-info-description {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+/* --- Trigger Words Section --- */
+.lora-trigger-section {
+    background: rgba(0, 255, 136, 0.03);
+    border: 1px solid rgba(0, 255, 136, 0.15);
+    border-radius: 4px;
+    padding: 14px;
+}
+
+.lora-trigger-label {
+    font-family: var(--font-retro);
+    font-size: 14px;
+    color: var(--accent-dim);
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.lora-trigger-word {
+    display: inline-block;
+    background: rgba(0, 255, 136, 0.08);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 5px 12px;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+    margin: 3px 4px 3px 0;
+}
+
+.lora-trigger-word:hover {
+    background: rgba(0, 255, 136, 0.2);
+    border-color: var(--accent);
+    box-shadow: 0 0 12px var(--accent-glow);
+    transform: translateY(-1px);
+    text-shadow: 0 0 8px var(--accent-glow);
+}
+
+.lora-trigger-word:active {
+    transform: translateY(0);
+}
+
+/* --- Civitai Button --- */
+.lora-civitai-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 8px 16px;
+    border-radius: 3px;
+    cursor: pointer;
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    background: rgba(59, 130, 246, 0.06);
+    color: #60a5fa;
+    letter-spacing: 1px;
+    transition: all 0.25s ease;
+    text-decoration: none;
+    align-self: flex-start;
+}
+
+.lora-civitai-btn:hover {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: #60a5fa;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+    color: #93bbfc;
+}
+
+.lora-civitai-btn::after {
+    content: '↗';
+    font-size: 14px;
+}
+
+/* --- LoRA Gallery Responsive --- */
+@media (max-width: 1100px) {
+    #lora-gallery.active {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    #lora-gallery.active {
+        grid-template-columns: 1fr;
+    }
+
+    .gallery-tabs {
+        flex-wrap: wrap;
+    }
+
+    .gallery-tab {
+        font-size: 16px;
+        padding: 4px 10px;
+    }
+
+    .lora-info-panel {
+        padding: 16px;
+    }
+}
 
 
 /* --- Builder Section (Sticky Panel) --- */

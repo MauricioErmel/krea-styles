@@ -1,0 +1,9 @@
+BASE Model:Krea 2 Raw
+Recommend using the 5000 version, with the 2000 version as a backup.
+
+Training on ModelsSope
+
+Trigger words: No trigger words needed
+
+Civitai link:
+https://civitai.red/models/2771337/z3zz4-krea-2?modelVersionId=3120222
