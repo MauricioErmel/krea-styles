@@ -1291,7 +1291,7 @@ const STYLE_CATEGORIES = [
 // ---- Shared Theme Demonstration Prompts ----
 const THEME_DEMO_PROMPTS = {
     'fantasy': {
-        'simple': `A woman in fullplate walking between the market stalls of a crowded fantasy city. `,
+        'simple': `a female elf wearing a kirtle holding a lantern, wading through still marsh water at night, waist-deep, thick fog hanging heavy just above the moonlit waterline.`,
         'complex': `A low-angle camera shot looking upward, emphasizing the height difference between two characters at night. They stand before a hovel in a tenement yard in a poor quarter of a great medieval city, where all the surrounding dwellings are little more than lean-to shacks. A torch in the foreground casts its warm, flickering light upon them, creating deep shadows and dynamic highlights. 
 
 Character-1: A lean human male, height 1.70m (5'7"), with a weathered but youthful face, angular jaw, full beard, warm light skin, and brown eyes. Long dirty-blond hair gathered in a low bun with loose wavy strands framing his face. He wears leather-and-mail armor with a pauldron and a rust-orange cape. He stands upright, body turned three-quarters toward the camera, hands on his hips. Pose: Standing up, body turned three-quarters toward the camera, hands resting on the hips. Expression: Confusion. One eyebrow is raised high while the other dips downward in an asymmetrical slant. He stares directly into the camera.
@@ -1300,9 +1300,15 @@ Character-2: A massively built half-orc female, height 2.05m (6'7"), with broad 
     },
     'modern': {
         'simple': `A young woman walking down a busy downtown street at sunset, holding a warm coffee cup.`,
-        'complex': `A cinematic street-level shot in a bustling metropolis at dusk. Neon signs reflect on wet asphalt while pedestrians move in soft motion blur.
+        'complex': `Scene: A dimly lit New York apartment at night, viewed from inside a cozy but worn living room. A large window in the background shows the glow and scattered lights of the city skyline outside, with soft ambient street light bleeding into the room. The space has a slightly rustic, lived-in feel — wooden shelving packed with books lines the left wall, and a low wooden coffee table in the foreground is cluttered with scattered magazines and papers. A worn brown sofa sits in the middle of the room.
 
-Character-1: A stylish urban photographer with a crossbody camera bag, wearing an oversized trench coat, looking intently through a viewfinder.`
+Character 1 (standing): A young human woman of Scandinavian descent, with a strong build. She stands near the sofa, looking down at her phone, its blue-white glow reflecting softly on her face and lighting her half-lidded eyes from below. She wears a practical navy-blue rain jacket over a grey hoodie and dark jeans. Her straight, mid-length sandy-blond hair is tucked behind one ear; she wears no accessories. Expression: A pouting facial expression. Her lower lip is pushed distinctly outward, extending past her upper lip in a full, pronounced swell. Her eyebrows are drawn into a soft central furrow.
+
+Character 2 (seated): A young latina woman with small, subtle cat ears and vertical-slit pupils, slim build. She sits on the sofa, gesturing with one hand mid-conversation while holding a lit cigarette between two fingers of the other, a thin trail of smoke rising. She's dressed in cyber-goth fashion: an oversized vinyl coat and a mini-skirt in vinyl, layered silver chains. Her hair is an asymmetrical bob dyed half neon-pink, half black. Expression: An asymmetrical smile facial expression. Her mouth is pulled into an uneven, crooked grin where the left lip corner lifts high toward her cheekbone to reveal upper teeth, while the right corner stays closed and low. Her cheeks rise to different heights, and one eyebrow sits faintly higher than the other.
+
+Lighting & Atmosphere: Warm interior lamp light mixes with cool blue light from the phone screen and the distant glow of the city through the window, creating contrast between warm and cool tones across the room. Nighttime, indoor, intimate and slightly moody atmosphere.
+
+Camera: Close-up wide-angle shot using a fisheye lens, positioned close to the two characters so the curvature of the lens slightly bends the edges of the room — the bookshelves, window, and coffee table bowing outward toward the frame edges. The perspective exaggerates the closeness of the standing and seated figures, making them loom larger and more central in the frame while the background recedes and distorts around them. The framing feels intimate and slightly voyeuristic, as if the viewer is standing right in the room with them.`
     },
     'sci-fi': {
         'simple': `A starship engineer calibrating holographic displays in a neon-lit orbital hangar.`,
