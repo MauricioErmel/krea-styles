@@ -2369,6 +2369,192 @@ body.lightbox-open {
     line-height: 1.4;
 }
 
+.lightbox-header-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.lightbox-prompt-toggle-btn {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    background: #181818;
+    border: 1px solid var(--border);
+    color: var(--text-bright);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.lightbox-prompt-toggle-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.lightbox-prompt-section {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    margin: 6px 0 10px;
+    background: rgba(16, 16, 16, 0.95);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.lightbox-prompt-tabs {
+    display: flex;
+    background: #111;
+    border-bottom: 1px solid var(--border);
+}
+
+.lightbox-prompt-tab {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 8px 10px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.lightbox-prompt-tab:hover {
+    color: var(--text-bright);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.lightbox-prompt-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    background: rgba(0, 255, 136, 0.06);
+    font-weight: bold;
+}
+
+.lightbox-prompt-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    padding: 12px;
+    gap: 10px;
+}
+
+.lightbox-prompt-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.lightbox-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid var(--border);
+    background: #161616;
+    color: var(--text-bright);
+}
+
+.lightbox-action-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0, 255, 136, 0.1);
+}
+
+.lightbox-copy-btn.copied {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0, 255, 136, 0.25);
+    font-weight: bold;
+}
+
+.lightbox-apply-btn:hover {
+    border-color: #00ccff;
+    color: #00ccff;
+    background: rgba(0, 204, 255, 0.1);
+}
+
+.lightbox-prompt-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.lightbox-prompt-scroll::-webkit-scrollbar {
+    width: 4px;
+}
+
+.lightbox-prompt-scroll::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.lightbox-prompt-scroll::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 2px;
+}
+
+.lightbox-prompt-scroll::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+}
+
+.lightbox-prompt-text {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.6;
+    color: #cfcfcf;
+    word-break: break-word;
+    user-select: text;
+}
+
+.lightbox-lora-trigger-box {
+    margin-bottom: 8px;
+    padding: 8px 10px;
+    background: rgba(0, 255, 136, 0.08);
+    border: 1px dashed rgba(0, 255, 136, 0.4);
+    border-radius: 4px;
+}
+
+.lightbox-lora-trigger-title {
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 1px;
+    font-weight: bold;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.lightbox-lora-trigger-text {
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.lightbox-lora-desc {
+    color: #b0b0b0;
+    font-size: 12px;
+    line-height: 1.5;
+    margin-top: 6px;
+}
+
 .lightbox-close {
     width: 36px;
     height: 36px;
@@ -2448,6 +2634,26 @@ body.lightbox-open {
     transition: opacity 0.2s ease;
 }
 
+/* Navigation Control Groups (Left & Right Sidebars) */
+.lightbox-nav-group {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    z-index: 10;
+}
+
+.lightbox-nav-left {
+    left: 20px;
+}
+
+.lightbox-nav-right {
+    right: 20px;
+}
+
 .lightbox-nav-btn {
     position: absolute;
     top: 50%;
@@ -2469,16 +2675,42 @@ body.lightbox-open {
     padding: 0;
 }
 
-.lightbox-nav-btn:hover {
+.lightbox-nav-group .lightbox-nav-btn {
+    position: static;
+    transform: none;
+}
+
+.lightbox-nav-btn:hover,
+.lightbox-nav-group .lightbox-nav-btn:hover {
     border-color: var(--accent);
     color: var(--accent);
     background: rgba(0, 255, 136, 0.15);
     box-shadow: 0 0 18px var(--accent-glow);
-    transform: translateY(-50%) scale(1.1);
+    transform: scale(1.1);
 }
 
-.lightbox-nav-btn:active {
-    transform: translateY(-50%) scale(0.95);
+.lightbox-nav-btn:active,
+.lightbox-nav-group .lightbox-nav-btn:active {
+    transform: scale(0.95);
+}
+
+.lightbox-nav-btn-style {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(20, 20, 20, 0.9);
+}
+
+.lightbox-nav-btn-style:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0, 255, 136, 0.2);
+    box-shadow: 0 0 20px var(--accent-glow);
+}
+
+.lightbox-nav-btn[disabled],
+.lightbox-nav-btn.disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
 }
 
 .lightbox-prev {
@@ -2559,8 +2791,8 @@ body.lightbox-open {
     font-weight: bold;
 }
 
-/* Responsive adjustment for screens <= 860px */
-@media (max-width: 860px) {
+/* Responsive adjustment for screens < 1200px (Vertical / Column Gallery Mode) */
+@media (max-width: 1200px) {
     .lightbox-container {
         flex-direction: column;
     }
@@ -2585,6 +2817,27 @@ body.lightbox-open {
 
     .lightbox-header-hint {
         display: none;
+    }
+
+    .lightbox-prompt-toggle-btn {
+        display: inline-flex;
+    }
+
+    .lightbox-prompt-section {
+        display: none;
+        position: fixed;
+        top: 64px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: calc(100% - 32px);
+        max-width: 500px;
+        max-height: 300px;
+        z-index: 2050;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9);
+    }
+
+    .lightbox-prompt-section.open {
+        display: flex;
     }
 
     .lightbox-body {
@@ -2622,5 +2875,27 @@ body.lightbox-open {
         width: auto;
         font-size: 11px;
         padding: 5px 10px;
+    }
+
+    .lightbox-nav-group {
+        gap: 8px;
+    }
+
+    .lightbox-nav-left {
+        left: 10px;
+    }
+
+    .lightbox-nav-right {
+        right: 10px;
+    }
+
+    .lightbox-nav-btn {
+        width: 40px;
+        height: 40px;
+    }
+
+    .lightbox-nav-btn svg {
+        width: 20px;
+        height: 20px;
     }
 }
