@@ -119,6 +119,16 @@
                     </div>
                 </div>
             </div>
+            <!-- Category Filter Pills Bar for LoRAs -->
+            <div id="lora-category-filters" class="style-category-filters hidden">
+                <button type="button" class="category-filter-btn active" data-category="all">All <span class="filter-count">100</span></button>
+                <button type="button" class="category-filter-btn" data-category="Design">Design <span class="filter-count">11</span></button>
+                <button type="button" class="category-filter-btn" data-category="Comic and Western Mangas">Comic <span class="filter-count">9</span></button>
+                <button type="button" class="category-filter-btn" data-category="Sketch and Cartoon">Sketch &amp; Cartoon <span class="filter-count">14</span></button>
+                <button type="button" class="category-filter-btn" data-category="Anime and Manga">Anime &amp; Manga <span class="filter-count">18</span></button>
+                <button type="button" class="category-filter-btn" data-category="Painting and Fine Art">Painting &amp; Fine Art <span class="filter-count">44</span></button>
+                <button type="button" class="category-filter-btn" data-category="Photography">Photography <span class="filter-count">4</span></button>
+            </div>
             <!-- Floating Search Bar -->
             <div id="gallery-search-container" class="floating-search-container">
                 <div class="floating-search-box">
@@ -438,6 +448,59 @@
     </div>
 
     <div id="toast" class="toast" aria-live="polite"></div>
+
+    <!-- Compare Drawer Toggle Button (Floating) -->
+    <button type="button" id="btn-toggle-compare-drawer" class="compare-drawer-toggle" aria-label="Toggle Compare Drawer" title="Open Compare Drawer">
+        <span class="compare-toggle-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="8" height="14" rx="1"></rect>
+                <rect x="14" y="3" width="8" height="14" rx="1"></rect>
+                <line x1="6" y1="21" x2="6" y2="19"></line>
+                <line x1="18" y1="21" x2="18" y2="19"></line>
+            </svg>
+        </span>
+        <span class="compare-toggle-text">COMPARE</span>
+        <span id="compare-toggle-badge" class="compare-toggle-badge">0</span>
+    </button>
+
+    <!-- Compare Drawer (Bottom Panel) -->
+    <div id="compare-drawer" class="compare-drawer" aria-label="Image Compare Drawer">
+        <div class="compare-drawer-header">
+            <div class="compare-drawer-header-left">
+                <span class="compare-drawer-title">COMPARE</span>
+                <span class="compare-drawer-count" id="compare-drawer-count">0 images</span>
+            </div>
+            <div class="compare-drawer-header-actions">
+                <button type="button" class="btn compare-btn-compare" id="btn-compare-fullscreen" title="View comparison fullscreen">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px; margin-right: 4px;">
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <polyline points="9 21 3 21 3 15"></polyline>
+                        <line x1="21" y1="3" x2="14" y2="10"></line>
+                        <line x1="3" y1="21" x2="10" y2="14"></line>
+                    </svg>
+                    Compare
+                </button>
+                <button type="button" class="btn compare-btn-clear" id="btn-compare-clear" title="Remove all images from compare">Clear All</button>
+                <button type="button" class="compare-drawer-close" id="btn-compare-drawer-close" aria-label="Close compare drawer" title="Close">×</button>
+            </div>
+        </div>
+        <div class="compare-drawer-body">
+            <div class="compare-drawer-items" id="compare-drawer-items">
+                <div class="compare-drawer-empty">Click the compare button on any card to add images here</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fullscreen Compare Modal -->
+    <div id="compare-fullscreen-modal" class="compare-fullscreen-modal" aria-hidden="true" role="dialog" aria-label="Fullscreen Image Comparison">
+        <div class="compare-fullscreen-header">
+            <span class="compare-fullscreen-title">COMPARE VIEW</span>
+            <button type="button" class="compare-fullscreen-close" id="btn-compare-fullscreen-close" aria-label="Close comparison view" title="Close (Esc)">×</button>
+        </div>
+        <div class="compare-fullscreen-body" id="compare-fullscreen-body">
+            <!-- Dynamic comparison images injected here -->
+        </div>
+    </div>
 
     <footer id="site-footer">
         <p>KREA STYLES &amp; PROMPT BUILDER &mdash; Click. Copy. Assemble. Create.</p>

@@ -2132,6 +2132,659 @@ body.drawer-open {
     }
 }
 
+/* --- Compare Button on Card Image --- */
+.card-compare-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    background: rgba(10, 10, 10, 0.78);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 5;
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    padding: 0;
+    user-select: none;
+}
+
+.style-card:hover .card-compare-btn,
+.lora-card:hover .card-compare-btn {
+    opacity: 1;
+}
+
+.card-compare-btn:hover {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+    transform: scale(1.12);
+    box-shadow: 0 0 16px var(--accent-glow), 0 4px 12px rgba(0, 0, 0, 0.8);
+}
+
+.card-compare-btn:active {
+    transform: scale(0.95);
+}
+
+.card-compare-btn.in-compare {
+    opacity: 1;
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+    box-shadow: 0 0 12px var(--accent-glow);
+}
+
+.card-compare-btn.in-compare:hover {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: #fff;
+    box-shadow: 0 0 12px rgba(255, 68, 68, 0.4);
+}
+
+/* --- Compare Drawer Toggle Button (Floating) --- */
+.compare-drawer-toggle {
+    display: none;
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1025;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: rgba(14, 14, 14, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--accent-dim);
+    border-radius: 30px;
+    color: var(--accent);
+    font-family: var(--font-retro);
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8), 0 0 14px var(--accent-glow);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, background-color 0.25s ease, border-color 0.25s ease;
+    user-select: none;
+}
+
+.compare-drawer-toggle.has-items {
+    display: flex;
+}
+
+/* Hide floating toggle button when the compare drawer is open so they don't overlap */
+.compare-drawer-toggle.drawer-open,
+body:has(#compare-drawer.open) .compare-drawer-toggle {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(20px) scale(0.9);
+}
+
+/* When builder toggle also exists, stack compare above it */
+body:has(.builder-drawer-toggle) .compare-drawer-toggle {
+    bottom: 80px;
+}
+
+.compare-drawer-toggle:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.9), 0 0 25px var(--accent-glow);
+    background: rgba(0, 255, 136, 0.12);
+    border-color: #33ff99;
+}
+
+.compare-drawer-toggle:active {
+    transform: translateY(0) scale(0.97);
+}
+
+.compare-toggle-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+}
+
+.compare-toggle-badge {
+    background: var(--accent);
+    color: #000;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: bold;
+    padding: 2px 7px;
+    border-radius: 10px;
+    line-height: 1;
+    box-shadow: 0 0 8px var(--accent-glow);
+}
+
+@keyframes compareBtnPulse {
+    0% {
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8), 0 0 0 0 rgba(0, 255, 136, 0.8);
+        transform: scale(1);
+    }
+    40% {
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8), 0 0 25px 8px rgba(0, 255, 136, 0.7);
+        transform: scale(1.08);
+    }
+    100% {
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8), 0 0 14px var(--accent-glow);
+        transform: scale(1);
+    }
+}
+
+.compare-drawer-toggle.pulse-anim {
+    animation: compareBtnPulse 0.8s ease-out;
+}
+
+/* --- Compare Drawer Panel (Bottom) --- */
+.compare-drawer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1060;
+    background: rgba(12, 12, 12, 0.96);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--accent-dim);
+    box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.7), 0 0 20px var(--accent-glow);
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    max-height: 220px;
+    display: flex;
+    flex-direction: column;
+}
+
+.compare-drawer.open {
+    transform: translateY(0);
+}
+
+.compare-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.compare-drawer-header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.compare-drawer-title {
+    font-family: var(--font-retro);
+    font-size: 16px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px var(--accent-glow);
+}
+
+.compare-drawer-count {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.compare-drawer-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.compare-drawer-header-actions .btn {
+    font-size: 12px;
+    padding: 5px 14px;
+}
+
+.compare-btn-compare {
+    background: var(--accent) !important;
+    color: #000 !important;
+    font-weight: bold;
+    border: none !important;
+    box-shadow: 0 0 12px var(--accent-glow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.compare-btn-compare:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px var(--accent-glow);
+}
+
+.compare-btn-clear {
+    background: transparent !important;
+    color: var(--danger) !important;
+    border: 1px solid rgba(255, 68, 68, 0.3) !important;
+}
+
+.compare-btn-clear:hover {
+    background: var(--danger-bg) !important;
+    border-color: var(--danger) !important;
+}
+
+.compare-drawer-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+    font-size: 18px;
+    line-height: 1;
+    padding: 0;
+}
+
+.compare-drawer-close:hover {
+    color: var(--text-bright);
+    border-color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.compare-drawer-body {
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 12px 20px 16px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-dim) transparent;
+}
+
+.compare-drawer-body::-webkit-scrollbar {
+    height: 6px;
+}
+
+.compare-drawer-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.compare-drawer-body::-webkit-scrollbar-thumb {
+    background: var(--accent-dim);
+    border-radius: 3px;
+}
+
+.compare-drawer-items {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    min-height: 110px;
+}
+
+.compare-drawer-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 100px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 1px;
+}
+
+/* --- Compare Drawer Thumbnail --- */
+.compare-thumb {
+    position: relative;
+    flex-shrink: 0;
+    width: 80px;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    cursor: default;
+}
+
+.compare-thumb:hover {
+    border-color: var(--accent-dim);
+    box-shadow: 0 0 12px var(--accent-glow);
+}
+
+.compare-thumb-img {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    display: block;
+}
+
+.compare-thumb-label {
+    padding: 4px 6px;
+    font-family: var(--font-retro);
+    font-size: 11px;
+    color: var(--text-bright);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-top: 1px solid var(--border);
+    line-height: 1.2;
+}
+
+.compare-thumb-type {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 1px;
+}
+
+.compare-thumb-remove {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+    padding: 0;
+    opacity: 0;
+    transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.compare-thumb:hover .compare-thumb-remove {
+    opacity: 1;
+}
+
+.compare-thumb-remove:hover {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: #fff;
+}
+
+/* Remove button in fullscreen comparison view cell */
+.compare-fullscreen-cell .compare-thumb-remove {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(12, 12, 12, 0.88);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+    padding: 0;
+    opacity: 0;
+    z-index: 10;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.7);
+    transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.compare-fullscreen-cell:hover .compare-thumb-remove,
+.compare-fullscreen-cell .compare-thumb-remove:focus-visible {
+    opacity: 1;
+}
+
+.compare-fullscreen-cell .compare-thumb-remove:hover {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: #fff;
+    transform: scale(1.15);
+    box-shadow: 0 0 18px rgba(255, 68, 68, 0.6), 0 4px 14px rgba(0, 0, 0, 0.9);
+}
+
+.compare-fullscreen-cell .compare-thumb-remove:active {
+    transform: scale(0.95);
+}
+
+@media (hover: none) {
+    .compare-fullscreen-cell .compare-thumb-remove {
+        opacity: 0.85;
+    }
+}
+
+/* --- Fullscreen Compare Modal --- */
+.compare-fullscreen-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    z-index: 1100;
+    background: rgba(5, 5, 5, 0.97);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.compare-fullscreen-modal.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.compare-fullscreen-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    background: rgba(10, 10, 10, 0.95);
+    z-index: 20;
+}
+
+.compare-fullscreen-title {
+    font-family: var(--font-retro);
+    font-size: 20px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px var(--accent-glow);
+}
+
+.compare-fullscreen-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+    font-size: 22px;
+    line-height: 1;
+    padding: 0;
+}
+
+.compare-fullscreen-close:hover {
+    color: var(--text-bright);
+    border-color: var(--accent-dim);
+    background: rgba(0, 255, 136, 0.08);
+}
+
+.compare-fullscreen-body {
+    flex: 1 1 0;
+    min-height: 0;
+    width: 100%;
+    height: 100%;
+    overflow-x: auto;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    justify-content: safe center;
+    gap: 24px;
+    padding: 24px 36px 32px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) rgba(18, 18, 18, 0.9);
+}
+
+/* Horizontal scrollbar styling */
+.compare-fullscreen-body::-webkit-scrollbar {
+    height: 12px;
+    width: 10px;
+}
+
+.compare-fullscreen-body::-webkit-scrollbar-track {
+    background: rgba(14, 14, 14, 0.95);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    margin: 0 24px;
+}
+
+.compare-fullscreen-body::-webkit-scrollbar-thumb {
+    background: var(--accent-dim);
+    border-radius: 6px;
+    border: 2px solid rgba(14, 14, 14, 0.95);
+}
+
+.compare-fullscreen-body::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+    box-shadow: 0 0 14px var(--accent-glow);
+}
+
+/* Compare fullscreen card cell - NEVER reduces in height, preserves full size */
+.compare-fullscreen-cell {
+    position: relative;
+    height: calc(100vh - 150px);
+    height: calc(100dvh - 150px);
+    max-height: 850px;
+    min-height: 440px;
+    aspect-ratio: 3 / 4;
+    max-width: calc(100vw - 48px);
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.compare-fullscreen-cell:hover {
+    border-color: var(--accent-dim);
+    box-shadow: 0 0 25px var(--accent-glow), 0 10px 40px rgba(0, 0, 0, 0.8);
+}
+
+/* Image shown FULLY without any cropping */
+.compare-fullscreen-img {
+    width: 100%;
+    flex: 1 1 0;
+    min-height: 0;
+    object-fit: contain;
+    background: #080808;
+    display: block;
+    transition: filter 0.3s ease;
+}
+
+.compare-fullscreen-cell:hover .compare-fullscreen-img {
+    filter: brightness(1.06);
+}
+
+.compare-fullscreen-label {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(14, 14, 14, 0.95);
+    border-top: 1px solid var(--border);
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.compare-fullscreen-name {
+    font-family: var(--font-retro);
+    font-size: 16px;
+    color: var(--text-bright);
+    letter-spacing: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.compare-fullscreen-meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 3px;
+}
+
+/* Body scroll lock when compare fullscreen is open */
+body.compare-fullscreen-open {
+    overflow: hidden;
+}
+
+@media (max-width: 768px) {
+    .compare-fullscreen-body {
+        padding: 16px 20px 24px;
+        gap: 16px;
+    }
+    .compare-fullscreen-cell {
+        height: calc(100vh - 130px);
+        height: calc(100dvh - 130px);
+        min-height: 380px;
+    }
+}
+
+/* Compare drawer responsive */
+@media (max-width: 768px) {
+    .compare-drawer-toggle {
+        bottom: 16px;
+        right: 16px;
+        padding: 8px 14px;
+        font-size: 12px;
+    }
+
+    body:has(.builder-drawer-toggle) .compare-drawer-toggle {
+        bottom: 70px;
+    }
+
+    .compare-drawer-header {
+        padding: 8px 14px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .compare-drawer-body {
+        padding: 10px 14px 12px;
+    }
+
+    .compare-thumb {
+        width: 68px;
+    }
+}
+
 /* --- Info Panel Prompt Variations Gallery --- */
 .info-panel-gallery-section {
     margin-top: 8px;

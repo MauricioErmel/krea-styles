@@ -1244,6 +1244,7 @@ let currentExpandedStyle = null;
 let currentStyleTheme = 'fantasy';     // 'fantasy' | 'modern' | 'sci-fi'
 let currentStyleSubstyle = 'simple';   // 'simple' | 'complex'
 let currentStyleCategoryFilter = 'all';
+let currentLoraCategoryFilter = 'all';
 let currentStyleSearchQuery = '';
 let currentLoraSearchQuery = '';
 
@@ -1287,6 +1288,8 @@ const STYLE_CATEGORIES = [
     'Painting and Fine Art',
     'Photography'
 ];
+
+const LORA_CATEGORIES = STYLE_CATEGORIES;
 
 // ---- Shared Theme Demonstration Prompts ----
 const THEME_DEMO_PROMPTS = {
@@ -1451,18 +1454,30 @@ function getAvailableLightboxStyles() {
 
 function getAvailableLightboxLoras() {
     const query = currentLoraSearchQuery.trim().toLowerCase();
-    let filteredLoras = LORA_DATA;
-    if (query) {
-        filteredLoras = LORA_DATA.filter(l =>
-            l.name.toLowerCase().includes(query) ||
-            (l.prompt && l.prompt.toLowerCase().includes(query)) ||
-            (l.trigger && l.trigger.toLowerCase().includes(query))
-        );
-    }
-    if (filteredLoras.length === 0 || (currentLightboxState.item && !filteredLoras.some(l => l.name === currentLightboxState.item.name))) {
+    const visibleLoras = [];
+
+    LORA_CATEGORIES.forEach(categoryName => {
+        let lorasInCategory = LORA_DATA.filter(l => l.category === categoryName);
+        if (lorasInCategory.length === 0) return;
+
+        const isCategoryVisible = currentLoraCategoryFilter === 'all' || currentLoraCategoryFilter === categoryName;
+        if (!isCategoryVisible) return;
+
+        if (query) {
+            lorasInCategory = lorasInCategory.filter(l =>
+                l.name.toLowerCase().includes(query) ||
+                (l.category && l.category.toLowerCase().includes(query)) ||
+                (l.description && l.description.toLowerCase().includes(query)) ||
+                (l.triggerWords && l.triggerWords.toLowerCase().includes(query))
+            );
+        }
+        visibleLoras.push(...lorasInCategory);
+    });
+
+    if (visibleLoras.length === 0 || (currentLightboxState.item && !visibleLoras.some(l => l.name === currentLightboxState.item.name))) {
         return LORA_DATA;
     }
-    return filteredLoras;
+    return visibleLoras;
 }
 
 function stepLightboxVariation(delta) {
@@ -1953,6 +1968,28 @@ function buildStylesGallery() {
             });
             card.appendChild(zoomBtn);
 
+            // Compare Button (add to compare drawer)
+            const compareBtn = document.createElement('button');
+            compareBtn.type = 'button';
+            compareBtn.className = 'card-compare-btn';
+            compareBtn.title = 'Add to compare';
+            compareBtn.setAttribute('aria-label', 'Add to compare');
+            compareBtn.dataset.compareType = 'style';
+            compareBtn.dataset.compareIndex = index;
+            compareBtn.innerHTML = `
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="3" width="8" height="14" rx="1"></rect>
+                    <rect x="14" y="3" width="8" height="14" rx="1"></rect>
+                    <line x1="6" y1="21" x2="6" y2="19"></line>
+                    <line x1="18" y1="21" x2="18" y2="19"></line>
+                </svg>
+            `;
+            compareBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                handleCompareButtonClick('style', index, style, compareBtn);
+            });
+            card.appendChild(compareBtn);
+
             const title = document.createElement('div');
             title.className = 'style-card-title';
             title.textContent = style.name;
@@ -1997,6 +2034,11 @@ function buildStylesGallery() {
                 searchInput?.focus();
             });
         }
+    }
+
+    // Sync compare button states after rebuild
+    if (typeof updateAllCompareButtonStates === 'function') {
+        updateAllCompareButtonStates();
     }
 }
 
@@ -2174,6 +2216,7 @@ function initStylesThemeSelector() {
             updateStylesPromptContent();
             collapseStylePanel(true);
             updateStyleImages();
+            updateAllCompareButtonStates();
         });
     });
 
@@ -2187,6 +2230,7 @@ function initStylesThemeSelector() {
             updateStylesPromptContent();
             collapseStylePanel(true);
             updateStyleImages();
+            updateAllCompareButtonStates();
         });
     });
 
@@ -2248,837 +2292,1236 @@ function initStyleCategoryFilters() {
 
 const LORA_DATA = [
     {
-        name: "004 - Midnight Gouache",
-        file: "004 - Midnight Gouache.jpg",
-        triggerWords: "n0vuschr0ma style, gouache painting.",
-        description: `A gouache painting style with a dominant midnight blue color palette with pink accents. It often adds botanical patterns to backgrounds and surfaces. Tends toward minimalism if an entire scene isn't requested. Subjects tend to be cute and cartoony. The trigger is n0vuschr0ma style, and you can add "gouache painting" to enhance the painterly effect.`,
-        civitaiLink: "https://civitai.red/models/2798635/004-midnight-gouache?modelVersionId=3154735"
-    },
-    {
-        name: "164 - Oil Pastels",
-        file: "164 - Oil Pastels.jpg",
-        triggerWords: "n0vuschr0ma style, oil pastels illustration.",
-        description: `This is a version of oil pastels that looks quite different from Krea 2's default. This one uses thicker strokes, more waxy looking blending, grain that shows the background paper, has less fine detail, and more vibrant colors. I get the most consistent results using both the trigger "n0vuschr0ma style" and "oil pastels illustration". It could also be used for crayon illustrations.
-
-This particular version does more of a stylized cute cartoonish look for characters.`,
-        civitaiLink: "https://civitai.red/models/2831588/164-oil-pastels?modelVersionId=3195213"
-    },
-    {
-        name: "301 - World of Plush",
-        file: "301 - World of Plush.jpg",
-        triggerWords: "n0vuschr0ma style",
-        description: `This LoRA gives almost everything in the scene a soft plush texture. The exceptions are typically liquids like water, smooth surfaces like glass or screens, and sometimes grass or tiles.
-
-Only the trigger "n0vuschr0ma style" is required. You don't need to ask for plush in your prompt. Omitting it makes it easier to do landscapes or interiors if you don't want animals or people in them. In experiments, entire scenes with other fabric materials like knitted yarn or felt were possible by turning down the weight.`,
-        civitaiLink: "https://civitai.red/models/2836493/301-world-of-plush"
-    },
-    {
-        name: "60s Psychedelic Movie",
-        file: "60s Psychedelic Movie.jpg",
-        triggerWords: "ArsMovieStill, movie still from a 60s psychedelic movie",
-        description: `This LoRA tries to take you into a 60s psychedelic movie.
-
-V2 Update: The training dataset has been expanded by 300%, significantly increasing its scope. This update enhances the range of scenes and characters, offering greater flexibility.`,
-        civitaiLink: "https://civitai.red/models/878199/60s-psychedelic-movie?modelVersionId=3129133"
-    },
-    {
-        name: "1041uuu TOYOI Yuuta Style",
-        file: "1041uuu TOYOI Yuuta Style.jpg",
-        triggerWords: "@1041uuu, pixel art",
-        description: `This is the initial release of the LoRA trained by @1041uuu (TOYOI Yuuta) pixel artworks.
-
-Pixel perfection is NOT guaranteed. This LoRA is incompatible with the Pixelate x4 VAE. For best results, generate at 512x512 or higher using base-v01 with 30 steps / 5 CFG and EulerER_SDE / Simple.
-
-Recommended Weight: 1.0
-Optional Positive Prompts: jaggy lines, dithering, no lineart, limited palette
-Optional Negative Prompts: jpeg artifacts, isometric, letterboxed, pillarboxed, dated`,
-        civitaiLink: "https://civitai.red/models/2689816/1041uuu-toyoi-yuuta-style?modelVersionId=3104005"
-    },
-    {
-        name: "acyantree - Artist Style",
-        file: "acyantree - Artist Style.jpg",
-        triggerWords: "@acyantree",
-        description: `Trigger words: @acyantree`,
-        civitaiLink: "https://civitai.red/models/2834724/acyantree-artist-style?modelVersionId=3199096"
-    },
-    {
-        name: "ADILSON FARIAS style",
-        file: "ADILSON FARIAS style.jpg",
-        triggerWords: "ADILSON FARIAS style watercolor illustration,",
-        description: `adilson farias style watercolor illustration, cartoon style, a whimsical grumpy scene`,
-        civitaiLink: "https://civitai.red/models/2838491/adilson-farias-style?modelVersionId=3203851"
-    },
-    {
-        name: "Akira Style",
-        file: "Akira Style.jpg",
-        triggerWords: "Retro Anime Style.",
-        description: `Akira Style Lora for Krea 2.
-
-Recommended Strength: 0.7
-
-Example Prompt: "retro anime style image of runaway girl in a torn school jacket with a tense posture inside a crowded neon street market beneath massive concrete overpasses, with hot neon red, dirty concrete gray, and electric blue accents, with the background kept secondary to the subject."
-
-Tip: You don't need more style tags than "retro anime style"`,
-        civitaiLink: "https://civitai.red/models/2740599/retro-anime-akira-style?modelVersionId=3082075"
-    },
-    {
-        name: "Alexander Mokhov",
-        file: "Alexander Mokhov.jpg",
-        triggerWords: "AM0khov Style",
-        description: `Weights: 0.5 - 1.0 - Lower the weight if you use other LoRAs with it.`,
-        civitaiLink: "https://civitai.red/models/2849314/alexander-mokhov-artist-style-or-krea-2"
-    },
-    {
-        name: "Alexandre Benois \u2014 Mir Iskusstva",
-        file: "Alexandre Benois \u2014 Mir Iskusstva.jpg",
-        triggerWords: "No trigger words.",
-        description: `LoRA trained on the complete artistic legacy of Alexandre Benois (1870\u20131960): paintings, watercolours, gouache, pastels, theatre sketches and book illustrations. The model captures his elegant World of Art (Mir Iskusstva) manner \u2014 the nostalgic Versailles and 18th-century Petersburg scenes, the Ballets Russes costume designs, the Pushkin illustrations, and the refined graphic line over translucent washes.
-
-The Manner: 18th-century court of Louis XIV and Louis XV, Versailles, Watteau, the French Rococo rendered with archaeological precision and deep melancholy. Petersburg panoramas, theatrical vision, translucent layering, pastel palette, nostalgia as method, stylised historicism, graphic precision, masked balls and masquerades, book illustration.
-
-Recommended LoRA weight: 0.85\u20131.0`,
-        civitaiLink: "https://civitai.red/models/2850302/alexandre-benois-mir-iskusstva-or-paintings-and-graphics-or-lora-krea2-turbo"
-    },
-    {
-        name: "Alphonse Mucha",
-        file: "Alphonse Mucha.jpg",
-        triggerWords: "@alphonse mucha, year 1896, art nouveau",
-        description: `This LoRA was trained on all 171 Alphonse Mucha artworks registered on WikiArt. The dataset includes not only Mucha's famous Art Nouveau decorative style, but also other types of works such as self-portraits, sculptures, and oil paintings.
-
-The recognizable "Art Nouveau decorative elements" tend to appear quite strongly, and those decorations are often generated in circular or ring-like patterns.`,
-        civitaiLink: "https://civitai.red/models/2816430/alphonse-mucha"
-    },
-    {
-        name: "Arcane Style",
-        file: "Arcane Style.jpg",
-        triggerWords: "arcanekreastyle",
-        description: `Arcane Style \u2014 League of Legends LoRA
-Cinematic visuals inspired by the world of Arcane. Hand-painted textures and detailed brushwork. Dark, atmospheric cities with rich environments. Dramatic lighting and vibrant color contrasts. Expressive characters with realistic facial features. Dynamic action scenes and powerful compositions. Stylized 3D animation with a painterly finish. Steampunk, magic, and industrial aesthetics.`,
-        civitaiLink: "https://civitai.red/models/2815410/arcane-style?modelVersionId=3175347"
-    },
-    {
-        name: "Art illustration Chizhikov (\u0427\u0438\u0436\u0438\u043A\u043E\u0432)",
-        file: "Art illustration Chizhikov (\u0427\u0438\u0436\u0438\u043A\u043E\u0432).jpg",
-        triggerWords: "vintage children book illustration, watercolor, ink, gouache, warm colors, paper texture, expressive.",
-        description: `This LoRA captures the unique, warm, and incredibly nostalgic style of vintage children's book illustrations by the legendary Soviet artist Viktor Chizhikov. Perfect for generating images in the style of classic Soviet fairy tales, storybook characters, vintage greeting cards, and cozy, heartwarming illustrations.
-
-The style is characterized by soft watercolor and gouache textures, expressive ink linework, warm pastel tones, and that special "cozy" atmosphere.
-
-Prompting Tips: Add keywords like vintage children book illustration, watercolor, ink, gouache, warm colors, paper texture, expressive.`,
-        civitaiLink: "https://civitai.red/models/2770208/art-illustration-chizhikov-chizhikov-krea-2?modelVersionId=3151012"
-    },
-    {
-        name: "atmospheric photography",
-        file: "atmospheric photography.jpg",
-        triggerWords: "No trigger words.",
-        description: `It is good at creating an emotional photography style through dramatic light and shadow layers and intense color collisions.`,
-        civitaiLink: "https://civitai.red/models/2775666/atmospheric-photography?modelVersionId=3125499"
-    },
-    {
-        name: "Baichuan Baichuan Style",
-        file: "Baichuan Baichuan Style.jpg",
-        triggerWords: "@baichuan_baichuan",
-        description: `Based on baichuan_baichuan's style.
-
-Suggested strength: 0.8-1.00 when used alone.`,
-        civitaiLink: "https://civitai.red/models/2633330/baichuan-baichuan-style-animakrea2?modelVersionId=3223144"
-    },
-    {
-        name: "Berni Wrightson Illustrations from Frankenstain style",
-        file: "Berni Wrightson Illustrations from Frankenstain style.jpg",
-        triggerWords: "bwrightson, highly detailed black and white ink engraving, masterful dense cross-hatching with varied directional lines, intricate parallel and cross-hatch textures, extreme chiaroscuro with deep blacks and dramatic highlights, heavy expressive linework, raw engraved texture.",
-        description: `This must be my favorite lora I have trained in a while, it produces beautiful detailed pen and ink illustrations. You can go with black & white, dataset was Berni's Wrightson illustrations for Frankenstein book which are B&W or describe the colors its awesome either way. As usually lower strength of character lora for the style to take over.`,
-        civitaiLink: "https://civitai.red/models/2524467/berni-wrightson-illustrations-from-frankenstain-style"
-    },
-    {
-        name: "Bruce Timm - Naughty and Nice The Good Girl Art of Bruce Timm",
-        file: "Bruce Timm - Naughty and Nice The Good Girl Art of Bruce Timm.jpg",
-        triggerWords: "brucetimm_style, illustration of",
-        description: `Trained on Krea2.
-Best result with weight between: 0.8-1`,
-        civitaiLink: "https://civitai.red/models/2843849/bruce-timm-naughty-and-nice-the-good-girl-art-of-bruce-timm-style-krea2-lora?modelVersionId=3210638"
-    },
-    {
-        name: "Cartoon style of Rapunzel's Tangled Adventure",
-        file: "Cartoon style of Rapunzel's Tangled Adventure.jpg",
-        triggerWords: "No trigger words needed.",
-        description: `This model is intended to imitate the animated art style of the series Rapunzel's Tangled Adventure.`,
-        civitaiLink: "https://civitai.red/models/828762/cartoon-style-of-rapunzels-tangled-adventure?modelVersionId=3217911"
-    },
-    {
-        name: "Chenbo (Bo Chen)",
-        file: "Chenbo (Bo Chen).jpg",
-        triggerWords: "@chenbo",
-        description: `Trigger words: @chenbo`,
-        civitaiLink: "https://civitai.red/models/2743871/chenbo-bo-chen-artist-style?modelVersionId=3138651"
-    },
-    {
-        name: "Cinematic Dark Lighting",
-        file: "Cinematic Dark Lighting.jpg",
-        triggerWords: "A dimly lit scene featuring",
-        description: `LoRA designed to create cinematic dark lighting effect while maintaining subject clarity. It helps eliminate flat lighting and adds a more moody, storytelling feel to images.
-
-Krea2 Triggers: A dimly lit scene featuring a or A dimly lit photograph featuring a
-Weight: 0.6-0.8`,
-        civitaiLink: "https://civitai.red/models/2477155/cinematic-dark-lighting?modelVersionId=3167935"
-    },
-    {
-        name: "Cinematic Shot",
-        file: "Cinematic Shot.jpg",
-        triggerWords: "cinematic, cinematic still image.",
-        description: `Trigger words: cinematic, cinematic still image.`,
-        civitaiLink: "https://civitai.red/models/432586/cinematic-shot?modelVersionId=3085969"
-    },
-    {
-        name: "Clyde Caldwell Style",
-        file: "Clyde Caldwell Style.jpg",
-        triggerWords: "oilpainting by clyde caldwell.",
-        description: `Bring back the unmistakable vibe of 80s and 90s high-fantasy art! This LoRA is trained on the iconic artistic style of Clyde Caldwell, legendary for his classic cover artworks for Dungeons & Dragons (D&D), Dragonlance, and Ravenloft.`,
-        civitaiLink: "https://civitai.red/models/2751976/clyde-caldwell-style-krea-2?modelVersionId=3096079"
-    },
-    {
-        name: "cocokana artstyle",
-        file: "cocokana artstyle.jpg",
-        triggerWords: "cocokana Digital anime-style",
-        description: `Krea 2:
-Checkpoint: krea2_turbo_int8_convrot
-Cfg: 1
-Steps: 8`,
-        civitaiLink: "https://civitai.red/models/2499881/cocokana-artstyle?modelVersionId=3210873"
-    },
-    {
-        name: "Concept Art like Yoshitaka Amano",
-        file: "Concept Art like Yoshitaka Amano.jpg",
-        triggerWords: "Concept art",
-        description: `A LoRA to emulate the style of Yoshitaka Amano in creating the artwork for various classic Final Fantasy videogames.
-
-Write concept art, and maybe watercolor-style or something like that, to be sure.`,
-        civitaiLink: "https://civitai.red/models/2830669/concept-art-like-yoshitaka-amano?modelVersionId=3196755"
-    },
-    {
-        name: "Crazy Character Design Rubber Hose Animation",
-        file: "Crazy Character Design Rubber Hose Animation.jpg",
-        triggerWords: "No trigger word needed.",
-        description: `Vintage cartoons and rubber hose animation from the 1930s mixed with modern pop surrealism and lowbrow art. Character Design: Anthropomorphic objects (telephones, food, elements), exaggerated and flexible body proportions, expressive eyes, grotesque yet charismatic facial features, dynamic and absurd poses. Technique and Textures: Thick ink outlines, cel shading, glossy highlights, film grain texture, aged paper effect, chromatic aberration, and retro printing. Color palette: Either bright, saturated neon colors with high contrast or muted vintage tones (dusty greens, ochers, faded reds). Mood: Energetic, chaotic, humorous, surreal, and slightly spooky.`,
-        civitaiLink: "https://civitai.red/models/2815349/crazy-character-design-rubber-hose-animation?modelVersionId=3175267"
-    },
-    {
-        name: "D&D Painterly (Clean)",
-        file: "D&D Painterly (Clean).jpg",
-        triggerWords: "D&D Painterly.",
-        description: `This LoRA captures the rich, atmospheric aesthetic of tabletop RPG character art with painterly brushwork and cinematic lighting. Detailed armor and gear rendered in warm colors, candlelit taverns, and misty forest clearings. Invoking the classic "character sheet illustration" quality where every portrait tells a story.
-
-The dataset of "D&D Painterly" has been additionally processed and captioned with different VL.`,
-        civitaiLink: "https://civitai.red/models/2140417/dandd-painterly-clean"
-    },
-    {
-        name: "Dan Mora Chavez Style",
-        file: "Dan Mora Chavez Style.jpg",
-        triggerWords: "In the style of Dan Mora Chavez",
-        description: `Recommended Prompt
-Include the trigger naturally at the beginning of your prompt, for example:
-
-In the style of Dan Mora Chavez. A heroic knight standing atop ancient castle ruins at sunrise, flowing cape, intricate armor, cinematic backlighting, dynamic perspective, vibrant colors, crisp linework, highly detailed digital comic illustration.
-
-Style Characteristics
-Clean, confident comic-book linework
-Dynamic anatomy and expressive poses
-Cinematic composition and perspective
-Bold lighting with dramatic contrast
-Vibrant, saturated color palettes
-Detailed costumes, armor, and character designs
-Heroic fantasy and superhero aesthetics
-Crisp silhouettes and readable forms
-Polished digital painting over strong inks
-Action-focused visual storytelling
-
-This LoRA excels at fantasy, superheroes, science fiction, original characters, creatures, and action scenes, while also producing striking portraits and highly stylized illustrations with a polished modern comic-book finish.`,
-        civitaiLink: "https://civitai.red/models/2793943/dan-mora-chavez-style?modelVersionId=3148918"
-    },
-    {
-        name: "Disney Animation Style",
-        file: "Disney Animation Style.jpg",
-        triggerWords: "disney_animation_style,",
-        description: `Trigger words: disney_animation_style,`,
-        civitaiLink: "https://civitai.red/models/2840506/disney-animation-style"
-    },
-    {
-        name: "dndstyle \u2014 D&D fantasy illustration [Krea 2]",
-        file: "dndstyle \u2014 D&D fantasy illustration [Krea 2].jpg",
-        triggerWords: "dndstyle",
-        description: `Classic tabletop-rulebook fantasy illustration style for Krea 2. Dramatic character-first compositions, painted armor and scale texture, torchlit dungeons, golden-hour battlefields \u2014 the look of a modern D&D sourcebook plate. Style only: no characters baked in, so your subjects stay yours.
-
-USAGE \u2014 Trigger: dndstyle (put it at the start of your prompt). Strength 1.0 default; forgiving from 0.5 (light fantasy grade) to 2.0 (full homage). Prompt in natural language (Qwen3-VL encoder), not tag soup.
-
-PAIRS WELL WITH \u2014 brushcelstyle, a painterly semi-3D LoRA: chain both LoraLoaderModelOnly nodes and use both triggers: dndstyle 1.0 + brushcelstyle 0.7 for illustration-first, 0.7 / 1.0 for painterly-first, 0.8 / 0.8 balanced.`,
-        civitaiLink: "https://civitai.red/models/2749607/dndstyle-dandd-fantasy-illustration-krea-2?modelVersionId=3093121"
-    },
-    {
-        name: "Engraving Cross Hatching Style",
-        file: "Engraving Cross Hatching Style.jpg",
-        triggerWords: "@cr00shatch, A highly detailed engraving-style portrait.",
-        description: `This LoRA excels at mixing monochrome with a single striking color. Use selective coloring: monochromatic sepia tones or monochrome foreground with vivid color pops (e.g., vivid cyan beam of light, vivid pink melted ice cream, vivid red flames).
-
-Mood & Composition: allegorical narrative, intense and ominous, quiet tension drives dramatic, theatrical, and highly expressive poses. visceral suffering / macabre: Good for darker, gothic, or dark fantasy concepts.`,
-        civitaiLink: "https://civitai.red/models/2627909/engraving-cross-hatching-style-or-krea-2-anima?modelVersionId=3180812"
-    },
-    {
-        name: "Expressive Euro Cartoon",
-        file: "Expressive Euro Cartoon.jpg",
-        triggerWords: "like comic, 2d, flat color",
-        description: `Strength: 1.0 - 1.5.
-
-A bit tricky on Krea2 because of prompt adherence or god knows what:
-
-- If you try to use words that creates realism, you will absolutely need 1.5 strength
-- If you try to use known celebrity fanart words with specific styling like Disney Princesses then you will need 1.2+ strength.
-- If above two is False then 1.0 is enough in most cases.`,
-        civitaiLink: "https://civitai.red/models/2694211/expressive-euro-cartoon?modelVersionId=3133709"
-    },
-    {
-        name: "Fantasy Impressions",
-        file: "Fantasy Impressions.jpg",
-        triggerWords: "velnari",
-        description: `"Fantasy Impressions" is a LoRA that combines the subtleties of artistic illustration, vivid fantasy motifs and unique painting styles. Ideal for creating stunning female portraits, unusual creatures, as well as fantastic scenes with exquisite detail.
-
-This LORA can be used with or without trigger words to enhance the effect. To use WITHOUT TRIGGERS, increase the LORA weight to 1 or slightly higher. But for best results, use trigger words.`,
-        civitaiLink: "https://civitai.red/models/1096987/fantasy-impressions?modelVersionId=3161907"
-    },
-    {
-        name: "Flat Illustration",
-        file: "Flat Illustration.jpg",
-        triggerWords: "An illustration of",
-        description: `A quick Krea 2 LoRA trained on a handful of images in a flat anime/flat illustration style. No trigger word necessary. Prefacing generations with "An illustration of..." works well. 1.0 strength, and seems to pair well with both other SFW and NSFW LoRAs.`,
-        civitaiLink: "https://civitai.red/models/2744176/krea-2-flat-illustrationanime-style?modelVersionId=3086495"
-    },
-    {
-        name: "Fleischer Studio Style",
-        file: "Fleischer Studio Style.jpg",
-        triggerWords: "Fleischer Style.",
-        description: `This LoRA is designed to recreate the unmistakable charm of vintage Fleischer-inspired animation, bringing the lively energy of 1930s theatrical cartoons into your generations.
-
-The style features bold black outlines, exaggerated expressions, rubber-hose movement, rounded character designs, and richly painted storybook backgrounds. Expect expressive characters with large eyes, dramatic gestures, elastic poses, oversized gloves, and simplified shapes. Colors are vivid yet slightly aged.
-
-The goal is to capture the spirit of early theatrical cartoons: whimsical, energetic, theatrical, and occasionally a little eerie. Works especially well for fairy tales, fantasy adventures, anthropomorphic animals, comedic villains, musical scenes, and reimagined classic stories.`,
-        civitaiLink: "https://civitai.red/models/2817646/fleischer-studio-style?modelVersionId=3178066"
-    },
-    {
-        name: "Francisco Goya \u2014 Paintings & Etchings",
-        file: "Francisco Goya \u2014 Paintings & Etchings.jpg",
-        triggerWords: "No trigger word needed.",
-        description: `Trigger words: No trigger word needed.`,
-        civitaiLink: "https://civitai.red/models/2849706/francisco-goya-paintings-and-etchings-or-zhivopis-i-grafika?modelVersionId=3217866"
-    },
-    {
-        name: "Frank Cho Comic Book Style",
-        file: "Frank Cho Comic Book Style.jpg",
-        triggerWords: "No trigger words needed.",
-        description: `A comic book style LoRA inspired by the artwork of Frank Cho. Best results are usually achieved at strengths between 0.75 and 1.0. No trigger word is required.`,
-        civitaiLink: "http://civitai.red/models/2788873/frank-cho-comic-book-style?modelVersionId=3142592"
-    },
-    {
-        name: "Frank Frazetta style",
-        file: "Frank Frazetta style.jpg",
-        triggerWords: "painting, FrankFrazetta.",
-        description: `Trigger words: painting, FrankFrazetta.`,
-        civitaiLink: "https://civitai.red/models/2734696/frank-frazetta-style?modelVersionId=3074818"
-    },
-    {
-        name: "Frank Frazetta Style Oil Painting",
-        file: "Frank Frazetta Style Oil Painting.jpg",
-        triggerWords: "frazetta style dark fantasy oil painting",
-        description: `Trained to match the style of oil paintings by the legendary Frank Frazetta.
-
-Krea 2 - Good Starting Prompt: Frazetta style dark fantasy oil painting.
-.9 is great but anything after .5 usually has good results.`,
-        civitaiLink: "https://civitai.red/models/657789/frank-frazetta-style-oil-painting-krea2-flux?modelVersionId=3096520"
-    },
-    {
-        name: "Friendly Sketch",
-        file: "Friendly Sketch.jpg",
-        triggerWords: "an illustration of",
-        description: `Apply a friendly, warm style to your Krea 2 illustrations.
-
-No trigger word needed. 1.0 strength, but try 0.8 to 1.3 for cool variations. Mixes well with character LoRAs or second style LoRAs. Using happiness, laughing, smiling etc. gets the best results \u2014 it's built to be friendly!
-
-If you run into trouble, try raising the strength in 0.1 increments, add words like "an illustration of..." to the start of your prompt, and remove any leftover camera hardware words.`,
-        civitaiLink: "https://civitai.red/models/2756662/friendly-sketch-krea2"
-    },
-    {
-        name: "Ghibli style (Kiki's Delivery Service)",
-        file: "Ghibli style (Kiki's Delivery Service).jpg",
-        triggerWords: "ghibli style",
-        description: `KREA 2
-Turbo model, Euler / simple / 8 steps / CFG 1
-768x1152, Lora strength of 1.3`,
-        civitaiLink: "https://civitai.red/models/523485/ghibli-style-kikis-delivery-service?modelVersionId=3084641"
-    },
-    {
-        name: "Greg Capullo Style",
-        file: "Greg Capullo Style.jpg",
-        triggerWords: "A color illustration by Greg Capullo. The illustration uses outlines and black shadows and light source. It has been digitally inked and colored.",
-        description: `It is possible to generate sketch style with this lora:
-"A pencil illustration by Greg Capullo.", Color illustration by Greg Capullo.`,
-        civitaiLink: "https://civitai.red/models/2259942/greg-capullo-style?modelVersionId=3184522"
-    },
-    {
-        name: "Hollow Void",
-        file: "Hollow Void.jpg",
-        triggerWords: "No trigger word needed.",
-        description: `A fantastical style inspired by hollowvoidly on Tumblr.
-
-When prompting use words like: surreal, dark, fog, armor, wizard, Gothic-style, halftone, castle, eerie atmosphere etc.
-
-To keep the finer details and noise, recommend using 4x-AnimeSharp or 4x-UltraSharpV2 when doing a second pass or upscale. Avoid latent, nearest, lanczos etc.`,
-        civitaiLink: "https://civitai.red/models/2851092/hollow-void?modelVersionId=3219631"
-    },
-    {
-        name: "IdontknowhowtonamethisArtStyle",
-        file: "IdontknowhowtonamethisArtStyle.jpg",
-        triggerWords: "An angular, 3d art style, with brush stroke color texture",
-        description: `Trigger words: An angular, 3d art style, with brush stroke color texture`,
-        civitaiLink: "https://civitai.com/models/2781650/idontknowhowtonamethisartstyle"
-    },
-    {
-        name: "Ink Caricature Style of the End Credits of Tangled",
-        file: "Ink Caricature Style of the End Credits of Tangled.jpg",
-        triggerWords: "No trigger words needed.",
-        description: `This LoRA is trained to produce a stylized ink on paper illustrated style.`,
-        civitaiLink: "https://civitai.red/models/2841027/ink-caricature-style-of-the-end-credits-of-tangled-krea-2?modelVersionId=3207085"
-    },
-    {
-        name: "Jeff Easley Style - Krea 2",
-        file: "Jeff Easley Style - Krea 2.jpg",
-        triggerWords: "vintage fantasy oil painting in the style of Jeff Easley",
-        description: `It perfectly replicates the legendary oil-painting aesthetic famous for Dungeons & Dragons (AD&D) rulebook covers, fierce dragons, gritty heroes, and atmospheric sword-and-sorcery illustrations.
-
-Recommended Generation Settings:
-LoRA Weight: 0.5 - 0.7 (Sweetspot: 0.6)
-CFG Scale: 3.5 - 5.5 (Keep it lower for authentic analog hand-painted texture)
-
-Prompting Tips: Mix the trigger phrase with classic dark fantasy keywords:
-oil on canvas, cinematic chiaroscuro, heavy shadows, dramatic lighting, detailed armor, dynamic combat stance, retro fantasy book cover illustration.`,
-        civitaiLink: "https://civitai.red/models/2765523/jeff-easley-style-krea-2?modelVersionId=3118577"
-    },
-    {
-        name: "Junji Ito Style",
-        file: "Junji Ito Style.jpg",
-        triggerWords: "jnj style, a black and white drawing.",
-        description: `Trigger: "jnj style", "a black and white drawing" or a "colored image".
-You can add "heavy cross-hatching" and "screentones" if you prefer.
-Sampler/scheduler: er_sde/beta`,
-        civitaiLink: "https://civitai.red/models/2781757/junji-ito-style-krea"
-    },
-    {
-        name: "Katsuya Terada style",
-        file: "Katsuya Terada style.jpg",
-        triggerWords: "katsuyak2style, Dynamic, highly detailed pen-and-ink linework with expressive brush strokes, intricate cross-hatching, fluid anatomy, cinematic composition, bold perspective, organic textures, and a fusion of manga-inspired energy with painterly fantasy realism; dramatic lighting, rich visual storytelling, and meticulous handcrafted detail.",
-        description: `Trigger words: katsuyak2style, Dynamic, highly detailed pen-and-ink linework with expressive brush strokes, intricate cross-hatching, fluid anatomy, cinematic composition, bold perspective, organic textures, and a fusion of manga-inspired energy with painterly fantasy realism; dramatic lighting, rich visual storytelling, and meticulous handcrafted detail.`,
-        civitaiLink: "https://civitai.red/models/2752263/katsuya-terada-style?modelVersionId=3096446"
-    },
-    {
-        name: "Khyleri - Khyle",
-        file: "Khyleri - Khyle.jpg",
-        triggerWords: "khyleri_style, illustration of",
-        description: `Trained on Krea2.
-Best result with weight between: 0.8-1.3`,
-        civitaiLink: "https://civitai.red/models/2849403/khyleri-khyle-style-krea2-lora?modelVersionId=3217511"
-    },
-    {
-        name: "KreaZhangXi",
-        file: "KreaZhangXi.jpg",
-        triggerWords: "Bradhamel art style.",
-        description: `Trigger words: Bradhamel art style.`,
-        civitaiLink: "https://civitai.red/models/2773746/kreazhangxi?modelVersionId=3123196"
-    },
-    {
-        name: "KyuYong Eom Artist Style",
-        file: "KyuYong Eom Artist Style.jpg",
-        triggerWords: "KyuY0ng3om Style",
-        description: `Weights: 0.5 - 1.0 - Lower the weight if you use other LoRAs with it.`,
-        civitaiLink: "https://civitai.red/models/2836652/kyuyong-eom-artist-style-or-krea-2?modelVersionId=3201598"
-    },
-    {
-        name: "Low Poly Pixel Art",
-        file: "Low Poly Pixel Art.jpg",
-        triggerWords: "a digital low poly pixel art,",
-        description: `A type of 3d low poly pixel art.`,
-        civitaiLink: "https://civitai.red/models/2851202/low-poly-pixel-art-krea2-style?modelVersionId=3219757"
-    },
-    {
-        name: "Luis Royo (Secrets) dark fantasy style",
-        file: "Luis Royo (Secrets) dark fantasy style.jpg",
-        triggerWords: "A dark sensual fantasy digital painting in the distinctive style of lroyo, detailed dramatic moody atmosphere with intricate textures and lighting, gothic fantasy elements.",
-        description: `Trained on Luis Royo "Secrets" artbook illustrations, strengths: 0.8 - 1.2`,
-        civitaiLink: "https://civitai.red/models/2505872/luis-royo-secrets-dark-fantasy-style"
-    },
-    {
-        name: "Manga style (Berserk)",
-        file: "Manga style (Berserk).jpg",
-        triggerWords: "manga style.",
-        description: `Krea 2
-Turbo model: 8 steps / CFG 1 & Euler simple
-768x1152, x2 Hires (10 steps, 0.35 with 4x_NMKD_Siax)
-Lora strength 1.2
-
-Can also do characters: Guts, Casca, Griffith.`,
-        civitaiLink: "https://civitai.red/models/743448/manga-style-berserk"
-    },
-    {
-        name: "Manga style (Naoki Urasawa)",
-        file: "Manga style (Naoki Urasawa).jpg",
-        triggerWords: "No trigger words needed",
-        description: `KREA 2
-Showcase images:
-
-Turbo model: 10 steps / CFG 1 & Euler simple
-944x1408
-x2 Hires (10 steps, 0.35 with 4x_NMKD_Siax)
-Lora strength 1.3
-
-IDEOGRAM 4
-Json caption style with:
-art_style: Naoki Urasawa style
-medium: manga
-aesthetics: black_and_white`,
-        civitaiLink: "https://civitai.red/models/690155/manga-style-naoki-urasawa?modelVersionId=3087718"
-    },
-
-    {
-        name: "MidJourney chiaroscuro style",
-        file: "MidJourney chiaroscuro style.jpg",
-        triggerWords: "no trigger word",
-        description: `KREA:
-Strength: I prefer 1.5
-Use Euler / Beta
-
-Example: a low-angle medium shot, painting, from the waist up of`,
-        civitaiLink: "https://civitai.red/models/2764520/midjourney-chiaroscuro-style?modelVersionId=3111501"
-    },
-    {
-        name: "Midjourney thick painting style",
-        file: "Midjourney\u539A\u6D82\u98CE\u683C  Midjourney thick painting style.jpg",
-        triggerWords: "MTP_style, impasto oil painting style.",
-        description: `This is a LoRA model leaning toward impasto oil painting style.
-
-Krea2:
-Recommended LoRA weight: 0.95
-Recommended sampling steps: 8\u201310
-Recommended CFG scale: 1.1
-Recommended samplers: er_sde, Euler A`,
-        civitaiLink: "https://civitai.red/models/2785232/midjourney-or-midjourney-thick-painting-style?modelVersionId=3138012"
-    },
-    {
-        name: "Mike Mignola Style",
-        file: "Mike Mignola Style.jpg",
-        triggerWords: "MignolaStyle",
-        description: `Use the trigger MignolaStyle at the start, don't describe the style.`,
-        civitaiLink: "https://civitai.red/models/2841548/mike-mignola-style"
-    },
-    {
-        name: "Modern Fantasy Paint Art",
-        file: "Modern Fantasy Paint Art.jpg",
-        triggerWords: "No trigger words.",
-        description: `Attempt to make a fantasy-oriented style mimicking an atmosphere of TTRPG book art and video game concept and cover art.`,
-        civitaiLink: "https://civitai.red/models/2029643/modern-fantasy-paint-art?modelVersionId=3207579"
-    },
-    {
-        name: "Moral Superiority - A Vintage Claymation Inspired Style",
-        file: "Moral Superiority - A Vintage Claymation Inspired Style.jpg",
-        triggerWords: "m0ralsuperiority",
-        description: `Moral Superiority is a style LoRA inspired by vintage public broadcasting and late-night adult television, encapsulating both with smoother textures and HD clarity.
-
-CFG - 1 (if not using turbo adjust)
-STEPS - 8 (if not using turbo adjust)
-
-Recommended Resources:
-TrashAI's Total Chaos Randomizer WF
-DaSiWa Cute Disaster Turbo UC Krea 2 Model`,
-        civitaiLink: "https://civitai.red/models/2855630/moral-superiority-a-vintage-claymation-inspired-style-krea2?modelVersionId=3225150"
-    },
-    {
-        name: "motocross saito Style",
-        file: "motocross saito Style.jpg",
-        triggerWords: "@motocross saito, pixel art",
-        description: `Trigger words: @motocross saito, pixel art`,
-        civitaiLink: "https://civitai.red/models/2782223/motocross-saito-style?modelVersionId=3133600"
-    },
-    {
-        name: "murata range artstyle",
-        file: "murata range artstyle.jpg",
-        triggerWords: "murata range digital anime-style illustration",
-        description: `Krea 2:
-Checkpoint: krea2_turbo_int8_convrot
-Cfg: 1
-Steps: 8`,
-        civitaiLink: "https://civitai.red/models/2838564/murata-range-artstyle?modelVersionId=3203938"
-    },
-
-    {
-        name: "ogipote\u837Bpote style",
-        file: "ogipote\u837Bpote style.jpg",
-        triggerWords: "Ogipote style",
-        description: `Trigger words: Ogipote style`,
-        civitaiLink: "https://civitai.red/models/2529695/ogipotepote-style?modelVersionId=3094753"
-    },
-    {
-        name: "Oil on Canvas - Salvador Dali",
-        file: "Oil on Canvas - Salvador Dali.jpg",
-        triggerWords: "A surrealist dreamlike painting in the distinctive style of sdali, detailed realistic surreal elements with symbolic dreamlike composition, soft ethereal lighting with dramatic contrasts, intricate textures",
-        description: `Trained on around 40 images of Dali paintings. Euler/bong_tangent or beta57 recommended, strength: 0.8-1.2`,
-        civitaiLink: "https://civitai.red/models/2655245/oil-on-canvas-salvador-dali"
-    },
-    {
-        name: "oil paint semi-realistic anime style",
-        file: "oil paint semi-realistic anime style.jpg",
-        triggerWords: "oilpaint_anime semi-realistic",
-        description: `Semi-realistic anime style oil painting.`,
-        civitaiLink: "https://civitai.red/models/2832835/oil-paint-semi-realistic-anime-style?modelVersionId=3196795"
-    },
-    {
-        name: "Oil Painting - Thomas Gainsborough",
-        file: "Oil Painting - Thomas Gainsborough.jpg",
-        triggerWords: "Thomas Gainsborough style, late 18th century English painting, oil on canvas.",
-        description: `Model trained on around 40 images of Thomas Gainsborough paintings. Results are pleasant but need good description to get real authentic feel of the artist. Play with the strength, probably 0.8-1.2 is the way.`,
-        civitaiLink: "https://civitai.red/models/2650650/oil-painting-thomas-gainsborough"
-    },
-    {
-        name: "Pall Wash - A Versatile Dark Fantasy Anime Style",
-        file: "Pall Wash - A Versatile Dark Fantasy Anime Style.jpg",
-        triggerWords: "pallwash",
-        description: `A versatile anime style LoRA with serious range. Confident linework, dramatic lighting, and color that swings from richly saturated to moody and muted depending on what you ask for.
-
-Trigger must come before quality tags (masterpiece, best quality, etc.), not after. Using LESS quality tags = better result.
-
-Heads up: left to its own devices on a sparse prompt, Pall Wash leans surreal and uncanny. Skulls, glowing eyes, unsettling accents show up even when you didn't ask.
-
-Suggested Settings:
-DPM++ 2M Karras, or Euler A / Beta 57/Karras
-CFG 6\u20136.5, (if using DaSiWa Checkpoints, lower this to 5.0)`,
-        civitaiLink: "https://civitai.red/models/2719146/pall-wash-a-versatile-dark-fantasy-anime-style-illanimakrea-2?modelVersionId=3118088"
-    },
-    {
-        name: "Paper flat",
-        file: "Paper flat.jpg",
-        triggerWords: "chibikrea2style",
-        description: `Clean compositions that look like modern vector illustration.
-
-Put the trigger at the start of your prompt, then describe the scene as usual.
-Add chibi to push chibi proportions, or omit it for a more standard anime look.
-Strength guide: 0.8 \u2014 softer stylization, 1.0 \u2014 full artist flavor.`,
-        civitaiLink: "https://civitai.red/models/2851727/stylepaper-flat-anima-krea2?modelVersionId=3220419"
-    },
-    {
-        name: "Path of Exile 2 style",
-        file: "Path of Exile 2 style.jpg",
-        triggerWords: "poe2k2style",
-        description: `Trigger words: poe2k2style`,
-        civitaiLink: "https://civitai.red/models/2208918/path-of-exile-2-style?modelVersionId=3099687"
-    },
-    {
-        name: "Retro anime style",
-        file: "Retro anime style.jpg",
-        triggerWords: "retro anime style.",
-        description: `Krea 2
-For this one, a really small dataset (7 images) was used so it's overtrained, but it is really closer to the style intended.
-
-Turbo model, 768x1152, Euler / simple / 10 steps / CFG 1`,
-        civitaiLink: "https://civitai.red/models/2594665/retro-anime-style?modelVersionId=3118780"
-    },
-    {
-        name: "Retro Ghibli style (Porco Rosso)",
-        file: "Retro Ghibli style (Porco Rosso).jpg",
-        triggerWords: "ghibli style",
-        description: `Turbo model, 768x1152
-x1.5 Hires (10 steps, 0.2-0.35 with 4x_foolhardy_Remacri)
-Euler / simple / 10 steps / CFG 1
-Lora strength 1`,
-        civitaiLink: "https://civitai.red/models/1153088/retro-ghibli-style-porco-rosso?modelVersionId=3127101"
-    },
-    {
-        name: "Retro Vintage Comics Style",
-        file: "Retro Vintage Comics Style.jpg",
-        triggerWords: "No trigger words.",
-        description: `This LoRA is trained to reproduce a vintage illustrated comic style, with a focus on detailed line art and minimalist colors.`,
-        civitaiLink: "https://civitai.red/models/2802947/retro-vintage-comics-style-krea-2?modelVersionId=3160068"
-    },
-    {
-        name: "Rusted Horizons",
-        file: "Rusted Horizons.jpg",
-        triggerWords: "horiz4k",
-        description: `Rusted Horizons creates a painterly, lived-in science-fiction aesthetic filled with worn spacecraft, dusty settlements, industrial environments, and characters who feel like they are part of a working world.
-
-The style emphasizes visible brushwork, weathered materials, practical clothing, aged machinery, and cinematic environmental storytelling. Its palette leans toward muted greys, blues, and earthy tones, often contrasted with yellow, amber, or orange accents.
-
-Recommended Prompt Starter: Cinematic narrative concept illustration, painterly semi-realistic editorial art, graphic novel style, visible brushwork,`,
-        civitaiLink: "https://civitai.red/models/2344157/rusted-horizons?modelVersionId=3089427"
-    },
-    {
-        name: "Satoshi Urushihara style",
-        file: "Satoshi Urushihara style.jpg",
-        triggerWords: "No trigger words.",
-        description: `For that late 80's early 90's anime aesthetic. Trained on Satoshi Urushihara artwork and OVA stills.`,
-        civitaiLink: "https://civitai.red/models/7227/satoshi-urushihara-style?modelVersionId=3080191"
-    },
-    {
-        name: "SC\u00C4V\u00CBNG\u00CBR\u00D8",
-        file: "SC\u00C4V\u00CBNG\u00CBR\u00D8.jpg",
-        triggerWords: "modular armor, hard surface armor, geometric armor plates, panel-based design, industrial armor, mechanical joints, exposed connectors, circular nodes, segmented armor, techwear armor, integrated armor systems,",
-        description: `This is a style/concept trained on a large dataset of images of armor and creatures in a soft cyberpunk and post-apocalyptic style.
-
-Krea 2:
-Checkpoint: krea2_turbo_int8_convrot
-Cfg: 1
-Steps: 8`,
-        civitaiLink: "https://civitai.red/models/2359209/scavengero-or-styleconcept?modelVersionId=3216411"
-    },
-    {
-        name: "Serpieri Style",
-        file: "Serpieri Style.jpg",
-        triggerWords: "No trigger words.",
-        description: `This LoRA produces a style similar to that of Italian comic book artist Paolo Eleuteri Serpieri. He is best known for his work on the Druuna erotic science fiction series.`,
-        civitaiLink: "https://civitai.red/models/651123/serpieri-style?modelVersionId=3181981"
-    },
-    {
-        name: "shitty watercolor style",
-        file: "shitty watercolor style.jpg",
-        triggerWords: "Watercolor.",
-        description: `Krea2
-Turbo model, 768x1152
-Euler / simple / 10 steps / CFG 1
-Lora strength of 1`,
-        civitaiLink: "https://civitai.red/models/1030872/shitty-watercolor-style?modelVersionId=3112712"
-    },
-    {
-        name: "Simon Bisley style Anima 1.0",
-        file: "Simon Bisley style Anima 1.0.jpg",
-        triggerWords: "painting in Simon Bisley style",
-        description: `Retrained properly, this is the proper 1.0 version of Simon Bisley style lora. It creates beautiful vivid colorful illustration, especially views are very pretty.
-
-Images are generated with euler+bong + refined with z-image turbo 8 steps on 0.3 no upscale.`,
-        civitaiLink: "https://civitai.red/models/2628760/simon-bisley-style-anima-10?modelVersionId=3139812"
-    },
-    {
-        name: "Storybook Folk Art",
-        file: "Storybook Folk Art.jpg",
-        triggerWords: "whimsical storybook illustration.",
-        description: `This model creates whimsical, storybook-inspired folk art with flowing, dreamlike details. Except for Krea 2, the style is easily distracted, so if you want to stay true to it, use the following trigger: "Whimsical, storybook-inspired folk art with flowing, dreamlike details."
-
-Krea 2 Strength: 1.0`,
-        civitaiLink: "https://civitai.red/models/1321740/storybook-folk-art?modelVersionId=3199069"
-    },
-    {
-        name: "SXZ Cole Eastburn Style",
-        file: "SXZ Cole Eastburn Style.jpg",
-        triggerWords: "@colehole style",
-        description: `Trigger words: @colehole style`,
-        civitaiLink: "https://civitai.red/models/2853562/sxz-cole-eastburn-style-krea2"
-    },
-    {
-        name: "SXZ CrystalBeastie Style",
-        file: "SXZ CrystalBeastie Style.jpg",
-        triggerWords: "@crystalbeastie",
-        description: `Trigger words: @crystalbeastie`,
-        civitaiLink: "https://civitai.red/models/2853857/sxz-crystalbeastie-style-krea2?modelVersionId=3223045"
-    },
-    {
-        name: "SXZ Dark Fantasy Style",
-        file: "SXZ Dark Fantasy Style.jpg",
-        triggerWords: "@drkfnts, film grain",
-        description: `Trigger words: @drkfnts, film grain`,
-        civitaiLink: "https://civitai.red/models/2845979/sxz-dark-fantasy-style-krea2?modelVersionId=3213270"
-    },
-    {
-        name: "SXZ GTA 6 Style",
-        file: "SXZ GTA 6 Style.jpg",
-        triggerWords: "@gta6, illustration",
-        description: `Trigger words: @gta6, illustration`,
-        civitaiLink: "https://civitai.red/models/2851144/sxz-gta-6-style-krea2?modelVersionId=3219690"
-    },
-    {
-        name: "SXZ Will Murai Blizzcon KeyArt Style",
-        file: "SXZ Will Murai Blizzcon KeyArt Style.jpg",
-        triggerWords: "@willmurai",
-        description: `Trigger words: @willmurai`,
-        civitaiLink: "https://civitai.red/models/2846061/sxz-will-murai-blizzcon-keyart-style-krea2?modelVersionId=3213378"
-    },
-    {
-        name: "SXZ Xutunzi Style",
-        file: "SXZ Xutunzi Style.jpg",
-        triggerWords: "@xutzzz, stylized",
-        description: `Trigger words: @xutzzz, stylized`,
-        civitaiLink: "https://civitai.red/models/2853442/sxz-xutunzi-style-krea2?modelVersionId=3222535"
-    },
-    {
-        name: "The Legend of Zelda Breath of the Wild",
-        file: "The Legend of Zelda Breath of the Wild.jpg",
-        triggerWords: "botw_style, illustration of",
-        description: `Trained on Krea2.
-Best result with weight between: 0.8-1
-
-Starting prompts: botw_style, illustration of
-Optional prompts: backdrop framed by painterly brushstrokes, cel-shaded anime style. cel-shaded 3D anime art style.`,
-        civitaiLink: "https://civitai.red/models/2844663/the-legend-of-zelda-breath-of-the-wild-artwork-painting-style-krea2-lora?modelVersionId=3211633"
-    },
-    {
-        name: "TheDig Adventure - Background Art Style",
-        file: "TheDig Adventure - Background Art Style.jpg",
-        triggerWords: "This is a digital illustration depicting a",
-        description: `A digital-painting style LoRA trained on surreal, otherworldly landscapes \u2014 alien terrain, glowing planets, jagged rock formations and eerie caves rendered in dramatic gradient lighting and rich, saturated color palettes. Best used for atmospheric sci-fi/fantasy scenes with a strong sense of isolation and mystery. The input Images are from the 1995 LucasArts Adventure Game The Dig.`,
-        civitaiLink: "https://civitai.red/models/2840095/thedig-adventure-background-art-style?modelVersionId=3205842"
-    },
-    {
-        name: "Tiago Hoisel",
-        file: "Tiago Hoisel.jpg",
-        triggerWords: "No trigger word needed.",
-        description: `Trigger words: No trigger word needed.`,
-        civitaiLink: "https://civitai.red/models/2809971/tiago-hoisel?modelVersionId=3168777"
-    },
-    {
-        name: "Tony Sart",
-        file: "Tony Sart.jpg",
-        triggerWords: "No trigger word needed.",
-        description: `Tony Sart ("Tony's Art - art from Sart" project). Russian book illustrator, game designer and concept artist. One of his styles involves imitating the classic illustrations of Ivan Bilibin, featuring their characteristic colors, outlines, and borders. He employs this style in humorous and cultural projects.`,
-        civitaiLink: "https://civitai.red/models/2840915/tony-sart?modelVersionId=3206933"
-    },
-    {
-        name: "VALEJO",
-        file: "VALEJO.jpg",
-        triggerWords: "No trigger words.",
-        description: `Trigger words: No trigger words.`,
-        civitaiLink: "https://civitai.red/models/1579164/valejo?modelVersionId=3110064"
-    },
-
-    {
-        name: "YOSHITAKA AMANO - Final Fantasy Style",
-        file: "YOSHITAKA AMANO - Final Fantasy Style.jpg",
-        triggerWords: "a watercolor illustration in the style of yoshitaka amano",
-        description: `Krea 2 Release 06/27/2026
-
-Suggested strength: 0.8-1.2
-
-Been having fun with Krea 2, it works quite well and knows a lot of characters. If using multiple LoRas, lower strength to .8.
-
-Trigger words: Suggested tags: a watercolor illustration in the style of yoshitaka amano`,
-        civitaiLink: "https://civitai.red/models/588789/yoshitaka-amano-final-fantasy-style-for-anima-pony-il-krea-2?modelVersionId=3076044"
-    },
-    {
-        name: "Yujin Hare Style",
-        file: "Yujin Hare Style.jpg",
-        triggerWords: "@YujinHare, Yujin Hare style",
-        description: `Based on Yujin Hare's style. A thick paint semi-realistic style.
-
-Suggested strength: 0.8-1.00 when used alone.`,
-        civitaiLink: "https://civitai.red/models/2648375/yujin-hare-style-animakrea2?modelVersionId=3202246"
-    },
-    {
-        name: "Zeon (zzeeonn)",
-        file: "Zeon (zzeeonn).jpg",
-        triggerWords: "zeon_style, illustration of. Clean sharp line art, flat colors with glossy leather highlights, cell shading, minimalist fashion anime illustration, full body shot isolated on a pure white background.",
-        description: `Trained on Krea2.
-Best result with weight between: 0.8-1.3`,
-        civitaiLink: "https://civitai.red/models/2853125/zeon-zzeeonn-style-krea2-lora?modelVersionId=3222121"
-    }
+            name: "1041uuu TOYOI Yuuta Style",
+            file: "1041uuu TOYOI Yuuta Style.jpg",
+            triggerWords: "@1041uuu, pixel art.",
+            description: `This is the initial release of the LoRA trained by @1041uuu (TOYOI Yuuta) pixel artworks.
+    
+    Pixel perfection is NOT guaranteed. This LoRA is incompatible with the Pixelate x4 VAE. For best results, generate at 512x512 or higher using base-v01 with 30 steps / 5 CFG and EulerER_SDE / Simple.
+    
+    Recommended Weight: 1.0
+    Optional Positive Prompts: jaggy lines, dithering, no lineart, limited palette
+    Optional Negative Prompts: jpeg artifacts, isometric, letterboxed, pillarboxed, dated`,
+            civitaiLink: "https://civitai.red/models/2689816/1041uuu-toyoi-yuuta-style?modelVersionId=3104005",
+            category: "Design"
+        },
+    {
+            name: "301 - World of Plush",
+            file: "301 - World of Plush.jpg",
+            triggerWords: "n0vuschr0ma style.",
+            description: `This LoRA gives almost everything in the scene a soft plush texture. The exceptions are typically liquids like water, smooth surfaces like glass or screens, and sometimes grass or tiles.
+    
+    Only the trigger "n0vuschr0ma style" is required. You don't need to ask for plush in your prompt. Omitting it makes it easier to do landscapes or interiors if you don't want animals or people in them. In experiments, entire scenes with other fabric materials like knitted yarn or felt were possible by turning down the weight.`,
+            civitaiLink: "https://civitai.red/models/2836493/301-world-of-plush",
+            category: "Design"
+        },
+    {
+            name: "Flat Illustration",
+            file: "Flat Illustration.jpg",
+            triggerWords: "An illustration of",
+            description: `A quick Krea 2 LoRA trained on a handful of images in a flat anime/flat illustration style. No trigger word necessary. Prefacing generations with "An illustration of..." works well. 1.0 strength, and seems to pair well with both other SFW and NSFW LoRAs.`,
+            civitaiLink: "https://civitai.red/models/2744176/krea-2-flat-illustrationanime-style?modelVersionId=3086495",
+            category: "Design"
+        },
+    {
+            name: "Hollow Void",
+            file: "Hollow Void.jpg",
+            triggerWords: " ",
+            description: `A fantastical style inspired by hollowvoidly on Tumblr.
+    
+    When prompting use words like: surreal, dark, fog, armor, wizard, Gothic-style, halftone, castle, eerie atmosphere etc.
+    
+    To keep the finer details and noise, recommend using 4x-AnimeSharp or 4x-UltraSharpV2 when doing a second pass or upscale. Avoid latent, nearest, lanczos etc.`,
+            civitaiLink: "https://civitai.red/models/2851092/hollow-void?modelVersionId=3219631",
+            category: "Design"
+        },
+    {
+            name: "IdontknowhowtonamethisArtStyle",
+            file: "IdontknowhowtonamethisArtStyle.jpg",
+            triggerWords: "An angular, 3d art style, with brush stroke color texture.",
+            description: `Trigger words: An angular, 3d art style, with brush stroke color texture`,
+            civitaiLink: "https://civitai.com/models/2781650/idontknowhowtonamethisartstyle",
+            category: "Design"
+        },
+    {
+            name: "KreaZhangXi",
+            file: "KreaZhangXi.jpg",
+            triggerWords: "Bradhamel art style.",
+            description: `Trigger words: Bradhamel art style.`,
+            civitaiLink: "https://civitai.red/models/2773746/kreazhangxi?modelVersionId=3123196",
+            category: "Design"
+        },
+    {
+            name: "Low Poly Pixel Art",
+            file: "Low Poly Pixel Art.jpg",
+            triggerWords: "a digital low poly pixel art.",
+            description: `A type of 3d low poly pixel art.`,
+            civitaiLink: "https://civitai.red/models/2851202/low-poly-pixel-art-krea2-style?modelVersionId=3219757",
+            category: "Design"
+        },
+    {
+            name: "Moral Superiority - A Vintage Claymation Inspired Style",
+            file: "Moral Superiority - A Vintage Claymation Inspired Style.jpg",
+            triggerWords: "m0ralsuperiority.",
+            description: `Moral Superiority is a style LoRA inspired by vintage public broadcasting and late-night adult television, encapsulating both with smoother textures and HD clarity.
+    
+    CFG - 1 (if not using turbo adjust)
+    STEPS - 8 (if not using turbo adjust)
+    
+    Recommended Resources:
+    TrashAI's Total Chaos Randomizer WF
+    DaSiWa Cute Disaster Turbo UC Krea 2 Model`,
+            civitaiLink: "https://civitai.red/models/2855630/moral-superiority-a-vintage-claymation-inspired-style-krea2?modelVersionId=3225150",
+            category: "Design"
+        },
+    {
+            name: "motocross saito Style",
+            file: "motocross saito Style.jpg",
+            triggerWords: "@motocross saito, pixel art.",
+            description: `Trigger words: @motocross saito, pixel art`,
+            civitaiLink: "https://civitai.red/models/2782223/motocross-saito-style?modelVersionId=3133600",
+            category: "Design"
+        },
+    {
+            name: "Paper flat",
+            file: "Paper flat.jpg",
+            triggerWords: "chibikrea2style.",
+            description: `Clean compositions that look like modern vector illustration.
+    
+    Put the trigger at the start of your prompt, then describe the scene as usual.
+    Add chibi to push chibi proportions, or omit it for a more standard anime look.
+    Strength guide: 0.8 \u2014 softer stylization, 1.0 \u2014 full artist flavor.`,
+            civitaiLink: "https://civitai.red/models/2851727/stylepaper-flat-anima-krea2?modelVersionId=3220419",
+            category: "Design"
+        },
+    {
+            name: "SXZ Casual Mobile Games",
+            file: "SXZ Casual Mobile Games.jpg",
+            triggerWords: "@playrix style, 3d render, cute stylized 2d illustration, soft colors.",
+            description: ` `,
+            civitaiLink: "https://civitai.red/models/2878376/sxz-casual-mobile-games-playrix-style-krea2?modelVersionId=3252945",
+            category: "Design"
+        },
+    {
+            name: "Bruce Timm - Naughty and Nice The Good Girl Art of Bruce Timm",
+            file: "Bruce Timm - Naughty and Nice The Good Girl Art of Bruce Timm.jpg",
+            triggerWords: "brucetimm_style, illustration of",
+            description: `Trained on Krea2.
+    Best result with weight between: 0.8-1`,
+            civitaiLink: "https://civitai.red/models/2843849/bruce-timm-naughty-and-nice-the-good-girl-art-of-bruce-timm-style-krea2-lora?modelVersionId=3210638",
+            category: "Comic and Western Mangas"
+        },
+    {
+            name: "Dan Mora Chavez Style",
+            file: "Dan Mora Chavez Style.jpg",
+            triggerWords: "In the style of Dan Mora Chavez.",
+            description: `Recommended Prompt
+    Include the trigger naturally at the beginning of your prompt, for example:
+    
+    In the style of Dan Mora Chavez. A heroic knight standing atop ancient castle ruins at sunrise, flowing cape, intricate armor, cinematic backlighting, dynamic perspective, vibrant colors, crisp linework, highly detailed digital comic illustration.
+    
+    Style Characteristics
+    Clean, confident comic-book linework
+    Dynamic anatomy and expressive poses
+    Cinematic composition and perspective
+    Bold lighting with dramatic contrast
+    Vibrant, saturated color palettes
+    Detailed costumes, armor, and character designs
+    Heroic fantasy and superhero aesthetics
+    Crisp silhouettes and readable forms
+    Polished digital painting over strong inks
+    Action-focused visual storytelling
+    
+    This LoRA excels at fantasy, superheroes, science fiction, original characters, creatures, and action scenes, while also producing striking portraits and highly stylized illustrations with a polished modern comic-book finish.`,
+            civitaiLink: "https://civitai.red/models/2793943/dan-mora-chavez-style?modelVersionId=3148918",
+            category: "Comic and Western Mangas"
+        },
+    {
+            name: "Engel-Middleton",
+            file: "Engel-Middleton.jpg",
+            triggerWords: "engmddltn.",
+            description: `Joshua Middleton Art Style LoRA (KREA 2)
+    
+    Capture the striking, painterly elegance and iconic comic cover aesthetic of Joshua Middleton. This LoRA is trained to recreate his signature blend of clean graphic form, soft digital painting, high-contrast rim lighting, and elegant character rendering—reminiscent of his celebrated work on Batgirl, Aquaman, and NYX.
+    Recommended Settings
+    
+        Base Model: KREA 2
+    
+        LoRA Weight / Strength: 0.7 – 0.9 (Start at 0.8 for a balanced style blend)
+    
+        CFG Scale: 1
+    
+        Steps: 8
+    
+        I added a trigger word but I am not sure if it works so we'll see! And I totally did not AI that description.`,
+            civitaiLink: "https://civitai.red/models/2903018/engel-middleton-krea-2?modelVersionId=3282738",
+            category: "Comic and Western Mangas"
+        },
+    {
+            name: "Frank Cho",
+            file: "Frank Cho.jpg",
+            triggerWords: "Frank Cho Style, A fantasy artwork.",
+            description: `Frank Cho — The Modern Pin-Up Master | Classic Line, Curvaceous Heroines & Comedic Animals | LoRA (Krea2 Turbo)
+    
+    LoRA trained on the complete comic and illustration oeuvre of Frank Cho (b. 1971): the Korean-American artist universally recognized as the contemporary master of the pin-up tradition in comics. His work fuses the voluptuous glamour of 1940s–50s pin-up masters (Gil Elvgren, Alberto Vargas, George Petty) with the storytelling precision of classic American comic illustrators (Harvey Kurtzman, Wally Wood, Al Williamson, Norm Rockwell). From the anarchic comedy of Liberty Meadows — where a busty animal psychiatrist shares panels with a trigger-happy duck and a psycho weasel — to the savage jungle action of Shanna the She-Devil, Jungle Girl, and Savage Wolverine, Cho's signature is immaculate draftsmanship, anatomical confidence, and an unapologetic celebration of the female form wrapped in humor, adventure, and narrative wit.
+    
+    Tested Generation Settings
+    
+    Parameter
+    
+    Value
+    
+    Base model
+    
+    Krea2 Turbo
+    
+    VAE
+    
+    qwen_image_vae
+    
+    Text encoder
+    
+    qwen3vl_4b_fp8_scaled
+    
+    Steps
+    
+    8
+    
+    Sampler
+    
+    Euler a
+    
+    Schedule type
+    
+    Bong Tangent
+    
+    CFG scale
+    
+    1
+    
+    Resolution
+    
+    1536×2048 (vertical — native comic cover / pin-up format) / 2048×1536 (horizontal for action spreads and Liberty Meadows panels)
+    
+    LoRA weight
+    
+    0.9–1.0 (epoch 20 — full training, pin-up comic style holds full weight)
+    
+    Negative prompt
+    
+    Not required at CFG 1. For the Cho aesthetic, add to negative: children, minors, anime, manga style, 3D render, photorealism, flat shading, low detail, deformed anatomy, cartoonish, chibi, crude linework, desaturated palette
+    Trigger Words
+    
+    Frank Cho style, pin-up comic art, Liberty Meadows, Shanna the She-Devil, jungle queen illustration, classic American comic pin-up
+    
+    Thematic boosters: voluptuous pin-up heroine, confident ink line, leopard-print bikini, jungle queen, comedic animal cast, saturated candy palette, dynamic action pose, Vargas/Elvgren influence, comic cover design, anatomical mastery, retro-modern glamour
+    Versions
+    
+    Epoch 20 (current) — full training; stable at weight 0.9–1.0.`,
+            civitaiLink: "https://civitai.red/models/2903451/frank-cho-the-modern-pin-up-master-or-classic-line-curvaceous-heroines-and-comedic-animals-or-lora-krea2-turbo?modelVersionId=3283273",
+            category: "Comic and Western Mangas"
+        },
+    {
+            name: "Greg Capullo Style",
+            file: "Greg Capullo Style.jpg",
+            triggerWords: "A color illustration by Greg Capullo. The illustration uses outlines and black shadows and light source. It has been digitally inked and colored.",
+            description: `It is possible to generate sketch style with this lora:
+    "A pencil illustration by Greg Capullo.", Color illustration by Greg Capullo.`,
+            civitaiLink: "https://civitai.red/models/2259942/greg-capullo-style?modelVersionId=3184522",
+            category: "Comic and Western Mangas"
+        },
+    {
+            name: "Mike Mignola Style",
+            file: "Mike Mignola Style.jpg",
+            triggerWords: "MignolaStyle.",
+            description: `Use the trigger MignolaStyle at the start, don't describe the style.`,
+            civitaiLink: "https://civitai.red/models/2841548/mike-mignola-style",
+            category: "Comic and Western Mangas"
+        },
+    {
+            name: "Moebius Style",
+            file: "Moebius Style.jpg",
+            triggerWords: "Moebius.",
+            description: `A Lora following the art style of Moebius.`,
+            civitaiLink: "https://civitai.red/models/2909286/moebius-style?modelVersionId=3290513",
+            category: "Comic and Western Mangas"
+        },
+    {
+            name: "Retro Vintage Comics Style",
+            file: "Retro Vintage Comics Style.jpg",
+            triggerWords: " ",
+            description: `This LoRA is trained to reproduce a vintage illustrated comic style, with a focus on detailed line art and minimalist colors.`,
+            civitaiLink: "https://civitai.red/models/2802947/retro-vintage-comics-style-krea-2?modelVersionId=3160068",
+            category: "Comic and Western Mangas"
+        },
+    {
+            name: "SXZ Jim Lee",
+            file: "SXZ Jim Lee.jpg",
+            triggerWords: "@jimlee style, comicbook illustration.",
+            description: ` `,
+            civitaiLink: "https://civitai.red/models/2828710/sxz-jim-lee-krea2?modelVersionId=3191668",
+            category: "Comic and Western Mangas"
+        },
+    {
+            name: "ADILSON FARIAS style",
+            file: "ADILSON FARIAS style.jpg",
+            triggerWords: "ADILSON FARIAS style watercolor illustration.",
+            description: `adilson farias style watercolor illustration, cartoon style, a whimsical grumpy scene`,
+            civitaiLink: "https://civitai.red/models/2838491/adilson-farias-style?modelVersionId=3203851",
+            category: "Sketch and Cartoon"
+        },
+    {
+            name: "AG Vassago - Flat Cartoon Style",
+            file: "AG Vassago - Flat Cartoon Style.jpg",
+            triggerWords: "V4SS4G0X, flat art.",
+            description: `Ars Goetia is series of loras made on a whim, on variety of images, made from mix of Midjourney, Tumblr, NijiJourney and many more things. Each Demon brings something different. Quality might vary between loras - it's small experiment for me.
+    
+    I recommend using "cartoon" in the prompt. In the end of showcase you can see difference between trigger word alone and adding few more stylized words.
+    
+    Sampler:
+    
+        er_sde
+    
+        euler
+    
+    Scheduler:
+    
+        beta - for more drawn style
+    
+        simple
+    
+        linear_quadratic - for more softened, 3d look
+    
+    Lora Strength: 0.6-0.8
+    
+    Sampling steps: 8
+    
+    CFG: 1`,
+            civitaiLink: "https://civitai.red/models/2853357/ag-vassago-flat-cartoon-style?modelVersionId=3258343",
+            category: "Sketch and Cartoon"
+        },
+    {
+            name: "Berni Wrightson Illustrations from Frankenstain style",
+            file: "Berni Wrightson Illustrations from Frankenstain style.jpg",
+            triggerWords: "bwrightson, highly detailed black and white ink engraving, masterful dense cross-hatching with varied directional lines, intricate parallel and cross-hatch textures, extreme chiaroscuro with deep blacks and dramatic highlights, heavy expressive linework, raw engraved texture.",
+            description: `This must be my favorite lora I have trained in a while, it produces beautiful detailed pen and ink illustrations. You can go with black & white, dataset was Berni's Wrightson illustrations for Frankenstein book which are B&W or describe the colors its awesome either way. As usually lower strength of character lora for the style to take over.`,
+            civitaiLink: "https://civitai.red/models/2524467/berni-wrightson-illustrations-from-frankenstain-style",
+            category: "Sketch and Cartoon"
+        },
+    {
+            name: "CupHead Style",
+            file: "CupHead Style.jpg",
+            triggerWords: "cphdstyle, Colorful hand-painted background, soft morning light, bold ink outlines, vintage rubber-hose animation.",
+            description: `How to use :
+    cphdstyle, [your prompt], Colorful hand-painted background, soft morning light, bold ink outlines, vintage rubber-hose animation`,
+            civitaiLink: "https://civitai.red/models/2879923/cuphead-style?modelVersionId=3254870",
+            category: "Sketch and Cartoon"
+        },
+    {
+            name: "Disney Animation Style",
+            file: "Disney Animation Style.jpg",
+            triggerWords: "disney_animation_style.",
+            description: `Trigger words: disney_animation_style,`,
+            civitaiLink: "https://civitai.red/models/2840506/disney-animation-style",
+            category: "Sketch and Cartoon"
+        },
+    {
+            name: "Expressive Euro Cartoon",
+            file: "Expressive Euro Cartoon.jpg",
+            triggerWords: "like comic, 2d, flat color.",
+            description: `Strength: 1.0 - 1.5.
+    
+    A bit tricky on Krea2 because of prompt adherence or god knows what:
+    
+    - If you try to use words that creates realism, you will absolutely need 1.5 strength
+    - If you try to use known celebrity fanart words with specific styling like Disney Princesses then you will need 1.2+ strength.
+    - If above two is False then 1.0 is enough in most cases.`,
+            civitaiLink: "https://civitai.red/models/2694211/expressive-euro-cartoon?modelVersionId=3133709",
+            category: "Sketch and Cartoon"
+        },
+    {
+            name: "Fablelight",
+            file: "Fablelight.jpg",
+            triggerWords: "lastunic0rn.",
+            description: `Fablelight is a vintage fantasy illustration style inspired by the hand-drawn animation and painted backgrounds of The Last Unicorn. I wanted to capture the actual visual language rather than the characters themselves. Delicate linework, unusual proportions, rich painted environments, and that slightly melancholy storybook quality.
+    
+    It works across portraits, creatures, landscapes, interiors, objects, and more. Framing also changes how the style presents itself: close-ups tend to reveal softer, slightly wavy hand drawn linework and more of that traditional inked feel, while medium, full body, and distant compositions shift toward cleaner lines and crisper vintage cel shading, just like in the film.
+    
+    Trigger: lastunic0rn
+    
+    Settings:
+    CFG - 1 (ADJUST IF NOT USING A TURBO VERSION!!)
+    STEPS -8 (ADJUST IF NOT USING A TURBO VERSION!!)
+    EULER/SIMPLE`,
+            civitaiLink: "https://civitai.red/models/2880541/fablelight-a-vintage-animation-style-krea2?modelVersionId=3255659",
+            category: "Sketch and Cartoon"
+        },
+    {
+            name: "Friendly Sketch",
+            file: "Friendly Sketch.jpg",
+            triggerWords: "an illustration of",
+            description: `Apply a friendly, warm style to your Krea 2 illustrations.
+    
+    No trigger word needed. 1.0 strength, but try 0.8 to 1.3 for cool variations. Mixes well with character LoRAs or second style LoRAs. Using happiness, laughing, smiling etc. gets the best results \u2014 it's built to be friendly!
+    
+    If you run into trouble, try raising the strength in 0.1 increments, add words like "an illustration of..." to the start of your prompt, and remove any leftover camera hardware words.`,
+            civitaiLink: "https://civitai.red/models/2756662/friendly-sketch-krea2",
+            category: "Sketch and Cartoon"
+        },
+    {
+            name: "Ink Caricature Style of the End Credits of Tangled",
+            file: "Ink Caricature Style of the End Credits of Tangled.jpg",
+            triggerWords: " ",
+            description: `This LoRA is trained to produce a stylized ink on paper illustrated style.`,
+            civitaiLink: "https://civitai.red/models/2841027/ink-caricature-style-of-the-end-credits-of-tangled-krea-2?modelVersionId=3207085",
+            category: "Sketch and Cartoon"
+        },
+    {
+            name: "Khyleri - Khyle",
+            file: "Khyleri - Khyle.jpg",
+            triggerWords: "khyleri_style, illustration of ",
+            description: `Trained on Krea2.
+    Best result with weight between: 0.8-1.3`,
+            civitaiLink: "https://civitai.red/models/2849403/khyleri-khyle-style-krea2-lora?modelVersionId=3217511",
+            category: "Sketch and Cartoon"
+        },
+    {
+            name: "shitty watercolor style",
+            file: "shitty watercolor style.jpg",
+            triggerWords: "Watercolor.",
+            description: `Krea2
+    Turbo model, 768x1152
+    Euler / simple / 10 steps / CFG 1
+    Lora strength of 1`,
+            civitaiLink: "https://civitai.red/models/1030872/shitty-watercolor-style?modelVersionId=3112712",
+            category: "Sketch and Cartoon"
+        },
+    {
+            name: "Storybook Folk Art",
+            file: "Storybook Folk Art.jpg",
+            triggerWords: "whimsical storybook illustration.",
+            description: `This model creates whimsical, storybook-inspired folk art with flowing, dreamlike details. Except for Krea 2, the style is easily distracted, so if you want to stay true to it, use the following trigger: "Whimsical, storybook-inspired folk art with flowing, dreamlike details."
+    
+    Krea 2 Strength: 1.0`,
+            civitaiLink: "https://civitai.red/models/1321740/storybook-folk-art?modelVersionId=3199069",
+            category: "Sketch and Cartoon"
+        },
+    {
+            name: "SXZ Gretel Lusky Style",
+            file: "SXZ Gretel Lusky Style.jpg",
+            triggerWords: "@gretlusky style, 2d illustration, stylized.",
+            description: ` `,
+            civitaiLink: "https://civitai.red/models/2875135/sxz-gretel-lusky-style-krea2?modelVersionId=3248871",
+            category: "Sketch and Cartoon"
+        },
+    {
+            name: "The Legend of Zelda Breath of the Wild",
+            file: "The Legend of Zelda Breath of the Wild.jpg",
+            triggerWords: "botw_style, illustration of ",
+            description: `Trained on Krea2.
+    Best result with weight between: 0.8-1
+    
+    Starting prompts: botw_style, illustration of
+    Optional prompts: backdrop framed by painterly brushstrokes, cel-shaded anime style. cel-shaded 3D anime art style.`,
+            civitaiLink: "https://civitai.red/models/2844663/the-legend-of-zelda-breath-of-the-wild-artwork-painting-style-krea2-lora?modelVersionId=3211633",
+            category: "Sketch and Cartoon"
+        },
+    {
+            name: "Akira Style",
+            file: "Akira Style.jpg",
+            triggerWords: "Retro Anime Style.",
+            description: `Akira Style Lora for Krea 2.
+    
+    Recommended Strength: 0.7
+    
+    Example Prompt: "retro anime style image of runaway girl in a torn school jacket with a tense posture inside a crowded neon street market beneath massive concrete overpasses, with hot neon red, dirty concrete gray, and electric blue accents, with the background kept secondary to the subject."
+    
+    Tip: You don't need more style tags than "retro anime style"`,
+            civitaiLink: "https://civitai.red/models/2740599/retro-anime-akira-style?modelVersionId=3082075",
+            category: "Anime and Manga"
+        },
+    {
+            name: "Baichuan Baichuan Style",
+            file: "Baichuan Baichuan Style.jpg",
+            triggerWords: "@baichuan_baichuan.",
+            description: `Based on baichuan_baichuan's style.
+    
+    Suggested strength: 0.8-1.00 when used alone.`,
+            civitaiLink: "https://civitai.red/models/2633330/baichuan-baichuan-style-animakrea2?modelVersionId=3223144",
+            category: "Anime and Manga"
+        },
+    {
+            name: "cocokana artstyle",
+            file: "cocokana artstyle.jpg",
+            triggerWords: "cocokana Digital anime-style.",
+            description: `Krea 2:
+    Checkpoint: krea2_turbo_int8_convrot
+    Cfg: 1
+    Steps: 8`,
+            civitaiLink: "https://civitai.red/models/2499881/cocokana-artstyle?modelVersionId=3210873",
+            category: "Anime and Manga"
+        },
+    {
+            name: "Concept Art like Yoshitaka Amano",
+            file: "Concept Art like Yoshitaka Amano.jpg",
+            triggerWords: "Concept art.",
+            description: `A LoRA to emulate the style of Yoshitaka Amano in creating the artwork for various classic Final Fantasy videogames.
+    
+    Write concept art, and maybe watercolor-style or something like that, to be sure.`,
+            civitaiLink: "https://civitai.red/models/2830669/concept-art-like-yoshitaka-amano?modelVersionId=3196755",
+            category: "Anime and Manga"
+        },
+    {
+            name: "Ghibli style (Kiki's Delivery Service)",
+            file: "Ghibli style (Kiki's Delivery Service).jpg",
+            triggerWords: "ghibli style.",
+            description: `KREA 2
+    Turbo model, Euler / simple / 8 steps / CFG 1
+    768x1152, Lora strength of 1.3`,
+            civitaiLink: "https://civitai.red/models/523485/ghibli-style-kikis-delivery-service?modelVersionId=3084641",
+            category: "Anime and Manga"
+        },
+    {
+            name: "Junji Ito Style",
+            file: "Junji Ito Style.jpg",
+            triggerWords: "jnj style, a black and white drawing.",
+            description: `Trigger: "jnj style", "a black and white drawing" or a "colored image".
+    You can add "heavy cross-hatching" and "screentones" if you prefer.
+    Sampler/scheduler: er_sde/beta`,
+            civitaiLink: "https://civitai.red/models/2781757/junji-ito-style-krea",
+            category: "Anime and Manga"
+        },
+    {
+            name: "Katsuya Terada style",
+            file: "Katsuya Terada style.jpg",
+            triggerWords: "katsuyak2style, Dynamic, highly detailed pen-and-ink linework with expressive brush strokes, intricate cross-hatching, fluid anatomy, cinematic composition, bold perspective, organic textures, and a fusion of manga-inspired energy with painterly fantasy realism; dramatic lighting, rich visual storytelling, and meticulous handcrafted detail.",
+            description: `Trigger words: katsuyak2style, Dynamic, highly detailed pen-and-ink linework with expressive brush strokes, intricate cross-hatching, fluid anatomy, cinematic composition, bold perspective, organic textures, and a fusion of manga-inspired energy with painterly fantasy realism; dramatic lighting, rich visual storytelling, and meticulous handcrafted detail.`,
+            civitaiLink: "https://civitai.red/models/2752263/katsuya-terada-style?modelVersionId=3096446",
+            category: "Anime and Manga"
+        },
+    {
+            name: "Kojima Ayami 小岛文美 Castlevania style",
+            file: "Kojima Ayami 小岛文美 Castlevania style.jpg",
+            triggerWords: " ",
+            description: `这个模型不需要触发词
+    
+    This model doesn't need a trigger word
+    
+    本模型训练获得魔搭社区技术支持
+    
+    推荐出图参数:
+    分辨率：竖屏 1280x1856（1536x1536）
+    lora权重1.0
+    采样er_sde simple 8steps`,
+            civitaiLink: "https://civitai.red/models/2885757/kojima-ayami-castlevania-style-krea2?modelVersionId=3262014",
+            category: "Anime and Manga"
+        },
+    {
+            name: "Manga style (Berserk)",
+            file: "Manga style (Berserk).jpg",
+            triggerWords: "manga style.",
+            description: `Krea 2
+    Turbo model: 8 steps / CFG 1 & Euler simple
+    768x1152, x2 Hires (10 steps, 0.35 with 4x_NMKD_Siax)
+    Lora strength 1.2
+    
+    Can also do characters: Guts, Casca, Griffith.`,
+            civitaiLink: "https://civitai.red/models/743448/manga-style-berserk",
+            category: "Anime and Manga"
+        },
+    {
+            name: "Manga style (Naoki Urasawa)",
+            file: "Manga style (Naoki Urasawa).jpg",
+            triggerWords: " ",
+            description: `KREA 2
+    Showcase images:
+    
+    Turbo model: 10 steps / CFG 1 & Euler simple
+    944x1408
+    x2 Hires (10 steps, 0.35 with 4x_NMKD_Siax)
+    Lora strength 1.3
+    
+    IDEOGRAM 4
+    Json caption style with:
+    art_style: Naoki Urasawa style
+    medium: manga
+    aesthetics: black_and_white`,
+            civitaiLink: "https://civitai.red/models/690155/manga-style-naoki-urasawa?modelVersionId=3087718",
+            category: "Anime and Manga"
+        },
+    {
+            name: "murata range artstyle",
+            file: "murata range artstyle.jpg",
+            triggerWords: "murata range digital anime-style illustration.",
+            description: `Krea 2:
+    Checkpoint: krea2_turbo_int8_convrot
+    Cfg: 1
+    Steps: 8`,
+            civitaiLink: "https://civitai.red/models/2838564/murata-range-artstyle?modelVersionId=3203938",
+            category: "Anime and Manga"
+        },
+    {
+            name: "ogipote\u837Bpote style",
+            file: "ogipote\u837Bpote style.jpg",
+            triggerWords: "Ogipote style",
+            description: `Trigger words: Ogipote style.`,
+            civitaiLink: "https://civitai.red/models/2529695/ogipotepote-style?modelVersionId=3094753",
+            category: "Anime and Manga"
+        },
+    {
+            name: "Pall Wash - A Versatile Dark Fantasy Anime Style",
+            file: "Pall Wash - A Versatile Dark Fantasy Anime Style.jpg",
+            triggerWords: "pallwash.",
+            description: `A versatile anime style LoRA with serious range. Confident linework, dramatic lighting, and color that swings from richly saturated to moody and muted depending on what you ask for.
+    
+    Trigger must come before quality tags (masterpiece, best quality, etc.), not after. Using LESS quality tags = better result.
+    
+    Heads up: left to its own devices on a sparse prompt, Pall Wash leans surreal and uncanny. Skulls, glowing eyes, unsettling accents show up even when you didn't ask.
+    
+    Suggested Settings:
+    DPM++ 2M Karras, or Euler A / Beta 57/Karras
+    CFG 6\u20136.5, (if using DaSiWa Checkpoints, lower this to 5.0)`,
+            civitaiLink: "https://civitai.red/models/2719146/pall-wash-a-versatile-dark-fantasy-anime-style-illanimakrea-2?modelVersionId=3118088",
+            category: "Anime and Manga"
+        },
+    {
+            name: "Retro anime style",
+            file: "Retro anime style.jpg",
+            triggerWords: "retro anime style.",
+            description: `Krea 2
+    For this one, a really small dataset (7 images) was used so it's overtrained, but it is really closer to the style intended.
+    
+    Turbo model, 768x1152, Euler / simple / 10 steps / CFG 1`,
+            civitaiLink: "https://civitai.red/models/2594665/retro-anime-style?modelVersionId=3118780",
+            category: "Anime and Manga"
+        },
+    {
+            name: "Retro Ghibli style (Porco Rosso)",
+            file: "Retro Ghibli style (Porco Rosso).jpg",
+            triggerWords: "ghibli style.",
+            description: `Turbo model, 768x1152
+    x1.5 Hires (10 steps, 0.2-0.35 with 4x_foolhardy_Remacri)
+    Euler / simple / 10 steps / CFG 1
+    Lora strength 1`,
+            civitaiLink: "https://civitai.red/models/1153088/retro-ghibli-style-porco-rosso?modelVersionId=3127101",
+            category: "Anime and Manga"
+        },
+    {
+            name: "SXZ Arcane Style",
+            file: "SXZ Arcane Style.jpg",
+            triggerWords: "@arcane, 3d render, stylized.",
+            description: `euler - best for soft render close to the show style`,
+            civitaiLink: "https://civitai.red/models/2849323/sxz-arcane-style-krea2?modelVersionId=3217415",
+            category: "Anime and Manga"
+        },
+    {
+            name: "YOSHITAKA AMANO - Final Fantasy Style",
+            file: "YOSHITAKA AMANO - Final Fantasy Style.jpg",
+            triggerWords: "a watercolor illustration in the style of yoshitaka amano.",
+            description: `Krea 2 Release 06/27/2026
+    
+    Suggested strength: 0.8-1.2
+    
+    Been having fun with Krea 2, it works quite well and knows a lot of characters. If using multiple LoRas, lower strength to .8.
+    
+    Trigger words: Suggested tags: a watercolor illustration in the style of yoshitaka amano`,
+            civitaiLink: "https://civitai.red/models/588789/yoshitaka-amano-final-fantasy-style-for-anima-pony-il-krea-2?modelVersionId=3076044",
+            category: "Anime and Manga"
+        },
+    {
+            name: "Zeon (zzeeonn)",
+            file: "Zeon (zzeeonn).jpg",
+            triggerWords: "zeon_style, illustration of. Clean sharp line art, flat colors with glossy leather highlights, cell shading, minimalist fashion anime illustration, full body shot isolated on a pure white background.",
+            description: `Trained on Krea2.
+    Best result with weight between: 0.8-1.3`,
+            civitaiLink: "https://civitai.red/models/2853125/zeon-zzeeonn-style-krea2-lora?modelVersionId=3222121",
+            category: "Anime and Manga"
+        },
+    {
+            name: "004 - Midnight Gouache",
+            file: "004 - Midnight Gouache.jpg",
+            triggerWords: "n0vuschr0ma style, gouache painting.",
+            description: `A gouache painting style with a dominant midnight blue color palette with pink accents. It often adds botanical patterns to backgrounds and surfaces. Tends toward minimalism if an entire scene isn't requested. Subjects tend to be cute and cartoony. The trigger is n0vuschr0ma style, and you can add "gouache painting" to enhance the painterly effect.`,
+            civitaiLink: "https://civitai.red/models/2798635/004-midnight-gouache?modelVersionId=3154735",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "164 - Oil Pastels",
+            file: "164 - Oil Pastels.jpg",
+            triggerWords: "n0vuschr0ma style, oil pastels illustration.",
+            description: `This is a version of oil pastels that looks quite different from Krea 2's default. This one uses thicker strokes, more waxy looking blending, grain that shows the background paper, has less fine detail, and more vibrant colors. I get the most consistent results using both the trigger "n0vuschr0ma style" and "oil pastels illustration". It could also be used for crayon illustrations.
+    
+    This particular version does more of a stylized cute cartoonish look for characters.`,
+            civitaiLink: "https://civitai.red/models/2831588/164-oil-pastels?modelVersionId=3195213",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "Alexander Mokhov",
+            file: "Alexander Mokhov.jpg",
+            triggerWords: "AM0khov Style.",
+            description: `Weights: 0.5 - 1.0 - Lower the weight if you use other LoRAs with it.`,
+            civitaiLink: "https://civitai.red/models/2849314/alexander-mokhov-artist-style-or-krea-2",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "Alexandre Benois \u2014 Mir Iskusstva",
+            file: "Alexandre Benois \u2014 Mir Iskusstva.jpg",
+            triggerWords: " ",
+            description: `LoRA trained on the complete artistic legacy of Alexandre Benois (1870\u20131960): paintings, watercolours, gouache, pastels, theatre sketches and book illustrations. The model captures his elegant World of Art (Mir Iskusstva) manner \u2014 the nostalgic Versailles and 18th-century Petersburg scenes, the Ballets Russes costume designs, the Pushkin illustrations, and the refined graphic line over translucent washes.
+    
+    The Manner: 18th-century court of Louis XIV and Louis XV, Versailles, Watteau, the French Rococo rendered with archaeological precision and deep melancholy. Petersburg panoramas, theatrical vision, translucent layering, pastel palette, nostalgia as method, stylised historicism, graphic precision, masked balls and masquerades, book illustration.
+    
+    Recommended LoRA weight: 0.85\u20131.0`,
+            civitaiLink: "https://civitai.red/models/2850302/alexandre-benois-mir-iskusstva-or-paintings-and-graphics-or-lora-krea2-turbo",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "Alphonse Mucha",
+            file: "Alphonse Mucha.jpg",
+            triggerWords: "@alphonse mucha, year 1896, art nouveau.",
+            description: `This LoRA was trained on all 171 Alphonse Mucha artworks registered on WikiArt. The dataset includes not only Mucha's famous Art Nouveau decorative style, but also other types of works such as self-portraits, sculptures, and oil paintings.
+    
+    The recognizable "Art Nouveau decorative elements" tend to appear quite strongly, and those decorations are often generated in circular or ring-like patterns.`,
+            civitaiLink: "https://civitai.red/models/2816430/alphonse-mucha",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "Chenbo (Bo Chen)",
+            file: "Chenbo (Bo Chen).jpg",
+            triggerWords: "@chenbo.",
+            description: `Trigger words: @chenbo`,
+            civitaiLink: "https://civitai.red/models/2743871/chenbo-bo-chen-artist-style?modelVersionId=3138651",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "Clyde Caldwell Style",
+            file: "Clyde Caldwell Style.jpg",
+            triggerWords: "oilpainting by clyde caldwell.",
+            description: `Bring back the unmistakable vibe of 80s and 90s high-fantasy art! This LoRA is trained on the iconic artistic style of Clyde Caldwell, legendary for his classic cover artworks for Dungeons & Dragons (D&D), Dragonlance, and Ravenloft.`,
+            civitaiLink: "https://civitai.red/models/2751976/clyde-caldwell-style-krea-2?modelVersionId=3096079",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "D&D Painterly (Clean)",
+            file: "D&D Painterly (Clean).jpg",
+            triggerWords: "D&D Painterly.",
+            description: `This LoRA captures the rich, atmospheric aesthetic of tabletop RPG character art with painterly brushwork and cinematic lighting. Detailed armor and gear rendered in warm colors, candlelit taverns, and misty forest clearings. Invoking the classic "character sheet illustration" quality where every portrait tells a story.
+    
+    The dataset of "D&D Painterly" has been additionally processed and captioned with different VL.`,
+            civitaiLink: "https://civitai.red/models/2140417/dandd-painterly-clean",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "Disco Elysium by Fortnox",
+            file: "Disco Elysium by Fortnox.jpg",
+            triggerWords: "Disco Elysium Style.",
+            description: `A style LoRA trained on iconic Disco Elysium portraits and skill artwork. Captures the gritty, expressive oil painting aesthetic with heavy brushstrokes, muted palettes, and distinct textural contrast.
+    
+    This is my first LoRA. Feedback and sample generations are welcome.`,
+            civitaiLink: "https://civitai.red/models/2869381/disco-elysium-by-fortnox?modelVersionId=3246025",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "dndstyle \u2014 D&D fantasy illustration [Krea 2]",
+            file: "dndstyle \u2014 D&D fantasy illustration [Krea 2].jpg",
+            triggerWords: "dndstyle.",
+            description: `Classic tabletop-rulebook fantasy illustration style for Krea 2. Dramatic character-first compositions, painted armor and scale texture, torchlit dungeons, golden-hour battlefields \u2014 the look of a modern D&D sourcebook plate. Style only: no characters baked in, so your subjects stay yours.
+    
+    USAGE \u2014 Trigger: dndstyle (put it at the start of your prompt). Strength 1.0 default; forgiving from 0.5 (light fantasy grade) to 2.0 (full homage). Prompt in natural language (Qwen3-VL encoder), not tag soup.
+    
+    PAIRS WELL WITH \u2014 brushcelstyle, a painterly semi-3D LoRA: chain both LoraLoaderModelOnly nodes and use both triggers: dndstyle 1.0 + brushcelstyle 0.7 for illustration-first, 0.7 / 1.0 for painterly-first, 0.8 / 0.8 balanced.`,
+            civitaiLink: "https://civitai.red/models/2749607/dndstyle-dandd-fantasy-illustration-krea-2?modelVersionId=3093121",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "Druuna Serpieri Style",
+            file: "Druuna Serpieri Style.jpg",
+            triggerWords: "druuna_style, traditional media, graphite (medium).",
+            description: `Druuna Style
+    
+    Druuna is the protagonist of the Italian erotic science fiction comic series by Paolo Eleuteri Serpieri, first published in 1985. The series is known for combining science fiction, fantasy and erotica in a single dark, dystopian world.
+    
+    Serpieri's art is dense and technically exceptional. Every tone is built from fine crosshatching and stippling rather than flat fill, with anatomically precise figure work and environments rendered in obsessive detail. Druuna herself is drawn with the voluptuous, heavily idealized proportions the series is famous for.
+    
+    The mood is decay. Post-apocalyptic landscapes, flooded corridors, rusted machinery and organic growth creeping over everything. Serpieri's handling of light and shadow is what carries it, deep chiaroscuro that gives the panels a cinematic weight most comic art never reaches.
+    
+    This LoRA captures that look. Rendering style, anatomy, atmosphere and lighting rather than a single character.
+    
+    How to prompt it
+    
+    Put druuna_style at the start of your prompt, then describe the scene in plain sentences.
+    
+    Keep the rest of the prompt about content. Subject, setting, framing and light source. The LoRA handles the style, so you don't need to describe it twice.
+    
+    If the output drifts too realistic, add traditional media, ink illustration or graphite (medium)
+    
+    Avoid photorealistic, photo, 8k, hyperrealistic, DSLR and similar terms. They fight the LoRA and flatten the linework.
+    
+    Always name a light source. These scenes live or die on the shadows.`,
+            civitaiLink: "https://civitai.red/models/2882456/druuna-serpieri-style?modelVersionId=3258016",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "Engraving Cross Hatching Style",
+            file: "Engraving Cross Hatching Style.jpg",
+            triggerWords: "@cr00shatch, A highly detailed engraving-style portrait.",
+            description: `This LoRA excels at mixing monochrome with a single striking color. Use selective coloring: monochromatic sepia tones or monochrome foreground with vivid color pops (e.g., vivid cyan beam of light, vivid pink melted ice cream, vivid red flames).
+    
+    Mood & Composition: allegorical narrative, intense and ominous, quiet tension drives dramatic, theatrical, and highly expressive poses. visceral suffering / macabre: Good for darker, gothic, or dark fantasy concepts.`,
+            civitaiLink: "https://civitai.red/models/2627909/engraving-cross-hatching-style-or-krea-2-anima?modelVersionId=3180812",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "Francisco Goya \u2014 Paintings & Etchings",
+            file: "Francisco Goya \u2014 Paintings & Etchings.jpg",
+            triggerWords: " ",
+            description: `Trigger words: No trigger word needed.`,
+            civitaiLink: "https://civitai.red/models/2849706/francisco-goya-paintings-and-etchings-or-zhivopis-i-grafika?modelVersionId=3217866",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "Frank Frazetta style",
+            file: "Frank Frazetta style.jpg",
+            triggerWords: "painting, FrankFrazetta.",
+            description: `Trigger words: painting, FrankFrazetta.`,
+            civitaiLink: "https://civitai.red/models/2734696/frank-frazetta-style?modelVersionId=3074818",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "Frank Frazetta Style Oil Painting",
+            file: "Frank Frazetta Style Oil Painting.jpg",
+            triggerWords: "frazetta style dark fantasy oil painting.",
+            description: `Trained to match the style of oil paintings by the legendary Frank Frazetta.
+    
+    Krea 2 - Good Starting Prompt: Frazetta style dark fantasy oil painting.
+    .9 is great but anything after .5 usually has good results.`,
+            civitaiLink: "https://civitai.red/models/657789/frank-frazetta-style-oil-painting-krea2-flux?modelVersionId=3096520",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "Gwent style for Krea 2",
+            file: "Gwent style for Krea 2.jpg",
+            triggerWords: "GWENT4RT, high-fidelity fantasy art.",
+            description: `this lora tries to mimic the style of Gwent card artworks.
+    
+    put GWENT4RT at start of your prompt. better to also include "high-fidelity fantasy art" in your prompt.
+    
+    use at strength 1`,
+            civitaiLink: "https://civitai.red/models/2889079/gwent-style-for-krea-2?modelVersionId=3266125",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "Impressionism",
+            file: "Impressionism.jpg",
+            triggerWords: "ArsMJStyle, impressionism.",
+            description: `The MJ7 dataset was recreated using MidJourney V7.
+    It has a better versatility, but it is not as strong as the previous 2 versions.
+    
+    You can start from higher LoRA strength/weight when using it.
+    
+    The Lora is trained on MidJourney Images that use my "Personalised Style" + Impressionism
+    V2 is highly flexible, but the effects are not as prominent as V1.
+    
+    Works without the trigger words ArsMJStyle, Impressionism
+    
+    Will start adding visible effects at 0.4+
+    Works great in the 0.6 - 1.5 range, depending on your preference
+    
+    It depends on the model, but you can go pretty high with this Lora's weight.
+    
+    Quality tags and negatives reduce the effect.`,
+            civitaiLink: "https://civitai.red/models/545264/impressionism?modelVersionId=3219131",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "John Everett Millais",
+            file: "John Everett Millais.jpg",
+            triggerWords: "John Everett Millais style, Pre-Raphaelite painting, Millais Ophelia, Pre-Raphaelite Brotherhood, botanical detail Victorian, luminous Pre-Raphaelite.",
+            description: `John Everett Millais — The Pre-Raphaelite Master | Truth to Nature | LoRA (Krea2 Turbo)
+    
+    LoRA trained on the complete oeuvre of John Everett Millais (1829–1896): the most technically gifted of the Pre-Raphaelite Brotherhood, whose revolutionary approach to painting combined obsessive detail, luminous color, and emotional intensity. From the drowning Ophelia floating among meticulously rendered flowers to the blind girl sensing a storm through rain-soaked skin, Millais painted with a devotion to nature so intense it bordered on the mystical. He was the child prodigy who entered the Royal Academy at eleven, the rebel who co-founded the Pre-Raphaelites at nineteen, and later the establishment figure who became the first baronet artist — but his greatest works remain those radical early paintings where every leaf, every petal, every thread was painted with almost hallucinatory clarity.
+    
+    Trained and tested on Krea2 Turbo.
+    About the Artist`,
+            civitaiLink: "https://civitai.red/models/2876774/john-everett-millais-the-pre-raphaelite-master-or-truth-to-nature-or-lora-krea2-turbo?modelVersionId=3250994",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "KyuYong Eom Artist Style",
+            file: "KyuYong Eom Artist Style.jpg",
+            triggerWords: "KyuY0ng3om Style",
+            description: `Weights: 0.5 - 1.0 - Lower the weight if you use other LoRAs with it.`,
+            civitaiLink: "https://civitai.red/models/2836652/kyuyong-eom-artist-style-or-krea-2?modelVersionId=3201598",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "Larry Elmore Style",
+            file: "Larry Elmore Style.jpg",
+            triggerWords: "painting style of larry elmore.",
+            description: `### 🐉 Larry Elmore Style Model - Version 2 (V2)
+    
+    Welcome to Version 2 of the Larry Elmore style LoRA! This version has been completely rebuilt from scratch to capture the legendary, nostalgic 1980s high-fantasy D&D and Dragonlance book cover aesthetic with maximum fidelity.
+    
+    The flat, digital "cartoon look" from V1 is completely gone! The first version suffered from over-smoothing and flat colors due to legacy AI upscalers (like ESRGAN 4x). For V2, the entire dataset was meticulously re-curated.
+    
+    ---
+    
+    ### 🛠️ Training Specifications
+    
+    * Dataset Size: 66 high-quality, hand-selected fantasy illustrations
+    
+    * Training Resolution: 1024 x 1024 px
+    
+    * Training Length: 27 Epochs (~1800 Total Steps)
+    
+    * Batch Size: 1
+    
+    * Optimal LoRA Weight: 1.0 (Feel free to scale down to 0.8 for more flexible compositions)
+    
+    ---
+    
+    ### 🔑 How to Use
+    
+    * Trigger Word: painting style of larry elmore
+    
+    * Prompting Advice: This model responds beautifully to descriptive, natural language (Descriptive Prompting). Avoid heavy tag lists.`,
+            civitaiLink: "https://civitai.red/models/2771368/larry-elmore-style-krea-2?modelVersionId=3145779",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "Luis Royo (Secrets) dark fantasy style",
+            file: "Luis Royo (Secrets) dark fantasy style.jpg",
+            triggerWords: "A dark sensual fantasy digital painting in the distinctive style of lroyo, detailed dramatic moody atmosphere with intricate textures and lighting, gothic fantasy elements.",
+            description: `Trained on Luis Royo "Secrets" artbook illustrations, strengths: 0.8 - 1.2`,
+            civitaiLink: "https://civitai.red/models/2505872/luis-royo-secrets-dark-fantasy-style",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "Max58art - Artist Style",
+            file: "Max58art - Artist Style.jpg",
+            triggerWords: "@max58art.",
+            description: `Sampler:
+    
+        er_sde | euler
+    
+    Scheduler:
+    
+        beta | linear_quadratic | simple
+    
+    Lora Strength: 0.8-1.4 | Steps: 8 | CFG: 8`,
+            civitaiLink: "https://civitai.red/models/2752021/max58art-artist-style?modelVersionId=3289313",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "MidJourney chiaroscuro style",
+            file: "MidJourney chiaroscuro style.jpg",
+            triggerWords: "a low-angle medium shot, painting, from the waist up of ",
+            description: `KREA:
+    Strength: I prefer 1.5
+    Use Euler / Beta
+    
+    Example: a low-angle medium shot, painting, from the waist up of`,
+            civitaiLink: "https://civitai.red/models/2764520/midjourney-chiaroscuro-style?modelVersionId=3111501",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "Midjourney thick painting style",
+            file: "Midjourney\u539A\u6D82\u98CE\u683C  Midjourney thick painting style.jpg",
+            triggerWords: "MTP_style, impasto oil painting style.",
+            description: `This is a LoRA model leaning toward impasto oil painting style.
+    
+    Krea2:
+    Recommended LoRA weight: 0.95
+    Recommended sampling steps: 8\u201310
+    Recommended CFG scale: 1.1
+    Recommended samplers: er_sde, Euler A`,
+            civitaiLink: "https://civitai.red/models/2785232/midjourney-or-midjourney-thick-painting-style?modelVersionId=3138012",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "Modern Fantasy Paint Art",
+            file: "Modern Fantasy Paint Art.jpg",
+            triggerWords: " ",
+            description: `Attempt to make a fantasy-oriented style mimicking an atmosphere of TTRPG book art and video game concept and cover art.`,
+            civitaiLink: "https://civitai.red/models/2029643/modern-fantasy-paint-art?modelVersionId=3207579",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "Modern Ukiyo",
+            file: "Modern Ukiyo.jpg",
+            triggerWords: "modernukiyo.",
+            description: `Modern Ukiyo is a contemporary take on Japanese woodblock-inspired art, combining bold linework, flat pigments, textured paper and flowing graphic shapes with modern subjects and compositions.
+    
+    The style is not limited to traditional Japanese themes. It works with portraits, animals, fantasy, landscapes, architecture, cars, motorcycles, modern environments and more.
+    
+    One of its defining features is the use of sweeping shapes inspired by wind, smoke, waves and clouds, often becoming a major part of the composition.
+    Prompting
+    
+    Start your prompt with:
+    
+    modernukiyo
+    
+    Then simply describe what you want to see. Focus on the subject, scene, composition, lighting and mood.
+    
+    You usually don't need to add terms such as ukiyo-e, woodblock print, Japanese print, washi paper or similar style descriptions. The LoRA is intended to provide the visual style itself.
+    Example:
+    
+    modernukiyo, a woman standing beneath an umbrella beside a black sports car during heavy rain, mountains in the distance, dramatic composition
+    
+    Try unexpected subjects too. Modern scenes, vehicles, fantasy creatures and everyday situations can produce some of the most interesting results.
+    
+    Recommended strength: 0.6–1.0
+    
+    Suggested starting point: 0.8
+    
+    Have fun experimenting with it.`,
+            civitaiLink: "https://civitai.red/models/2896759/modern-ukiyo?modelVersionId=3274963",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "Mutopix - Muted Pastel Ink Illustration",
+            file: "Mutopix - Muted Pastel Ink Illustration.jpg",
+            triggerWords: "Mutopix.",
+            description: `A muted pastel watercolor illustration style with delicate ink linework, trained on Krea 2.
+    
+    Trigger word: Mutopix
+    
+    Best around weight 1.0. Describe your subject naturally — Mutopix carries the palette, the linework, and the illustration medium on its own, so there's no need to add words like "watercolor" or "illustration" yourself; doing so won't hurt, it's just redundant.
+    
+    Trained on a small, deliberately varied 29-image set , people, animals, fantasy creatures, everyday objects, and landscapes , so it holds up well on subjects it never saw in training rather than just replaying its own dataset (see the dragon and wolf-rider samples).
+    
+    Style inspired by Dabin's cover artwork for his own music.
+    
+    Showcase renders: Krea 2 Turbo (INT8), 8 steps, CFG 1, euler/simple. Recommended, since that's what these samples actually used , the full Krea 2 Raw model wasn't tested with this LoRA and would need very different settings at that step count.`,
+            civitaiLink: "https://civitai.red/models/2866788/mutopix-muted-pastel-ink-illustration?modelVersionId=3238749",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "Oil on Canvas - Salvador Dali",
+            file: "Oil on Canvas - Salvador Dali.jpg",
+            triggerWords: "A surrealist dreamlike painting in the distinctive style of sdali, detailed realistic surreal elements with symbolic dreamlike composition, soft ethereal lighting with dramatic contrasts, intricate textures.",
+            description: `Trained on around 40 images of Dali paintings. Euler/bong_tangent or beta57 recommended, strength: 0.8-1.2`,
+            civitaiLink: "https://civitai.red/models/2655245/oil-on-canvas-salvador-dali",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "oil paint semi-realistic anime style",
+            file: "oil paint semi-realistic anime style.jpg",
+            triggerWords: "oilpaint_anime semi-realistic.",
+            description: `Semi-realistic anime style oil painting.`,
+            civitaiLink: "https://civitai.red/models/2832835/oil-paint-semi-realistic-anime-style?modelVersionId=3196795",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "Oil Painting - Thomas Gainsborough",
+            file: "Oil Painting - Thomas Gainsborough.jpg",
+            triggerWords: "Thomas Gainsborough style, late 18th century English painting, oil on canvas.",
+            description: `Model trained on around 40 images of Thomas Gainsborough paintings. Results are pleasant but need good description to get real authentic feel of the artist. Play with the strength, probably 0.8-1.2 is the way.`,
+            civitaiLink: "https://civitai.red/models/2650650/oil-painting-thomas-gainsborough",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "Path of Exile 2 style",
+            file: "Path of Exile 2 style.jpg",
+            triggerWords: "poe2k2style.",
+            description: `Trigger words: poe2k2style`,
+            civitaiLink: "https://civitai.red/models/2208918/path-of-exile-2-style?modelVersionId=3099687",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "Players Handbook Style",
+            file: "Players Handbook Style.jpg",
+            triggerWords: "A digital concept art piece with dynamic brushwork, vibrant colors, action shot, dynamic composition.",
+            description: `on a pure white background with borderless negative space on str 0.8 or so should omit the gold background
+    
+    Same dataset but captioned not tagged:
+    https://civitai.com/models/1148532/players-handbook-style-or-i-attack-the-darkness-or-il
+    
+    Will attempt to create semi realistic player's handbook style pictures with a gold border and elements of "frame breaking" on a gold trim border if you ask for it, and often not.
+    
+    Captioned instead of tagged. Gold border is super hard coded unfortunately. Working on a v2 sans gold borders. You will get a more anime push if you use tags vs captions. I recommend understanding how captioned models prompt like flux, zit, klein to use to it's highest potential.
+    
+    Str 0.8 to 1 depending on other prompts in the image.
+    
+    A vibrant digital concept art piece with dynamic brushwork and saturated colors. Absurdres, masterpiece, score_7,
+    
+    most basic:
+    
+    illustration of
+    
+    Works well:
+    
+    traditional media, or stylized painterly, etc
+    
+    action shot, dynamic pose, attacking, magic
+    
+    Anima likes absurdres, masterpiece, score_7, it may or may not help with heavily stylized loras.`,
+            civitaiLink: "https://civitai.red/models/2560815/players-handbook-style-or-dont-split-the-party-or-anima-3pkrea2?modelVersionId=3281104",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "RimWorld Storytellers Style",
+            file: "RimWorld Storytellers Style.jpg",
+            triggerWords: "rimworldkrea2.",
+            description: `This LORA model is based for generating images in the style of RimWorld, please treat the model with understanding, because this is my first work! :) Also, the model will be gradually updated.
+    
+    The model is trained on the RimWorld storytellers images.
+    
+    Enjoy!`,
+            civitaiLink: "https://civitai.red/models/1158557/rimworld-storytellers-style?modelVersionId=3244520",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "Serpieri Style",
+            file: "Serpieri Style.jpg",
+            triggerWords: " ",
+            description: `This LoRA produces a style similar to that of Italian comic book artist Paolo Eleuteri Serpieri. He is best known for his work on the Druuna erotic science fiction series.`,
+            civitaiLink: "https://civitai.red/models/651123/serpieri-style?modelVersionId=3181981",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "SXZ Cole Eastburn Style",
+            file: "SXZ Cole Eastburn Style.jpg",
+            triggerWords: "@colehole style.",
+            description: `Trigger words: @colehole style`,
+            civitaiLink: "https://civitai.red/models/2853562/sxz-cole-eastburn-style-krea2",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "SXZ DamnToadKing Style",
+            file: "SXZ DamnToadKing Style.jpg",
+            triggerWords: "@damntoadking, illustration.",
+            description: ` `,
+            civitaiLink: "https://civitai.red/models/2878423/sxz-damntoadking-style-krea2?modelVersionId=3253004",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "SXZ Dante Liu Style",
+            file: "SXZ Dante Liu Style.jpg",
+            triggerWords: "@danteliu style, 2d digital art.",
+            description: ` `,
+            civitaiLink: "https://civitai.red/models/2875786/sxz-dante-liu-style-krea2?modelVersionId=3249723",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "SXZ GTA 6 Style",
+            file: "SXZ GTA 6 Style.jpg",
+            triggerWords: "@gta6, illustration.",
+            description: `Trigger words: @gta6, illustration`,
+            civitaiLink: "https://civitai.red/models/2851144/sxz-gta-6-style-krea2?modelVersionId=3219690",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "SXZ PluviumG Style",
+            file: "SXZ PluviumG Style.jpg",
+            triggerWords: "@pluviumg, painting.",
+            description: ` `,
+            civitaiLink: "https://civitai.red/models/2901474/sxz-pluviumg-style-krea2?modelVersionId=3280853",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "SXZ Will Murai Blizzcon KeyArt Style",
+            file: "SXZ Will Murai Blizzcon KeyArt Style.jpg",
+            triggerWords: "@willmurai.",
+            description: `Trigger words: @willmurai`,
+            civitaiLink: "https://civitai.red/models/2846061/sxz-will-murai-blizzcon-keyart-style-krea2?modelVersionId=3213378",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "SXZ Xutunzi Style",
+            file: "SXZ Xutunzi Style.jpg",
+            triggerWords: "@xutzzz, stylized.",
+            description: `Trigger words: @xutzzz, stylized`,
+            civitaiLink: "https://civitai.red/models/2853442/sxz-xutunzi-style-krea2?modelVersionId=3222535",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "Tony Sart",
+            file: "Tony Sart.jpg",
+            triggerWords: " ",
+            description: `Tony Sart ("Tony's Art - art from Sart" project). Russian book illustrator, game designer and concept artist. One of his styles involves imitating the classic illustrations of Ivan Bilibin, featuring their characteristic colors, outlines, and borders. He employs this style in humorous and cultural projects.`,
+            civitaiLink: "https://civitai.red/models/2840915/tony-sart?modelVersionId=3206933",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "Vermis (artbook) style",
+            file: "Vermis (artbook) style.jpg",
+            triggerWords: "Strictly two-color duotone print, no full color palette, screentone dots visible across all surfaces instead of smooth gradients, coarse uneven woodcut-like cross-hatching, ragged jagged linework.",
+            description: `KREA 2 info
+    
+    Better work with weight: 1-1.3 (1.3 for more accurate style)
+    
+    Use these triggers for style: Strictly two-color duotone print, no full color palette, screentone dots visible across all surfaces instead of smooth gradients, coarse uneven woodcut-like cross-hatching, ragged jagged linework,
+    
+    __________________________________________________________________________________________
+    
+    Better work with weight: 1
+    
+    Use these triggers: vermis
+    
+    Additional use: horror art, detailed background, monochrome, greyscale, "your color" border,`,
+            civitaiLink: "https://civitai.red/models/1361559/vermis-artbook-style?modelVersionId=3282080",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "Yujin Hare Style",
+            file: "Yujin Hare Style.jpg",
+            triggerWords: "@YujinHare, Yujin Hare style.",
+            description: `Based on Yujin Hare's style. A thick paint semi-realistic style.
+    
+    Suggested strength: 0.8-1.00 when used alone.`,
+            civitaiLink: "https://civitai.red/models/2648375/yujin-hare-style-animakrea2?modelVersionId=3202246",
+            category: "Painting and Fine Art"
+        },
+    {
+            name: "atmospheric photography",
+            file: "atmospheric photography.jpg",
+            triggerWords: " ",
+            description: `It is good at creating an emotional photography style through dramatic light and shadow layers and intense color collisions.`,
+            civitaiLink: "https://civitai.red/models/2775666/atmospheric-photography?modelVersionId=3125499",
+            category: "Photography"
+        },
+    {
+            name: "Cinematic Shot",
+            file: "Cinematic Shot.jpg",
+            triggerWords: "cinematic, cinematic still image.",
+            description: `Trigger words: cinematic, cinematic still image.`,
+            civitaiLink: "https://civitai.red/models/432586/cinematic-shot?modelVersionId=3085969",
+            category: "Photography"
+        },
+    {
+            name: "iPod Touch 4th generation Camera Style",
+            file: "iPod Touch 4th generation Camera Style.jpg",
+            triggerWords: " ",
+            description: `8/31/26 UPDATE: On my last trip, I dropped my iPod approximately 6 inches, causing the screen to spiderweb with a huge crack along the whole screen. Due to this, I will likely retire this lora. I have some stuff planned for a V3.0 once I retrain V2.0 on all the models, but that's likely it. The good news is, I found an iPhone 4s at a junk market and am working on gaining access to it, from there I will likely make another phone camera Lora based on the 4S camera, which is noticeably higher quality but still not great. should be fun!
+    
+    This model attempts to make your outputs more like what a 4th generation iPod Touch camera will output. This means Poor dynamic range, washed out colors and noisy shadows.
+    
+    I think this particular Lora differentiates itself because I took all the photos myself. I found an old iPod (4th generation) at a garage sale and took a bunch of pictures over the past month to create the dataset. This means the actual camera qualities should be baked into the model VERY well. the downside is that the dataset is pretty small (127 images currently) and limited to stuff a can actually take pictures of. This means it's pretty bad at nsfw.
+    
+    It also tends to give images a more Candid, Amateur Look. That's because the dataset is completely amateur and candid.
+    
+    Krea2
+    
+    This one also has a strong push towards a more candid, amateur style, especially as you go to higher strengths. I had to train this one on the turbo model since i don't quite have enough VRAM for the raw model.
+    
+    Subtle: 0.3 - 0.5 (safe, keeps composition similar to no Lora but adds some old digital camera smoothness, compression, and color washing)
+    
+    Dramatic: 0.7-1.0 (changes to a more candid and amateur composition, and outputs that look very true to a shitty old phone camera)`,
+            civitaiLink: "https://civitai.red/models/2751876/ipod-touch-4th-generation-camera-style?modelVersionId=3282797",
+            category: "Photography"
+        },
+    {
+            name: "Retro 80s Vaporwave",
+            file: "Retro 80s Vaporwave.jpg",
+            triggerWords: "Retro 80s Vaporwave.",
+            description: `This LoRA reminds me of the worn, nostalgic feel of old VHS covers and magazine prints, but in a Vaporwave interpretation.
+    Bold colors softened by heavy grain, scratches, and print textures.
+    The aesthetic balances surreal calm with urban vibrance. It is both dreamlike and gritty.
+    Best for evocative portraits, cityscapes, and nostalgic retro-futurist edits. I also included 20 Animal Images in the Dataset :) `,
+            civitaiLink: "https://civitai.red/models/1989095/retro-80s-vaporwave?modelVersionId=3215746",
+            category: "Photography"
+        }
 ];
 
 
@@ -3139,18 +3582,117 @@ function buildLoraGallery() {
     collapseLoraPanel(true);
 
     const query = currentLoraSearchQuery.trim().toLowerCase();
-    let filteredLoras = LORA_DATA;
-    if (query) {
-        filteredLoras = LORA_DATA.filter(l =>
-            l.name.toLowerCase().includes(query) ||
-            (l.description && l.description.toLowerCase().includes(query)) ||
-            (l.triggerWords && l.triggerWords.toLowerCase().includes(query))
-        );
-    }
+    let totalVisibleLoras = 0;
 
-    updateSearchBadge(filteredLoras.length, LORA_DATA.length);
+    LORA_CATEGORIES.forEach(categoryName => {
+        let lorasInCategory = LORA_DATA.filter(l => l.category === categoryName);
+        if (lorasInCategory.length === 0) return;
 
-    if (filteredLoras.length === 0 && query) {
+        const isCategoryVisible = currentLoraCategoryFilter === 'all' || currentLoraCategoryFilter === categoryName;
+        if (!isCategoryVisible) return;
+
+        // Filter LoRAs by search query (match lora name, category, description, or triggerWords)
+        if (query) {
+            lorasInCategory = lorasInCategory.filter(l =>
+                l.name.toLowerCase().includes(query) ||
+                (l.category && l.category.toLowerCase().includes(query)) ||
+                (l.description && l.description.toLowerCase().includes(query)) ||
+                (l.triggerWords && l.triggerWords.toLowerCase().includes(query))
+            );
+        }
+
+        if (lorasInCategory.length === 0) return;
+        totalVisibleLoras += lorasInCategory.length;
+
+        // Category Section Header Divider
+        const header = document.createElement('div');
+        header.className = 'style-category-header';
+        header.id = `lora-cat-${categoryName.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
+        header.innerHTML = `
+            <h3>${categoryName}</h3>
+            <span class="style-category-count">${lorasInCategory.length} ${lorasInCategory.length === 1 ? 'LORA' : 'LORAS'}${query ? ' (FILTERED)' : ''}</span>
+        `;
+        loraGallery.appendChild(header);
+
+        lorasInCategory.forEach((lora) => {
+            const index = LORA_DATA.indexOf(lora);
+            const card = document.createElement('div');
+            card.className = 'lora-card';
+            card.id = `lora-card-${index}`;
+            card.dataset.loraIndex = index;
+            card.dataset.category = lora.category;
+
+            const img = document.createElement('img');
+            img.className = 'lora-card-image';
+            img.src = getLoraImagePath(lora);
+            img.alt = lora.name;
+            img.loading = 'lazy';
+            img.onerror = function () {
+                this.onerror = null;
+                this.src = 'img/placeholder.jpg';
+            };
+            card.appendChild(img);
+
+            // Fullscreen Icon Button (only visible when card is selected)
+            const zoomBtn = document.createElement('button');
+            zoomBtn.type = 'button';
+            zoomBtn.className = 'card-fullscreen-btn';
+            zoomBtn.title = 'View image in fullscreen';
+            zoomBtn.setAttribute('aria-label', 'View image in fullscreen');
+            zoomBtn.innerHTML = `
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <polyline points="9 21 3 21 3 15"></polyline>
+                    <line x1="21" y1="3" x2="14" y2="10"></line>
+                    <line x1="3" y1="21" x2="10" y2="14"></line>
+                </svg>
+            `;
+            zoomBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                openLoraFullscreen(index);
+            });
+            card.appendChild(zoomBtn);
+
+            // Compare Button (add to compare drawer)
+            const compareBtn = document.createElement('button');
+            compareBtn.type = 'button';
+            compareBtn.className = 'card-compare-btn';
+            compareBtn.title = 'Add to compare';
+            compareBtn.setAttribute('aria-label', 'Add to compare');
+            compareBtn.dataset.compareType = 'lora';
+            compareBtn.dataset.compareIndex = index;
+            compareBtn.innerHTML = `
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="3" width="8" height="14" rx="1"></rect>
+                    <rect x="14" y="3" width="8" height="14" rx="1"></rect>
+                    <line x1="6" y1="21" x2="6" y2="19"></line>
+                    <line x1="18" y1="21" x2="18" y2="19"></line>
+                </svg>
+            `;
+            compareBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                handleCompareButtonClick('lora', index, lora, compareBtn);
+            });
+            card.appendChild(compareBtn);
+
+            const title = document.createElement('div');
+            title.className = 'lora-card-title';
+            title.textContent = lora.name;
+            title.title = `${lora.name}\n\nTrigger Words: ${lora.triggerWords}`;
+            card.title = `${lora.name}\n\nTrigger Words: ${lora.triggerWords}`;
+            card.appendChild(title);
+
+            card.addEventListener('click', () => handleLoraCardClick(index));
+
+            loraGallery.appendChild(card);
+        });
+    });
+
+    // Update search badge counter
+    updateSearchBadge(totalVisibleLoras, LORA_DATA.length);
+
+    // Empty state if 0 loras match
+    if (totalVisibleLoras === 0 && query) {
         const emptyState = document.createElement('div');
         emptyState.className = 'gallery-empty-state';
         emptyState.innerHTML = `
@@ -3160,7 +3702,7 @@ function buildLoraGallery() {
                 <line x1="8" y1="11" x2="14" y2="11"></line>
             </svg>
             <h4>No LoRAs found</h4>
-            <p>No LoRAs match "<strong>${escapeHtml(query)}</strong>"</p>
+            <p>No LoRAs match "<strong>${escapeHtml(query)}</strong>"${currentLoraCategoryFilter !== 'all' ? ` in ${currentLoraCategoryFilter}` : ''}</p>
             <button type="button" class="btn btn-sm btn-accent" id="btn-clear-lora-empty-search">Clear Search</button>
         `;
         loraGallery.appendChild(emptyState);
@@ -3177,58 +3719,12 @@ function buildLoraGallery() {
                 searchInput?.focus();
             });
         }
-        return;
     }
 
-    filteredLoras.forEach((lora) => {
-        const index = LORA_DATA.indexOf(lora);
-        const card = document.createElement('div');
-        card.className = 'lora-card';
-        card.id = `lora-card-${index}`;
-        card.dataset.loraIndex = index;
-
-        const img = document.createElement('img');
-        img.className = 'lora-card-image';
-        img.src = getLoraImagePath(lora);
-        img.alt = lora.name;
-        img.loading = 'lazy';
-        img.onerror = function () {
-            this.onerror = null;
-            this.src = 'img/placeholder.jpg';
-        };
-        card.appendChild(img);
-
-        // Fullscreen Icon Button (only visible when card is selected)
-        const zoomBtn = document.createElement('button');
-        zoomBtn.type = 'button';
-        zoomBtn.className = 'card-fullscreen-btn';
-        zoomBtn.title = 'View image in fullscreen';
-        zoomBtn.setAttribute('aria-label', 'View image in fullscreen');
-        zoomBtn.innerHTML = `
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="15 3 21 3 21 9"></polyline>
-                <polyline points="9 21 3 21 3 15"></polyline>
-                <line x1="21" y1="3" x2="14" y2="10"></line>
-                <line x1="3" y1="21" x2="10" y2="14"></line>
-            </svg>
-        `;
-        zoomBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            openLoraFullscreen(index);
-        });
-        card.appendChild(zoomBtn);
-
-        const title = document.createElement('div');
-        title.className = 'lora-card-title';
-        title.textContent = lora.name;
-        title.title = `${lora.name}\n\nTrigger Words: ${lora.triggerWords}`;
-        card.title = `${lora.name}\n\nTrigger Words: ${lora.triggerWords}`;
-        card.appendChild(title);
-
-        card.addEventListener('click', () => handleLoraCardClick(index));
-
-        loraGallery.appendChild(card);
-    });
+    // Sync compare button states after rebuild
+    if (typeof updateAllCompareButtonStates === 'function') {
+        updateAllCompareButtonStates();
+    }
 }
 
 function handleLoraCardClick(index) {
@@ -3415,6 +3911,7 @@ function initLoraStyleSelector() {
             updateLoraPromptContent();
             collapseLoraPanel(true);
             updateLoraImages();
+            updateAllCompareButtonStates();
         });
     });
 
@@ -3428,6 +3925,7 @@ function initLoraStyleSelector() {
             updateLoraPromptContent();
             collapseLoraPanel(true);
             updateLoraImages();
+            updateAllCompareButtonStates();
         });
     });
 
@@ -3463,6 +3961,23 @@ function initLoraStyleSelector() {
     }
 
     updateLoraPromptContent();
+}
+
+function initLoraCategoryFilters() {
+    const container = document.getElementById('lora-category-filters');
+    if (!container) return;
+
+    const filterBtns = container.querySelectorAll('.category-filter-btn');
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const cat = btn.dataset.category;
+            filterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentLoraCategoryFilter = cat;
+            buildLoraGallery();
+            showToast(`FILTER: ${cat.toUpperCase()}`);
+        });
+    });
 }
 
 
@@ -3537,6 +4052,7 @@ function initGalleryTabs() {
     const stylesStyleSelector = document.getElementById('styles-style-selector');
     const styleCategoryFilters = document.getElementById('style-category-filters');
     const loraStyleSelector = document.getElementById('lora-style-selector');
+    const loraCategoryFilters = document.getElementById('lora-category-filters');
 
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
@@ -3558,6 +4074,7 @@ function initGalleryTabs() {
                 if (stylesStyleSelector) stylesStyleSelector.classList.remove('hidden');
                 if (styleCategoryFilters) styleCategoryFilters.classList.remove('hidden');
                 if (loraStyleSelector) loraStyleSelector.classList.add('hidden');
+                if (loraCategoryFilters) loraCategoryFilters.classList.add('hidden');
 
                 if (searchInput) {
                     searchInput.placeholder = 'Search styles by name, description... (Ctrl+K)';
@@ -3586,6 +4103,7 @@ function initGalleryTabs() {
                 if (stylesStyleSelector) stylesStyleSelector.classList.add('hidden');
                 if (styleCategoryFilters) styleCategoryFilters.classList.add('hidden');
                 if (loraStyleSelector) loraStyleSelector.classList.remove('hidden');
+                if (loraCategoryFilters) loraCategoryFilters.classList.remove('hidden');
 
                 if (searchInput) {
                     searchInput.placeholder = 'Search LoRAs, trigger words, description... (Ctrl+K)';
@@ -3724,16 +4242,15 @@ function initGalleryNav() {
             const isLoraTab = document.getElementById('tab-loras')?.classList.contains('active');
 
             if (isLoraTab) {
-                if (typeof LORA_DATA !== 'undefined' && LORA_DATA.length > 0) {
-                    const randomIndex = Math.floor(Math.random() * LORA_DATA.length);
-                    handleLoraCardClick(randomIndex);
-                    const selectedCard = document.getElementById(`lora-card-${randomIndex}`);
-                    if (selectedCard) {
-                        scrollToElementFramed(selectedCard, 70);
-                        selectedCard.classList.remove('nav-target-pulse');
-                        void selectedCard.offsetWidth;
-                        selectedCard.classList.add('nav-target-pulse');
-                    }
+                const visibleCards = Array.from(document.querySelectorAll('#lora-gallery .lora-card'));
+                if (visibleCards.length > 0) {
+                    const randomCard = visibleCards[Math.floor(Math.random() * visibleCards.length)];
+                    const index = parseInt(randomCard.dataset.loraIndex, 10);
+                    handleLoraCardClick(index);
+                    scrollToElementFramed(randomCard, 70);
+                    randomCard.classList.remove('nav-target-pulse');
+                    void randomCard.offsetWidth;
+                    randomCard.classList.add('nav-target-pulse');
                 }
             } else {
                 const visibleCards = Array.from(document.querySelectorAll('#gallery .style-card'));
@@ -4871,6 +5388,489 @@ function initBuilderDrawer() {
     });
 }
 
+// ==============================================
+// IMAGE COMPARE DRAWER & FULLSCREEN COMPARISON
+// ==============================================
+
+let compareItems = []; // Array of { id, type, name, imagePath, theme, substyle, variationLabel }
+let compareIdCounter = 0;
+let isCompareDrawerOpen = false;
+let isCompareFullscreenOpen = false;
+
+/**
+ * Generates a unique compare item from the current card state.
+ */
+function createCompareItem(type, index, item) {
+    const id = ++compareIdCounter;
+    let imagePath, theme, substyle, variationLabel;
+
+    if (type === 'style') {
+        imagePath = getStyleImagePath(item);
+        theme = currentStyleTheme;
+        substyle = currentStyleSubstyle;
+        variationLabel = `${theme.charAt(0).toUpperCase() + theme.slice(1)} • ${substyle.charAt(0).toUpperCase() + substyle.slice(1)}`;
+    } else {
+        imagePath = getLoraImagePath(item);
+        theme = currentLoraStyle;
+        substyle = currentLoraSubstyle;
+        const themeDisplay = theme === 'default' ? 'Default' : theme.charAt(0).toUpperCase() + theme.slice(1);
+        const substyleDisplay = theme === 'default' ? '' : ` • ${substyle.charAt(0).toUpperCase() + substyle.slice(1)}`;
+        variationLabel = `${themeDisplay}${substyleDisplay}`;
+    }
+
+    return {
+        id,
+        type,
+        index,
+        name: item.name,
+        imagePath,
+        theme,
+        substyle,
+        variationLabel
+    };
+}
+
+/**
+ * Handles clicking the compare button on a card.
+ * Toggles the item in/out of the compare list.
+ */
+function handleCompareButtonClick(type, index, item, btnElement) {
+    // Check if this exact image (same type + index + theme + substyle) is already in compare
+    const currentTheme = type === 'style' ? currentStyleTheme : currentLoraStyle;
+    const currentSubstyle = type === 'style' ? currentStyleSubstyle : currentLoraSubstyle;
+
+    const existingIndex = compareItems.findIndex(ci =>
+        ci.type === type &&
+        ci.index === index &&
+        ci.theme === currentTheme &&
+        ci.substyle === currentSubstyle
+    );
+
+    if (existingIndex !== -1) {
+        // Remove it
+        compareItems.splice(existingIndex, 1);
+        btnElement.classList.remove('in-compare');
+        btnElement.title = 'Add to compare';
+        showToast(`Removed from compare: ${item.name}`);
+    } else {
+        const wasEmpty = compareItems.length === 0;
+
+        // Add it
+        const compareItem = createCompareItem(type, index, item);
+        compareItems.push(compareItem);
+        btnElement.classList.add('in-compare');
+        btnElement.title = 'Remove from compare';
+        showToast(`Added to compare: ${item.name}`);
+        pulseCompareToggleBtn();
+
+        // Auto-open drawer when transitioning from empty to having items
+        if (wasEmpty) {
+            openCompareDrawer();
+        }
+    }
+
+    renderCompareDrawer();
+    updateAllCompareButtonStates();
+}
+
+/**
+ * Scans all visible compare buttons and updates their in-compare state.
+ * Called after theme/substyle changes to keep button states accurate.
+ */
+function updateAllCompareButtonStates() {
+    // Update style card compare buttons
+    document.querySelectorAll('#gallery .card-compare-btn').forEach(btn => {
+        const type = btn.dataset.compareType;
+        const index = parseInt(btn.dataset.compareIndex, 10);
+        if (type !== 'style' || isNaN(index)) return;
+
+        const isInCompare = compareItems.some(ci =>
+            ci.type === 'style' &&
+            ci.index === index &&
+            ci.theme === currentStyleTheme &&
+            ci.substyle === currentStyleSubstyle
+        );
+        btn.classList.toggle('in-compare', isInCompare);
+        btn.title = isInCompare ? 'Remove from compare' : 'Add to compare';
+    });
+
+    // Update lora card compare buttons
+    document.querySelectorAll('#lora-gallery .card-compare-btn').forEach(btn => {
+        const type = btn.dataset.compareType;
+        const index = parseInt(btn.dataset.compareIndex, 10);
+        if (type !== 'lora' || isNaN(index)) return;
+
+        const isInCompare = compareItems.some(ci =>
+            ci.type === 'lora' &&
+            ci.index === index &&
+            ci.theme === currentLoraStyle &&
+            ci.substyle === currentLoraSubstyle
+        );
+        btn.classList.toggle('in-compare', isInCompare);
+        btn.title = isInCompare ? 'Remove from compare' : 'Add to compare';
+    });
+}
+
+/**
+ * Adds the compare toggle button pulse animation.
+ */
+function pulseCompareToggleBtn() {
+    const toggleBtn = document.getElementById('btn-toggle-compare-drawer');
+    if (!toggleBtn) return;
+    toggleBtn.classList.remove('pulse-anim');
+    void toggleBtn.offsetWidth;
+    toggleBtn.classList.add('pulse-anim');
+}
+
+/**
+ * Removes a compare item by its unique ID.
+ */
+function removeFromCompare(id) {
+    const idx = compareItems.findIndex(ci => ci.id === id);
+    if (idx !== -1) {
+        const removed = compareItems[idx];
+        compareItems.splice(idx, 1);
+        showToast(`Removed from compare: ${removed.name}`);
+        renderCompareDrawer();
+        updateAllCompareButtonStates();
+
+        // If fullscreen compare view is open, refresh or close it
+        if (isCompareFullscreenOpen) {
+            if (compareItems.length === 0) {
+                closeCompareFullscreen();
+            } else {
+                renderCompareFullscreenGrid();
+            }
+        }
+    }
+}
+
+/**
+ * Clears all compare items.
+ */
+function clearCompare() {
+    if (compareItems.length === 0) return;
+    compareItems = [];
+    compareIdCounter = 0;
+    showToast('Compare cleared');
+    renderCompareDrawer();
+    updateAllCompareButtonStates();
+    if (isCompareFullscreenOpen) {
+        closeCompareFullscreen();
+    }
+}
+
+/**
+ * Renders the compare drawer contents: toggle button badge, drawer thumbnails, count.
+ */
+function renderCompareDrawer() {
+    const toggleBtn = document.getElementById('btn-toggle-compare-drawer');
+    const badge = document.getElementById('compare-toggle-badge');
+    const countElem = document.getElementById('compare-drawer-count');
+    const itemsContainer = document.getElementById('compare-drawer-items');
+    const compareBtn = document.getElementById('btn-compare-fullscreen');
+    const clearBtn = document.getElementById('btn-compare-clear');
+    const count = compareItems.length;
+
+    // Update toggle button visibility and badge
+    if (toggleBtn) {
+        toggleBtn.classList.toggle('has-items', count > 0);
+    }
+    if (badge) {
+        badge.textContent = count;
+    }
+    if (countElem) {
+        countElem.textContent = `${count} image${count !== 1 ? 's' : ''}`;
+    }
+
+    // Enable/disable action buttons
+    if (compareBtn) {
+        compareBtn.disabled = count < 2;
+        compareBtn.style.opacity = count < 2 ? '0.4' : '1';
+        compareBtn.style.pointerEvents = count < 2 ? 'none' : 'auto';
+    }
+    if (clearBtn) {
+        clearBtn.disabled = count === 0;
+        clearBtn.style.opacity = count === 0 ? '0.4' : '1';
+        clearBtn.style.pointerEvents = count === 0 ? 'none' : 'auto';
+    }
+
+    // Close drawer if no items
+    if (count === 0 && isCompareDrawerOpen) {
+        closeCompareDrawer();
+    }
+
+    // Render thumbnails
+    if (!itemsContainer) return;
+    itemsContainer.innerHTML = '';
+
+    if (count === 0) {
+        const emptyMsg = document.createElement('div');
+        emptyMsg.className = 'compare-drawer-empty';
+        emptyMsg.textContent = 'Click the compare button on any card to add images here';
+        itemsContainer.appendChild(emptyMsg);
+        return;
+    }
+
+    compareItems.forEach(item => {
+        const thumb = document.createElement('div');
+        thumb.className = 'compare-thumb';
+
+        const img = document.createElement('img');
+        img.className = 'compare-thumb-img';
+        img.src = item.imagePath;
+        img.alt = item.name;
+        img.loading = 'lazy';
+        img.onerror = function () {
+            this.onerror = null;
+            this.src = 'img/placeholder.jpg';
+        };
+        thumb.appendChild(img);
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'compare-thumb-remove';
+        removeBtn.title = 'Remove from compare';
+        removeBtn.setAttribute('aria-label', `Remove ${item.name} from compare`);
+        removeBtn.textContent = '×';
+        removeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            removeFromCompare(item.id);
+        });
+        thumb.appendChild(removeBtn);
+
+        const label = document.createElement('div');
+        label.className = 'compare-thumb-label';
+        label.textContent = item.name;
+        label.title = `${item.name} — ${item.variationLabel}`;
+
+        const typeBadge = document.createElement('span');
+        typeBadge.className = 'compare-thumb-type';
+        typeBadge.textContent = `${item.type === 'style' ? 'Style' : 'LoRA'} • ${item.variationLabel}`;
+        label.appendChild(typeBadge);
+
+        thumb.appendChild(label);
+        itemsContainer.appendChild(thumb);
+    });
+}
+
+/**
+ * Opens the compare drawer.
+ */
+function openCompareDrawer() {
+    const drawer = document.getElementById('compare-drawer');
+    const toggleBtn = document.getElementById('btn-toggle-compare-drawer');
+    if (!drawer) return;
+    drawer.classList.add('open');
+    if (toggleBtn) {
+        toggleBtn.classList.add('drawer-open');
+        toggleBtn.setAttribute('aria-expanded', 'true');
+    }
+    isCompareDrawerOpen = true;
+}
+
+/**
+ * Closes the compare drawer.
+ */
+function closeCompareDrawer() {
+    const drawer = document.getElementById('compare-drawer');
+    const toggleBtn = document.getElementById('btn-toggle-compare-drawer');
+    if (!drawer) return;
+    drawer.classList.remove('open');
+    if (toggleBtn) {
+        toggleBtn.classList.remove('drawer-open');
+        toggleBtn.setAttribute('aria-expanded', 'false');
+    }
+    isCompareDrawerOpen = false;
+}
+
+/**
+ * Toggles the compare drawer open/closed.
+ */
+function toggleCompareDrawer() {
+    if (isCompareDrawerOpen) {
+        closeCompareDrawer();
+    } else {
+        openCompareDrawer();
+    }
+}
+
+/**
+ * Renders the grid cells for the fullscreen comparison view.
+ */
+function renderCompareFullscreenGrid() {
+    const body = document.getElementById('compare-fullscreen-body');
+    if (!body) return;
+
+    body.innerHTML = '';
+    const count = compareItems.length;
+    body.setAttribute('data-count', count);
+
+    const titleElem = document.querySelector('.compare-fullscreen-title');
+    if (titleElem) {
+        titleElem.textContent = `COMPARE VIEW (${count} ${count === 1 ? 'IMAGE' : 'IMAGES'})`;
+    }
+
+    compareItems.forEach(item => {
+        const cell = document.createElement('div');
+        cell.className = 'compare-fullscreen-cell';
+
+        const img = document.createElement('img');
+        img.className = 'compare-fullscreen-img';
+        img.src = item.imagePath;
+        img.alt = item.name;
+        img.onerror = function () {
+            this.onerror = null;
+            this.src = 'img/placeholder.jpg';
+        };
+        cell.appendChild(img);
+
+        // Remove button directly on the fullscreen cell
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'compare-thumb-remove compare-fullscreen-remove';
+        removeBtn.title = 'Remove from compare';
+        removeBtn.setAttribute('aria-label', `Remove ${item.name} from compare`);
+        removeBtn.textContent = '×';
+        removeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            removeFromCompare(item.id);
+        });
+        cell.appendChild(removeBtn);
+
+        const label = document.createElement('div');
+        label.className = 'compare-fullscreen-label';
+
+        const nameSpan = document.createElement('div');
+        nameSpan.className = 'compare-fullscreen-name';
+        nameSpan.textContent = item.name;
+        label.appendChild(nameSpan);
+
+        const metaSpan = document.createElement('div');
+        metaSpan.className = 'compare-fullscreen-meta';
+        metaSpan.textContent = `${item.type === 'style' ? 'Style' : 'LoRA'} • ${item.variationLabel}`;
+        label.appendChild(metaSpan);
+
+        cell.appendChild(label);
+        body.appendChild(cell);
+    });
+}
+
+/**
+ * Opens the fullscreen comparison view.
+ */
+function openCompareFullscreen() {
+    if (compareItems.length < 2) return;
+
+    const modal = document.getElementById('compare-fullscreen-modal');
+    if (!modal) return;
+
+    renderCompareFullscreenGrid();
+
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('compare-fullscreen-open');
+    isCompareFullscreenOpen = true;
+}
+
+/**
+ * Closes the fullscreen comparison view.
+ */
+function closeCompareFullscreen() {
+    const modal = document.getElementById('compare-fullscreen-modal');
+    if (!modal) return;
+
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('compare-fullscreen-open');
+    isCompareFullscreenOpen = false;
+}
+
+/**
+ * Initializes all compare drawer event listeners.
+ */
+function initCompareDrawer() {
+    const toggleBtn = document.getElementById('btn-toggle-compare-drawer');
+    const closeBtn = document.getElementById('btn-compare-drawer-close');
+    const clearBtn = document.getElementById('btn-compare-clear');
+    const compareBtn = document.getElementById('btn-compare-fullscreen');
+    const fullscreenCloseBtn = document.getElementById('btn-compare-fullscreen-close');
+
+    // Toggle drawer
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleCompareDrawer();
+        });
+    }
+
+    // Close drawer
+    if (closeBtn) {
+        closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeCompareDrawer();
+        });
+    }
+
+    // Clear all
+    if (clearBtn) {
+        clearBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            clearCompare();
+        });
+    }
+
+    // Open fullscreen compare
+    if (compareBtn) {
+        compareBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openCompareFullscreen();
+        });
+    }
+
+    // Close fullscreen compare
+    if (fullscreenCloseBtn) {
+        fullscreenCloseBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeCompareFullscreen();
+        });
+    }
+
+    // Horizontal wheel scrolling for fullscreen comparison
+    const fullscreenBody = document.getElementById('compare-fullscreen-body');
+    if (fullscreenBody) {
+        fullscreenBody.addEventListener('wheel', (e) => {
+            if (isCompareFullscreenOpen && e.deltaY !== 0 && fullscreenBody.scrollWidth > fullscreenBody.clientWidth) {
+                e.preventDefault();
+                fullscreenBody.scrollLeft += e.deltaY;
+            }
+        }, { passive: false });
+    }
+
+    // Keyboard navigation: Escape to close, ArrowLeft/Right to scroll compare view
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            if (isCompareFullscreenOpen) {
+                e.stopPropagation();
+                closeCompareFullscreen();
+            } else if (isCompareDrawerOpen) {
+                e.stopPropagation();
+                closeCompareDrawer();
+            }
+        } else if (isCompareFullscreenOpen && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
+            const body = document.getElementById('compare-fullscreen-body');
+            if (body && body.scrollWidth > body.clientWidth) {
+                e.preventDefault();
+                const scrollAmount = e.key === 'ArrowRight' ? 380 : -380;
+                body.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            }
+        }
+    });
+
+    // Initial render
+    renderCompareDrawer();
+}
+
 // ---- Init ----
 document.addEventListener('DOMContentLoaded', () => {
     buildStylesGallery();
@@ -4881,8 +5881,10 @@ document.addEventListener('DOMContentLoaded', () => {
     initStylesThemeSelector();
     initStyleCategoryFilters();
     initLoraStyleSelector();
+    initLoraCategoryFilters();
     initPromptBuilder();
     initBuilderDrawer();
     initLightbox();
+    initCompareDrawer();
 });
 
