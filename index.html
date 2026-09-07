@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Krea Styles Prompt Builder - Assemble detailed AI image prompts with character, background, camera, and art style controls">
+    <meta name="description"
+        content="Krea Styles Prompt Builder - Assemble detailed AI image prompts with character, background, camera, and art style controls">
     <title>Krea Styles — AI Image Prompt Builder</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <header id="site-header">
         <h1>KREA STYLES & PROMPT BUILDER</h1>
-        <p class="subtitle">Assemble detailed character prompts &amp; click style tags to build AI images</p>
+        <p class="subtitle">A list of pre-trained styles and LoRAs from Krea2 model curated by Me.</p>
     </header>
 
     <main class="main-layout">
@@ -22,10 +25,13 @@
                         <button class="gallery-tab active" data-tab="styles" id="tab-styles">PRE-TRAINED STYLES</button>
                         <button class="gallery-tab" data-tab="loras" id="tab-loras">LoRAs</button>
                     </div>
-                    <span class="section-hint" id="gallery-hint">Click any style to copy prompt &amp; add to prompt</span>
+                    <span class="section-hint" id="gallery-hint">Click any style to copy prompt &amp; add to
+                        prompt</span>
                 </div>
-                <button type="button" id="btn-header-builder-drawer" class="btn btn-accent section-header-builder-btn" aria-label="Open Prompt Builder Drawer" title="Open Prompt Builder">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <button type="button" id="btn-header-builder-drawer" class="section-header-builder-btn"
+                    aria-label="Open Prompt Builder Drawer" title="Open Prompt Builder">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <line x1="4" y1="21" x2="4" y2="14"></line>
                         <line x1="4" y1="10" x2="4" y2="3"></line>
                         <line x1="12" y1="21" x2="12" y2="12"></line>
@@ -43,119 +49,174 @@
             <!-- Pre-trained Style Selector Bar (visible on Pre-trained Styles tab) -->
             <div id="styles-style-selector" class="lora-style-selector">
                 <div class="lora-style-primary">
-                    <button class="lora-style-btn active" data-style-theme="fantasy" id="style-theme-fantasy">Fantasy</button>
-                    <button class="lora-style-btn" data-style-theme="modern" id="style-theme-modern">Modern</button>
-                    <button class="lora-style-btn" data-style-theme="sci-fi" id="style-theme-scifi">Sci-Fi</button>
+                    <button class="lora-style-btn active" data-style-theme="fantasy" data-style-substyle="simple"
+                        id="style-theme-fantasy-simple">Fantasy Simple</button>
+                    <button class="lora-style-btn" data-style-theme="fantasy" data-style-substyle="complex"
+                        id="style-theme-fantasy-complex">Fantasy Complex</button>
+                    <button class="lora-style-btn" data-style-theme="modern" data-style-substyle="simple"
+                        id="style-theme-modern-simple">Modern Simple</button>
+                    <button class="lora-style-btn" data-style-theme="modern" data-style-substyle="complex"
+                        id="style-theme-modern-complex">Modern Complex</button>
+                    <button class="lora-style-btn" data-style-theme="sci-fi" data-style-substyle="simple"
+                        id="style-theme-scifi-simple">Sci-Fi Simple</button>
+                    <button class="lora-style-btn" data-style-theme="sci-fi" data-style-substyle="complex"
+                        id="style-theme-scifi-complex">Sci-Fi Complex</button>
                 </div>
-                <div class="lora-style-secondary" id="styles-style-secondary">
-                    <div class="lora-substyle-buttons">
-                        <button class="lora-substyle-btn active" data-style-substyle="simple" id="style-substyle-simple">Simple Prompt</button>
-                        <button class="lora-substyle-btn" data-style-substyle="complex" id="style-substyle-complex">Complex Prompt</button>
-                    </div>
-                    <div class="lora-prompt-inspector" id="styles-prompt-inspector">
-                        <button type="button" class="lora-prompt-toggle" id="styles-prompt-toggle" aria-expanded="false" title="Click to expand/collapse prompt details">
+                <div class="lora-prompt-inspector" id="styles-prompt-inspector">
+                    <div class="lora-prompt-inspector-bar">
+                        <div class="sticky-tab-nav" role="tablist" aria-label="Gallery Section Mode">
+                            <button type="button" class="sticky-tab-btn active" data-tab="styles" aria-selected="true"
+                                title="Switch to Pre-Trained Styles">Pre-Trained Styles</button>
+                            <button type="button" class="sticky-tab-btn" data-tab="loras" aria-selected="false"
+                                title="Switch to LoRAs">LoRAs</button>
+                        </div>
+                        <button type="button" class="lora-prompt-toggle" id="styles-prompt-toggle" aria-expanded="false"
+                            title="Click to expand/collapse prompt details">
                             <span class="lora-prompt-toggle-icon">▸</span>
                             <span class="lora-prompt-toggle-text">Check Prompt</span>
-                            <span class="lora-prompt-toggle-badge" id="styles-prompt-toggle-badge">Fantasy &bull; Simple</span>
+                            <span class="lora-prompt-toggle-badge" id="styles-prompt-toggle-badge">Fantasy &bull;
+                                Simple</span>
                         </button>
-                        <div class="lora-prompt-drawer hidden" id="styles-prompt-drawer">
-                            <div class="lora-prompt-drawer-header">
-                                <span class="lora-prompt-drawer-title" id="styles-prompt-drawer-title">Fantasy (Simple Prompt)</span>
-                                <button type="button" class="btn btn-sm btn-accent" id="btn-copy-styles-prompt" title="Copy prompt to clipboard">
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                    </svg>
-                                    <span>Copy Prompt</span>
-                                </button>
-                            </div>
-                            <pre class="lora-prompt-text" id="styles-prompt-text"></pre>
+                    </div>
+                    <div class="lora-prompt-drawer hidden" id="styles-prompt-drawer">
+                        <div class="lora-prompt-drawer-header">
+                            <span class="lora-prompt-drawer-title" id="styles-prompt-drawer-title">Fantasy (Simple
+                                Prompt)</span>
+                            <button type="button" class="btn btn-sm btn-accent" id="btn-copy-styles-prompt"
+                                title="Copy prompt to clipboard">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                                <span>Copy Prompt</span>
+                            </button>
                         </div>
+                        <pre class="lora-prompt-text" id="styles-prompt-text"></pre>
                     </div>
                 </div>
             </div>
             <!-- Category Filter Pills Bar for Pre-trained Styles -->
             <div id="style-category-filters" class="style-category-filters">
-                <button type="button" class="category-filter-btn active" data-category="all">All <span class="filter-count">197</span></button>
-                <button type="button" class="category-filter-btn" data-category="Design">Design <span class="filter-count">35</span></button>
-                <button type="button" class="category-filter-btn" data-category="Comic and Western Mangas">Comic <span class="filter-count">25</span></button>
-                <button type="button" class="category-filter-btn" data-category="Sketch and Cartoon">Sketch &amp; Cartoon <span class="filter-count">36</span></button>
-                <button type="button" class="category-filter-btn" data-category="Anime and Manga">Anime &amp; Manga <span class="filter-count">34</span></button>
-                <button type="button" class="category-filter-btn" data-category="Painting and Fine Art">Painting &amp; Fine Art <span class="filter-count">44</span></button>
-                <button type="button" class="category-filter-btn" data-category="Photography">Photography <span class="filter-count">23</span></button>
+                <button type="button" class="category-filter-btn active" data-category="all">All <span
+                        class="filter-count">197</span></button>
+                <button type="button" class="category-filter-btn" data-category="Anime and Manga">Anime &amp; Manga
+                    <span class="filter-count">34</span></button>
+                <button type="button" class="category-filter-btn" data-category="Comic and Western Mangas">Comic <span
+                        class="filter-count">25</span></button>
+                <button type="button" class="category-filter-btn" data-category="Design">Design <span
+                        class="filter-count">35</span></button>
+                <button type="button" class="category-filter-btn" data-category="Painting and Fine Art">Painting &amp;
+                    Fine Art <span class="filter-count">44</span></button>
+                <button type="button" class="category-filter-btn" data-category="Photography">Photography <span
+                        class="filter-count">23</span></button>
+                <button type="button" class="category-filter-btn" data-category="Sketch and Cartoon">Sketch &amp;
+                    Cartoon <span class="filter-count">36</span></button>
             </div>
             <!-- LoRA Style Selector Bar (visible only on LoRAs tab) -->
             <div id="lora-style-selector" class="lora-style-selector hidden">
                 <div class="lora-style-primary">
-                    <button class="lora-style-btn active" data-lora-style="default" id="lora-style-default">Default</button>
-                    <button class="lora-style-btn" data-lora-style="fantasy" id="lora-style-fantasy">Fantasy</button>
-                    <button class="lora-style-btn" data-lora-style="modern" id="lora-style-modern">Modern</button>
-                    <button class="lora-style-btn" data-lora-style="sci-fi" id="lora-style-scifi">Sci-Fi</button>
+                    <button class="lora-style-btn active" data-lora-style="fantasy" data-lora-substyle="simple"
+                        id="lora-style-fantasy-simple">Fantasy Simple</button>
+                    <button class="lora-style-btn" data-lora-style="fantasy" data-lora-substyle="complex"
+                        id="lora-style-fantasy-complex">Fantasy Complex</button>
+                    <button class="lora-style-btn" data-lora-style="modern" data-lora-substyle="simple"
+                        id="lora-style-modern-simple">Modern Simple</button>
+                    <button class="lora-style-btn" data-lora-style="modern" data-lora-substyle="complex"
+                        id="lora-style-modern-complex">Modern Complex</button>
+                    <button class="lora-style-btn" data-lora-style="sci-fi" data-lora-substyle="simple"
+                        id="lora-style-scifi-simple">Sci-Fi Simple</button>
+                    <button class="lora-style-btn" data-lora-style="sci-fi" data-lora-substyle="complex"
+                        id="lora-style-scifi-complex">Sci-Fi Complex</button>
                 </div>
-                <div class="lora-style-secondary hidden" id="lora-style-secondary">
-                    <div class="lora-substyle-buttons">
-                        <button class="lora-substyle-btn active" data-lora-substyle="simple" id="lora-substyle-simple">Simple Prompt</button>
-                        <button class="lora-substyle-btn" data-lora-substyle="complex" id="lora-substyle-complex">Complex Prompt</button>
-                    </div>
-                    <div class="lora-prompt-inspector" id="lora-prompt-inspector">
-                        <button type="button" class="lora-prompt-toggle" id="lora-prompt-toggle" aria-expanded="false" title="Click to expand/collapse prompt details">
+                <div class="lora-prompt-inspector" id="lora-prompt-inspector">
+                    <div class="lora-prompt-inspector-bar">
+                        <div class="sticky-tab-nav" role="tablist" aria-label="Gallery Section Mode">
+                            <button type="button" class="sticky-tab-btn" data-tab="styles" aria-selected="false"
+                                title="Switch to Pre-Trained Styles">Pre-Trained Styles</button>
+                            <button type="button" class="sticky-tab-btn active" data-tab="loras" aria-selected="true"
+                                title="Switch to LoRAs">LoRAs</button>
+                        </div>
+                        <button type="button" class="lora-prompt-toggle" id="lora-prompt-toggle" aria-expanded="false"
+                            title="Click to expand/collapse prompt details">
                             <span class="lora-prompt-toggle-icon">▸</span>
                             <span class="lora-prompt-toggle-text">Check Prompt</span>
-                            <span class="lora-prompt-toggle-badge" id="lora-prompt-toggle-badge">Fantasy &bull; Simple</span>
+                            <span class="lora-prompt-toggle-badge" id="lora-prompt-toggle-badge">Fantasy &bull;
+                                Simple</span>
                         </button>
-                        <div class="lora-prompt-drawer hidden" id="lora-prompt-drawer">
-                            <div class="lora-prompt-drawer-header">
-                                <span class="lora-prompt-drawer-title" id="lora-prompt-drawer-title">Fantasy (Simple Prompt)</span>
-                                <button type="button" class="btn btn-sm btn-accent" id="btn-copy-lora-prompt" title="Copy prompt to clipboard">
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                    </svg>
-                                    <span>Copy Prompt</span>
-                                </button>
-                            </div>
-                            <pre class="lora-prompt-text" id="lora-prompt-text"></pre>
+                    </div>
+                    <div class="lora-prompt-drawer hidden" id="lora-prompt-drawer">
+                        <div class="lora-prompt-drawer-header">
+                            <span class="lora-prompt-drawer-title" id="lora-prompt-drawer-title">Fantasy (Simple
+                                Prompt)</span>
+                            <button type="button" class="btn btn-sm btn-accent" id="btn-copy-lora-prompt"
+                                title="Copy prompt to clipboard">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                                <span>Copy Prompt</span>
+                            </button>
                         </div>
+                        <pre class="lora-prompt-text" id="lora-prompt-text"></pre>
                     </div>
                 </div>
             </div>
             <!-- Category Filter Pills Bar for LoRAs -->
             <div id="lora-category-filters" class="style-category-filters hidden">
-                <button type="button" class="category-filter-btn active" data-category="all">All <span class="filter-count">100</span></button>
-                <button type="button" class="category-filter-btn" data-category="Design">Design <span class="filter-count">11</span></button>
-                <button type="button" class="category-filter-btn" data-category="Comic and Western Mangas">Comic <span class="filter-count">9</span></button>
-                <button type="button" class="category-filter-btn" data-category="Sketch and Cartoon">Sketch &amp; Cartoon <span class="filter-count">14</span></button>
-                <button type="button" class="category-filter-btn" data-category="Anime and Manga">Anime &amp; Manga <span class="filter-count">18</span></button>
-                <button type="button" class="category-filter-btn" data-category="Painting and Fine Art">Painting &amp; Fine Art <span class="filter-count">44</span></button>
-                <button type="button" class="category-filter-btn" data-category="Photography">Photography <span class="filter-count">4</span></button>
+                <button type="button" class="category-filter-btn active" data-category="all">All <span
+                        class="filter-count">100</span></button>
+                <button type="button" class="category-filter-btn" data-category="Anime and Manga">Anime &amp; Manga
+                    <span class="filter-count">18</span></button>
+                <button type="button" class="category-filter-btn" data-category="Comic and Western Mangas">Comic <span
+                        class="filter-count">9</span></button>
+                <button type="button" class="category-filter-btn" data-category="Design">Design <span
+                        class="filter-count">11</span></button>
+                <button type="button" class="category-filter-btn" data-category="Painting and Fine Art">Painting &amp;
+                    Fine Art <span class="filter-count">44</span></button>
+                <button type="button" class="category-filter-btn" data-category="Photography">Photography <span
+                        class="filter-count">4</span></button>
+                <button type="button" class="category-filter-btn" data-category="Sketch and Cartoon">Sketch &amp;
+                    Cartoon <span class="filter-count">14</span></button>
             </div>
             <!-- Floating Search Bar -->
             <div id="gallery-search-container" class="floating-search-container">
                 <div class="floating-search-box">
-                    <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="11" cy="11" r="8"></circle>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
-                    <input type="text" id="gallery-search-input" class="floating-search-input" placeholder="Search styles by name, description... (Ctrl+K)" autocomplete="off" spellcheck="false" aria-label="Search styles by name or description">
+                    <input type="text" id="gallery-search-input" class="floating-search-input"
+                        placeholder="Search styles by name, description... (Ctrl+K)" autocomplete="off"
+                        spellcheck="false" aria-label="Search styles by name or description">
                     <span id="gallery-search-badge" class="floating-search-badge">197 styles</span>
-                    <button type="button" id="gallery-search-clear" class="floating-search-clear hidden" title="Clear search (Esc)" aria-label="Clear search">×</button>
+                    <button type="button" id="gallery-search-clear" class="floating-search-clear hidden"
+                        title="Clear search (Esc)" aria-label="Clear search">×</button>
                 </div>
             </div>
             <!-- Floating Gallery Navigation Rail -->
             <nav id="gallery-nav" class="gallery-nav-rail" aria-label="Gallery quick navigation">
-                <button type="button" class="gallery-nav-btn" id="gnav-search" data-tooltip="Search Styles (Ctrl+K)" title="Search Styles" aria-label="Search Styles">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <button type="button" class="gallery-nav-btn" id="gnav-search" data-tooltip="Search Styles (Ctrl+K)"
+                    title="Search Styles" aria-label="Search Styles">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="11" cy="11" r="8"></circle>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
                 </button>
-                <button type="button" class="gallery-nav-btn" id="gnav-top" data-tooltip="Scroll to Top" title="Scroll to Top" aria-label="Scroll to Top">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <button type="button" class="gallery-nav-btn" id="gnav-top" data-tooltip="Scroll to Top"
+                    title="Scroll to Top" aria-label="Scroll to Top">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="18 15 12 9 6 15"></polyline>
                     </svg>
                 </button>
-                <button type="button" class="gallery-nav-btn" id="gnav-selected" data-tooltip="Go to Selected Style" title="Go to Selected Style" aria-label="Go to Selected">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <button type="button" class="gallery-nav-btn" id="gnav-selected" data-tooltip="Go to Selected Style"
+                    title="Go to Selected Style" aria-label="Go to Selected">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="8"></circle>
                         <line x1="12" y1="2" x2="12" y2="6"></line>
                         <line x1="12" y1="18" x2="12" y2="22"></line>
@@ -163,8 +224,10 @@
                         <line x1="18" y1="12" x2="22" y2="12"></line>
                     </svg>
                 </button>
-                <button type="button" class="gallery-nav-btn" id="gnav-random" data-tooltip="Random Style" title="Random Style" aria-label="Random Style / LoRA">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <button type="button" class="gallery-nav-btn" id="gnav-random" data-tooltip="Random Style"
+                    title="Random Style" aria-label="Random Style / LoRA">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <rect x="2" y="2" width="20" height="20" rx="4" ry="4"></rect>
                         <circle cx="8" cy="8" r="1.5" fill="currentColor"></circle>
                         <circle cx="16" cy="8" r="1.5" fill="currentColor"></circle>
@@ -173,14 +236,18 @@
                         <circle cx="16" cy="16" r="1.5" fill="currentColor"></circle>
                     </svg>
                 </button>
-                <button type="button" class="gallery-nav-btn" id="gnav-clear" data-tooltip="Clear Selection" title="Clear Selection" aria-label="Clear Selection">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <button type="button" class="gallery-nav-btn" id="gnav-clear" data-tooltip="Clear Selection"
+                    title="Clear Selection" aria-label="Clear Selection">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
                 </button>
-                <button type="button" class="gallery-nav-btn" id="gnav-bottom" data-tooltip="Scroll to Bottom" title="Scroll to Bottom" aria-label="Scroll to Bottom">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <button type="button" class="gallery-nav-btn" id="gnav-bottom" data-tooltip="Scroll to Bottom"
+                    title="Scroll to Bottom" aria-label="Scroll to Bottom">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
                 </button>
@@ -196,8 +263,10 @@
             <div class="builder-header">
                 <div class="builder-header-title-wrap">
                     <h2>PROMPT BUILDER</h2>
-                    <button type="button" id="btn-close-builder-drawer" class="btn-close-drawer" aria-label="Close Prompt Builder Drawer" title="Close Drawer">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <button type="button" id="btn-close-builder-drawer" class="btn-close-drawer"
+                        aria-label="Close Prompt Builder Drawer" title="Close Drawer">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18"></line>
                             <line x1="6" y1="6" x2="18" y2="18"></line>
                         </svg>
@@ -212,14 +281,17 @@
 
             <!-- Style (top of builder) -->
             <div class="form-card style-standalone-card">
-                <h3 class="card-section-title">STYLE <span class="tag-badge">Free text or click any style tag from the gallery</span></h3>
+                <h3 class="card-section-title">STYLE <span class="tag-badge">Free text or click any style tag from the
+                        gallery</span></h3>
                 <div class="form-group">
                     <label for="scene-style">
                         <span>Style</span>
-                        <button type="button" class="btn-clear-field" data-clear-target="scene-style" title="Clear this field">Clear</button>
+                        <button type="button" class="btn-clear-field" data-clear-target="scene-style"
+                            title="Clear this field">Clear</button>
                     </label>
                     <div class="textarea-resize-wrapper">
-                        <textarea id="scene-style" rows="5" placeholder="e.g. An angular, 3d art style, with brush stroke color texture."></textarea>
+                        <textarea id="scene-style" rows="5"
+                            placeholder="e.g. An angular, 3d art style, with brush stroke color texture."></textarea>
                         <div class="textarea-resize-handle" data-resize-target="scene-style"></div>
                     </div>
                     <div class="tags-container" data-field="scene-style"></div>
@@ -231,8 +303,10 @@
                 <h3 class="card-section-title">
                     <span>SCENE &amp; ENVIRONMENT</span>
                     <div class="char-header-actions">
-                        <button type="button" id="btn-save-scene" class="btn btn-sm btn-accent" title="Save scene as JSON">Save</button>
-                        <label class="btn btn-sm btn-secondary" id="btn-load-scene-label" title="Load scene from JSON" style="cursor:pointer;">
+                        <button type="button" id="btn-save-scene" class="btn btn-sm btn-accent"
+                            title="Save scene as JSON">Save</button>
+                        <label class="btn btn-sm btn-secondary" id="btn-load-scene-label" title="Load scene from JSON"
+                            style="cursor:pointer;">
                             Load
                             <input type="file" id="btn-load-scene-input" accept=".json" style="display:none;">
                         </label>
@@ -242,11 +316,14 @@
                 <!-- Characters' Positioning (only shown when 2+ characters) -->
                 <div class="form-group hidden" id="scene-positioning-group">
                     <label for="scene-positioning">
-                        <span>Characters' Positioning <span class="tag-badge">Relative positions between characters</span></span>
-                        <button type="button" class="btn-clear-field" data-clear-target="scene-positioning" title="Clear this field">Clear</button>
+                        <span>Characters' Positioning <span class="tag-badge">Relative positions between
+                                characters</span></span>
+                        <button type="button" class="btn-clear-field" data-clear-target="scene-positioning"
+                            title="Clear this field">Clear</button>
                     </label>
                     <div class="textarea-resize-wrapper">
-                        <textarea id="scene-positioning" rows="2" placeholder="e.g. Character 1 seated at the foreground left, Character 2 standing behind on the right..."></textarea>
+                        <textarea id="scene-positioning" rows="2"
+                            placeholder="e.g. Character 1 seated at the foreground left, Character 2 standing behind on the right..."></textarea>
                         <div class="textarea-resize-handle" data-resize-target="scene-positioning"></div>
                     </div>
                     <div class="tags-container" data-field="scene-positioning"></div>
@@ -256,10 +333,12 @@
                 <div class="form-group">
                     <label for="scene-other-details">
                         <span>Other Details on the Scene</span>
-                        <button type="button" class="btn-clear-field" data-clear-target="scene-other-details" title="Clear this field">Clear</button>
+                        <button type="button" class="btn-clear-field" data-clear-target="scene-other-details"
+                            title="Clear this field">Clear</button>
                     </label>
                     <div class="textarea-resize-wrapper">
-                        <textarea id="scene-other-details" rows="4" placeholder="e.g. Behind character's shoulder, small demonic imp with dark red tint hovering..."></textarea>
+                        <textarea id="scene-other-details" rows="4"
+                            placeholder="e.g. Behind character's shoulder, small demonic imp with dark red tint hovering..."></textarea>
                         <div class="textarea-resize-handle" data-resize-target="scene-other-details"></div>
                     </div>
                     <div class="tags-container" data-field="scene-other-details"></div>
@@ -269,10 +348,12 @@
                 <div class="form-group">
                     <label for="scene-background">
                         <span>Background</span>
-                        <button type="button" class="btn-clear-field" data-clear-target="scene-background" title="Clear this field">Clear</button>
+                        <button type="button" class="btn-clear-field" data-clear-target="scene-background"
+                            title="Clear this field">Clear</button>
                     </label>
                     <div class="textarea-resize-wrapper">
-                        <textarea id="scene-background" rows="4" placeholder="e.g. Busy atmospheric tavern, warm lantern light contrasting with cool shadows..."></textarea>
+                        <textarea id="scene-background" rows="4"
+                            placeholder="e.g. Busy atmospheric tavern, warm lantern light contrasting with cool shadows..."></textarea>
                         <div class="textarea-resize-handle" data-resize-target="scene-background"></div>
                     </div>
                     <div class="tags-container" data-field="scene-background"></div>
@@ -282,10 +363,12 @@
                 <div class="form-group">
                     <label for="scene-camera">
                         <span>Camera</span>
-                        <button type="button" class="btn-clear-field" data-clear-target="scene-camera" title="Clear this field">Clear</button>
+                        <button type="button" class="btn-clear-field" data-clear-target="scene-camera"
+                            title="Clear this field">Clear</button>
                     </label>
                     <div class="textarea-resize-wrapper">
-                        <textarea id="scene-camera" rows="3" placeholder="e.g. Shot from wrist up, character facing directly toward camera"></textarea>
+                        <textarea id="scene-camera" rows="3"
+                            placeholder="e.g. Shot from wrist up, character facing directly toward camera"></textarea>
                         <div class="textarea-resize-handle" data-resize-target="scene-camera"></div>
                     </div>
                     <div class="tags-container" data-field="scene-camera"></div>
@@ -295,7 +378,8 @@
             <!-- Multi-Character Trait Warning Summary -->
             <div id="trait-conflict-summary" class="conflict-summary-bar hidden" role="alert">
                 <span class="warning-icon"></span>
-                <span id="conflict-summary-text">Missing character traits detected! Some characters have traits set while others are empty, which may cause AI model trait bleeding.</span>
+                <span id="conflict-summary-text">Missing character traits detected! Some characters have traits set
+                    while others are empty, which may cause AI model trait bleeding.</span>
             </div>
 
             <!-- Character Tabs -->
@@ -318,16 +402,19 @@
                         <button type="button" id="btn-copy-prompt" class="btn btn-accent">Copy Complete Prompt</button>
                     </div>
                 </div>
-                <pre id="prompt-output-preview" class="prompt-preview-box">Your generated prompt will appear here in real-time as you fill in details...</pre>
+                <pre id="prompt-output-preview"
+                    class="prompt-preview-box">Your generated prompt will appear here in real-time as you fill in details...</pre>
             </div>
 
         </section>
     </main>
 
     <!-- Floating Prompt Builder Drawer Toggle -->
-    <button type="button" id="btn-toggle-builder-drawer" class="builder-drawer-toggle" aria-label="Toggle Prompt Builder" aria-controls="builder-section" aria-expanded="false">
+    <button type="button" id="btn-toggle-builder-drawer" class="builder-drawer-toggle"
+        aria-label="Toggle Prompt Builder" aria-controls="builder-section" aria-expanded="false">
         <span class="drawer-toggle-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
                 <line x1="4" y1="21" x2="4" y2="14"></line>
                 <line x1="4" y1="10" x2="4" y2="3"></line>
                 <line x1="12" y1="21" x2="12" y2="12"></line>
@@ -344,16 +431,20 @@
     </button>
 
     <!-- Fullscreen Image Lightbox Modal -->
-    <div id="image-lightbox" class="image-lightbox hidden" aria-hidden="true" role="dialog" aria-label="Fullscreen Image View">
+    <div id="image-lightbox" class="image-lightbox hidden" aria-hidden="true" role="dialog"
+        aria-label="Fullscreen Image View">
         <div class="lightbox-backdrop" id="lightbox-backdrop"></div>
         <div class="lightbox-container">
             <!-- Left Sidebar: Header, Info & Close -->
             <div class="lightbox-header">
                 <div class="lightbox-header-top">
                     <div class="lightbox-header-actions">
-                        <button type="button" class="lightbox-close" id="lightbox-close" aria-label="Close fullscreen view" title="Close (Esc)">×</button>
-                        <button type="button" class="lightbox-prompt-toggle-btn" id="lightbox-prompt-toggle-btn" aria-label="Toggle prompt panel" title="Toggle prompt details">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <button type="button" class="lightbox-close" id="lightbox-close"
+                            aria-label="Close fullscreen view" title="Close (Esc)">×</button>
+                        <button type="button" class="lightbox-prompt-toggle-btn" id="lightbox-prompt-toggle-btn"
+                            aria-label="Toggle prompt panel" title="Toggle prompt details">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                 <polyline points="14 2 14 8 20 8"></polyline>
                                 <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -372,20 +463,26 @@
                 <!-- Prompt Inspector Section -->
                 <div class="lightbox-prompt-section" id="lightbox-prompt-section">
                     <div class="lightbox-prompt-tabs">
-                        <button type="button" class="lightbox-prompt-tab active" id="lb-tab-style" data-tab="style">Style Prompt</button>
-                        <button type="button" class="lightbox-prompt-tab" id="lb-tab-scene" data-tab="scene">Demo Scene</button>
+                        <button type="button" class="lightbox-prompt-tab active" id="lb-tab-style"
+                            data-tab="style">Style Prompt</button>
+                        <button type="button" class="lightbox-prompt-tab" id="lb-tab-scene" data-tab="scene">Demo
+                            Scene</button>
                     </div>
                     <div class="lightbox-prompt-body">
                         <div class="lightbox-prompt-actions">
-                            <button type="button" class="lightbox-action-btn lightbox-copy-btn" id="lightbox-copy-prompt-btn" title="Copy prompt to clipboard">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <button type="button" class="lightbox-action-btn lightbox-copy-btn"
+                                id="lightbox-copy-prompt-btn" title="Copy prompt to clipboard">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                                     <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                                 </svg>
                                 <span id="lightbox-copy-prompt-text">Copy</span>
                             </button>
-                            <button type="button" class="lightbox-action-btn lightbox-apply-btn" id="lightbox-apply-builder-btn" title="Apply to prompt builder">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <button type="button" class="lightbox-action-btn lightbox-apply-btn"
+                                id="lightbox-apply-builder-btn" title="Apply to prompt builder">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <line x1="12" y1="5" x2="12" y2="19"></line>
                                     <line x1="5" y1="12" x2="19" y2="12"></line>
                                 </svg>
@@ -407,13 +504,18 @@
             <!-- Center Viewport: Expansive Image -->
             <div class="lightbox-body">
                 <div class="lightbox-nav-group lightbox-nav-left">
-                    <button type="button" class="lightbox-nav-btn lightbox-prev" id="lightbox-prev" aria-label="Previous variation (Left Arrow)" title="Previous variation (Left Arrow)">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <button type="button" class="lightbox-nav-btn lightbox-prev" id="lightbox-prev"
+                        aria-label="Previous variation (Left Arrow)" title="Previous variation (Left Arrow)">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="15 18 9 12 15 6"></polyline>
                         </svg>
                     </button>
-                    <button type="button" class="lightbox-nav-btn lightbox-nav-btn-style lightbox-prev-style" id="lightbox-prev-style" aria-label="Previous Style / LoRA (Up Arrow)" title="Previous Style / LoRA (Up Arrow)">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <button type="button" class="lightbox-nav-btn lightbox-nav-btn-style lightbox-prev-style"
+                        id="lightbox-prev-style" aria-label="Previous Style / LoRA (Up Arrow)"
+                        title="Previous Style / LoRA (Up Arrow)">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="11 17 6 12 11 7"></polyline>
                             <polyline points="18 17 13 12 18 7"></polyline>
                         </svg>
@@ -423,13 +525,18 @@
                     <img id="lightbox-img" class="lightbox-img" src="" alt="Fullscreen image preview">
                 </div>
                 <div class="lightbox-nav-group lightbox-nav-right">
-                    <button type="button" class="lightbox-nav-btn lightbox-next" id="lightbox-next" aria-label="Next variation (Right Arrow)" title="Next variation (Right Arrow)">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <button type="button" class="lightbox-nav-btn lightbox-next" id="lightbox-next"
+                        aria-label="Next variation (Right Arrow)" title="Next variation (Right Arrow)">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="9 18 15 12 9 6"></polyline>
                         </svg>
                     </button>
-                    <button type="button" class="lightbox-nav-btn lightbox-nav-btn-style lightbox-next-style" id="lightbox-next-style" aria-label="Next Style / LoRA (Down Arrow)" title="Next Style / LoRA (Down Arrow)">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <button type="button" class="lightbox-nav-btn lightbox-nav-btn-style lightbox-next-style"
+                        id="lightbox-next-style" aria-label="Next Style / LoRA (Down Arrow)"
+                        title="Next Style / LoRA (Down Arrow)">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="13 17 18 12 13 7"></polyline>
                             <polyline points="6 17 11 12 6 7"></polyline>
                         </svg>
@@ -450,9 +557,11 @@
     <div id="toast" class="toast" aria-live="polite"></div>
 
     <!-- Compare Drawer Toggle Button (Floating) -->
-    <button type="button" id="btn-toggle-compare-drawer" class="compare-drawer-toggle" aria-label="Toggle Compare Drawer" title="Open Compare Drawer">
+    <button type="button" id="btn-toggle-compare-drawer" class="compare-drawer-toggle"
+        aria-label="Toggle Compare Drawer" title="Open Compare Drawer">
         <span class="compare-toggle-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
                 <rect x="2" y="3" width="8" height="14" rx="1"></rect>
                 <rect x="14" y="3" width="8" height="14" rx="1"></rect>
                 <line x1="6" y1="21" x2="6" y2="19"></line>
@@ -471,8 +580,10 @@
                 <span class="compare-drawer-count" id="compare-drawer-count">0 images</span>
             </div>
             <div class="compare-drawer-header-actions">
-                <button type="button" class="btn compare-btn-compare" id="btn-compare-fullscreen" title="View comparison fullscreen">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px; margin-right: 4px;">
+                <button type="button" class="btn compare-btn-compare" id="btn-compare-fullscreen"
+                    title="View comparison fullscreen">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px; margin-right: 4px;">
                         <polyline points="15 3 21 3 21 9"></polyline>
                         <polyline points="9 21 3 21 3 15"></polyline>
                         <line x1="21" y1="3" x2="14" y2="10"></line>
@@ -480,8 +591,10 @@
                     </svg>
                     Compare
                 </button>
-                <button type="button" class="btn compare-btn-clear" id="btn-compare-clear" title="Remove all images from compare">Clear All</button>
-                <button type="button" class="compare-drawer-close" id="btn-compare-drawer-close" aria-label="Close compare drawer" title="Close">×</button>
+                <button type="button" class="btn compare-btn-clear" id="btn-compare-clear"
+                    title="Remove all images from compare">Clear All</button>
+                <button type="button" class="compare-drawer-close" id="btn-compare-drawer-close"
+                    aria-label="Close compare drawer" title="Close">×</button>
             </div>
         </div>
         <div class="compare-drawer-body">
@@ -492,10 +605,12 @@
     </div>
 
     <!-- Fullscreen Compare Modal -->
-    <div id="compare-fullscreen-modal" class="compare-fullscreen-modal" aria-hidden="true" role="dialog" aria-label="Fullscreen Image Comparison">
+    <div id="compare-fullscreen-modal" class="compare-fullscreen-modal" aria-hidden="true" role="dialog"
+        aria-label="Fullscreen Image Comparison">
         <div class="compare-fullscreen-header">
             <span class="compare-fullscreen-title">COMPARE VIEW</span>
-            <button type="button" class="compare-fullscreen-close" id="btn-compare-fullscreen-close" aria-label="Close comparison view" title="Close (Esc)">×</button>
+            <button type="button" class="compare-fullscreen-close" id="btn-compare-fullscreen-close"
+                aria-label="Close comparison view" title="Close (Esc)">×</button>
         </div>
         <div class="compare-fullscreen-body" id="compare-fullscreen-body">
             <!-- Dynamic comparison images injected here -->
@@ -508,4 +623,5 @@
 
     <script src="app.js"></script>
 </body>
+
 </html>

@@ -132,12 +132,12 @@ const STYLE_THEME_DIR_MAP = {
 };
 
 const STYLE_CATEGORIES = [
-    'Design',
-    'Comic and Western Mangas',
-    'Sketch and Cartoon',
     'Anime and Manga',
+    'Comic and Western Mangas',
+    'Design',
     'Painting and Fine Art',
-    'Photography'
+    'Photography',
+    'Sketch and Cartoon'
 ];
 
 const LORA_CATEGORIES = STYLE_CATEGORIES;
@@ -220,6 +220,20 @@ const PROMPT_VARIATIONS = [
     { key: 'scifi_simple', theme: 'sci-fi', substyle: 'simple', label: 'Sci-Fi Simple', dir: 'sci-fi' },
     { key: 'scifi_complex', theme: 'sci-fi', substyle: 'complex', label: 'Sci-Fi Complex', dir: 'sci-fi' }
 ];
+
+/**
+ * Randomizes the initial prompt variation for both Styles and LoRAs on page load/refresh.
+ */
+function randomizeInitialVariation() {
+    const randomIndex = Math.floor(Math.random() * PROMPT_VARIATIONS.length);
+    const randomVar = PROMPT_VARIATIONS[randomIndex];
+    if (!randomVar) return;
+
+    currentStyleTheme = randomVar.theme;
+    currentStyleSubstyle = randomVar.substyle;
+    currentLoraStyle = randomVar.theme;
+    currentLoraSubstyle = randomVar.substyle;
+}
 
 function getStyleVariationImagePath(style, variation) {
     return `img/style/${variation.dir}/${variation.substyle}/${style.name}_00001_.jpg`;
@@ -546,8 +560,7 @@ function openLoraFullscreen(index) {
     if (!lora) return;
 
     // Find current variation index based on current lora style & substyle
-    const currentTheme = currentLoraStyle === 'default' ? 'fantasy' : currentLoraStyle;
-    const varIdx = PROMPT_VARIATIONS.findIndex(v => v.theme === currentTheme && v.substyle === currentLoraSubstyle);
+    const varIdx = PROMPT_VARIATIONS.findIndex(v => v.theme === currentLoraStyle && v.substyle === currentLoraSubstyle);
     openLightboxModal({
         title: lora.name,
         type: 'lora',
@@ -1047,41 +1060,79 @@ function updateStylesPromptContent() {
     }
 }
 
+/**
+ * Synchronizes the active prompt variation globally between Pre-Trained Styles and LoRAs,
+ * keeping both selector bars, prompt inspector badges/drawers, and card images in sync.
+ */
+function setGlobalPromptVariation(theme, substyle) {
+    if (!theme || !substyle) return;
+
+    currentStyleTheme = theme;
+    currentStyleSubstyle = substyle;
+    currentLoraStyle = theme;
+    currentLoraSubstyle = substyle;
+
+    // Sync Pre-Trained Styles selector buttons
+    const stylesSelector = document.getElementById('styles-style-selector');
+    if (stylesSelector) {
+        stylesSelector.querySelectorAll('.lora-style-btn').forEach(btn => {
+            const isMatch = btn.dataset.styleTheme === theme && btn.dataset.styleSubstyle === substyle;
+            btn.classList.toggle('active', isMatch);
+        });
+    }
+
+    // Sync LoRA selector buttons
+    const loraSelector = document.getElementById('lora-style-selector');
+    if (loraSelector) {
+        loraSelector.querySelectorAll('.lora-style-btn').forEach(btn => {
+            const isMatch = btn.dataset.loraStyle === theme && btn.dataset.loraSubstyle === substyle;
+            btn.classList.toggle('active', isMatch);
+        });
+    }
+
+    // Update prompt inspector content & badges for both
+    if (typeof updateStylesPromptContent === 'function') {
+        updateStylesPromptContent();
+    }
+    if (typeof updateLoraPromptContent === 'function') {
+        updateLoraPromptContent();
+    }
+
+    // Update images in both galleries
+    if (typeof updateStyleImages === 'function') {
+        updateStyleImages();
+    }
+    if (typeof updateLoraImages === 'function') {
+        updateLoraImages();
+    }
+
+    // Update compare button states
+    if (typeof updateAllCompareButtonStates === 'function') {
+        updateAllCompareButtonStates();
+    }
+}
+
 function initStylesThemeSelector() {
     const selector = document.getElementById('styles-style-selector');
     if (!selector) return;
 
-    const primaryBtns = selector.querySelectorAll('.lora-style-btn');
-    const substyleBtns = selector.querySelectorAll('.lora-substyle-btn');
+    const buttons = selector.querySelectorAll('.lora-style-btn');
     const promptToggle = document.getElementById('styles-prompt-toggle');
     const promptDrawer = document.getElementById('styles-prompt-drawer');
     const copyPromptBtn = document.getElementById('btn-copy-styles-prompt');
 
-    primaryBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const theme = btn.dataset.styleTheme;
-            primaryBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-
-            currentStyleTheme = theme;
-            updateStylesPromptContent();
-            collapseStylePanel(true);
-            updateStyleImages();
-            updateAllCompareButtonStates();
-        });
+    // Sync active button state with currentStyleTheme & currentStyleSubstyle
+    buttons.forEach(btn => {
+        const isMatch = btn.dataset.styleTheme === currentStyleTheme && btn.dataset.styleSubstyle === currentStyleSubstyle;
+        btn.classList.toggle('active', isMatch);
     });
 
-    substyleBtns.forEach(btn => {
+    buttons.forEach(btn => {
         btn.addEventListener('click', () => {
+            const theme = btn.dataset.styleTheme;
             const substyle = btn.dataset.styleSubstyle;
-            substyleBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-
-            currentStyleSubstyle = substyle;
-            updateStylesPromptContent();
             collapseStylePanel(true);
-            updateStyleImages();
-            updateAllCompareButtonStates();
+            setGlobalPromptVariation(theme, substyle);
         });
     });
 
@@ -1142,11 +1193,10 @@ function initStyleCategoryFilters() {
 // ==============================================
 
 let currentExpandedLora = null;
-let currentLoraStyle = 'default';     // 'default' | 'fantasy' | 'modern' | 'sci-fi'
+let currentLoraStyle = 'fantasy';     // 'fantasy' | 'modern' | 'sci-fi'
 let currentLoraSubstyle = 'simple';   // 'simple' | 'complex'
 
 const LORA_STYLE_DIR_MAP = {
-    'default': 'default',
     'fantasy': 'fantasy',
     'modern': 'present',
     'sci-fi': 'sci-fi'
@@ -1155,12 +1205,8 @@ const LORA_STYLE_DIR_MAP = {
 const LORA_THEME_PROMPTS = THEME_DEMO_PROMPTS;
 
 function getLoraImagePath(lora) {
-    if (currentLoraStyle === 'default') {
-        return `img/lora/default/${lora.file}`;
-    }
-
-    const dir = LORA_STYLE_DIR_MAP[currentLoraStyle];
-    const substyle = currentLoraSubstyle;
+    const dir = LORA_STYLE_DIR_MAP[currentLoraStyle] || 'fantasy';
+    const substyle = currentLoraSubstyle || 'simple';
 
     let cleanName = lora.name;
     if (cleanName.startsWith('@')) {
@@ -1497,48 +1543,23 @@ function initLoraStyleSelector() {
     const selector = document.getElementById('lora-style-selector');
     if (!selector) return;
 
-    const primaryBtns = selector.querySelectorAll('.lora-style-btn');
-    const secondaryRow = document.getElementById('lora-style-secondary');
-    const substyleBtns = selector.querySelectorAll('.lora-substyle-btn');
+    const buttons = selector.querySelectorAll('.lora-style-btn');
     const promptToggle = document.getElementById('lora-prompt-toggle');
     const promptDrawer = document.getElementById('lora-prompt-drawer');
     const copyPromptBtn = document.getElementById('btn-copy-lora-prompt');
 
-    primaryBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const style = btn.dataset.loraStyle;
-            primaryBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-
-            currentLoraStyle = style;
-
-            if (style === 'default') {
-                secondaryRow.classList.add('hidden');
-            } else {
-                secondaryRow.classList.remove('hidden');
-                secondaryRow.style.animation = 'none';
-                void secondaryRow.offsetWidth;
-                secondaryRow.style.animation = '';
-            }
-
-            updateLoraPromptContent();
-            collapseLoraPanel(true);
-            updateLoraImages();
-            updateAllCompareButtonStates();
-        });
+    // Sync active button state with currentLoraStyle & currentLoraSubstyle
+    buttons.forEach(btn => {
+        const isMatch = btn.dataset.loraStyle === currentLoraStyle && btn.dataset.loraSubstyle === currentLoraSubstyle;
+        btn.classList.toggle('active', isMatch);
     });
 
-    substyleBtns.forEach(btn => {
+    buttons.forEach(btn => {
         btn.addEventListener('click', () => {
+            const style = btn.dataset.loraStyle;
             const substyle = btn.dataset.loraSubstyle;
-            substyleBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-
-            currentLoraSubstyle = substyle;
-            updateLoraPromptContent();
             collapseLoraPanel(true);
-            updateLoraImages();
-            updateAllCompareButtonStates();
+            setGlobalPromptVariation(style, substyle);
         });
     });
 
@@ -1656,8 +1677,45 @@ function initGallerySearch() {
 }
 
 // ---- Gallery Tab Switching ----
-function initGalleryTabs() {
-    const tabs = document.querySelectorAll('.gallery-tab');
+function switchGalleryTab(targetTab) {
+    collapseStylePanel(true);
+    collapseLoraPanel(true);
+
+    // Keep active prompt selection synchronized between tabs
+    setGlobalPromptVariation(currentStyleTheme, currentStyleSubstyle);
+
+    // Synchronize prompt inspector drawer expanded state between tabs
+    const stylesPromptToggle = document.getElementById('styles-prompt-toggle');
+    const stylesPromptDrawer = document.getElementById('styles-prompt-drawer');
+    const loraPromptToggle = document.getElementById('lora-prompt-toggle');
+    const loraPromptDrawer = document.getElementById('lora-prompt-drawer');
+
+    if (targetTab === 'styles') {
+        const wasExpanded = loraPromptToggle && loraPromptToggle.classList.contains('expanded');
+        if (stylesPromptToggle && stylesPromptDrawer) {
+            stylesPromptToggle.classList.toggle('expanded', wasExpanded);
+            stylesPromptToggle.setAttribute('aria-expanded', wasExpanded ? 'true' : 'false');
+            stylesPromptDrawer.classList.toggle('hidden', !wasExpanded);
+        }
+    } else {
+        const wasExpanded = stylesPromptToggle && stylesPromptToggle.classList.contains('expanded');
+        if (loraPromptToggle && loraPromptDrawer) {
+            loraPromptToggle.classList.toggle('expanded', wasExpanded);
+            loraPromptToggle.setAttribute('aria-expanded', wasExpanded ? 'true' : 'false');
+            loraPromptDrawer.classList.toggle('hidden', !wasExpanded);
+        }
+    }
+
+    const mainTabs = document.querySelectorAll('.gallery-tab');
+    mainTabs.forEach(t => t.classList.toggle('active', t.dataset.tab === targetTab));
+
+    const stickyTabs = document.querySelectorAll('.sticky-tab-btn');
+    stickyTabs.forEach(btn => {
+        const isActive = btn.dataset.tab === targetTab;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+
     const hint = document.getElementById('gallery-hint');
     const btnRandom = document.getElementById('gnav-random');
     const btnSelected = document.getElementById('gnav-selected');
@@ -1667,79 +1725,92 @@ function initGalleryTabs() {
     const loraStyleSelector = document.getElementById('lora-style-selector');
     const loraCategoryFilters = document.getElementById('lora-category-filters');
 
+    document.querySelectorAll('.gallery-panel').forEach(p => p.classList.remove('active'));
+
+    const searchInput = document.getElementById('gallery-search-input');
+    const btnSearch = document.getElementById('gnav-search');
+
+    if (targetTab === 'styles') {
+        document.getElementById('gallery').classList.add('active');
+        if (hint) hint.textContent = 'Click any style to copy prompt & add to prompt';
+        if (stylesStyleSelector) stylesStyleSelector.classList.remove('hidden');
+        if (styleCategoryFilters) styleCategoryFilters.classList.remove('hidden');
+        if (loraStyleSelector) loraStyleSelector.classList.add('hidden');
+        if (loraCategoryFilters) loraCategoryFilters.classList.add('hidden');
+
+        if (searchInput) {
+            searchInput.placeholder = 'Search styles by name, description... (Ctrl+K)';
+            searchInput.value = currentStyleSearchQuery;
+        }
+        if (btnSearch) {
+            btnSearch.setAttribute('data-tooltip', 'Search Styles (Ctrl+K)');
+            btnSearch.setAttribute('title', 'Search Styles');
+        }
+        if (btnRandom) {
+            btnRandom.setAttribute('data-tooltip', 'Random Style');
+            btnRandom.setAttribute('title', 'Random Style');
+        }
+        if (btnSelected) {
+            btnSelected.setAttribute('data-tooltip', 'Go to Selected Style');
+            btnSelected.setAttribute('title', 'Go to Selected Style');
+        }
+        if (btnClear) {
+            btnClear.setAttribute('data-tooltip', 'Clear Style Selection');
+            btnClear.setAttribute('title', 'Clear Style Selection');
+        }
+        buildStylesGallery();
+    } else {
+        document.getElementById('lora-gallery').classList.add('active');
+        if (hint) hint.textContent = 'Click any LoRA to copy trigger words & view details';
+        if (stylesStyleSelector) stylesStyleSelector.classList.add('hidden');
+        if (styleCategoryFilters) styleCategoryFilters.classList.add('hidden');
+        if (loraStyleSelector) loraStyleSelector.classList.remove('hidden');
+        if (loraCategoryFilters) loraCategoryFilters.classList.remove('hidden');
+
+        if (searchInput) {
+            searchInput.placeholder = 'Search LoRAs, trigger words, description... (Ctrl+K)';
+            searchInput.value = currentLoraSearchQuery;
+        }
+        if (btnSearch) {
+            btnSearch.setAttribute('data-tooltip', 'Search LoRAs (Ctrl+K)');
+            btnSearch.setAttribute('title', 'Search LoRAs');
+        }
+        if (btnRandom) {
+            btnRandom.setAttribute('data-tooltip', 'Random LoRA');
+            btnRandom.setAttribute('title', 'Random LoRA');
+        }
+        if (btnSelected) {
+            btnSelected.setAttribute('data-tooltip', 'Go to Selected LoRA');
+            btnSelected.setAttribute('title', 'Go to Selected LoRA');
+        }
+        if (btnClear) {
+            btnClear.setAttribute('data-tooltip', 'Clear LoRA Selection');
+            btnClear.setAttribute('title', 'Clear LoRA Selection');
+        }
+        buildLoraGallery();
+    }
+
+    const gallerySection = document.getElementById('gallery-section');
+    if (gallerySection && window.scrollY > gallerySection.offsetTop) {
+        window.scrollTo({
+            top: gallerySection.offsetTop,
+            behavior: 'instant'
+        });
+    }
+}
+
+function initGalleryTabs() {
+    const tabs = document.querySelectorAll('.gallery-tab');
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
-            collapseStylePanel(true);
-            collapseLoraPanel(true);
+            switchGalleryTab(tab.dataset.tab);
+        });
+    });
 
-            tabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-
-            const targetTab = tab.dataset.tab;
-            document.querySelectorAll('.gallery-panel').forEach(p => p.classList.remove('active'));
-
-            const searchInput = document.getElementById('gallery-search-input');
-            const btnSearch = document.getElementById('gnav-search');
-
-            if (targetTab === 'styles') {
-                document.getElementById('gallery').classList.add('active');
-                hint.textContent = 'Click any style to copy prompt & add to prompt';
-                if (stylesStyleSelector) stylesStyleSelector.classList.remove('hidden');
-                if (styleCategoryFilters) styleCategoryFilters.classList.remove('hidden');
-                if (loraStyleSelector) loraStyleSelector.classList.add('hidden');
-                if (loraCategoryFilters) loraCategoryFilters.classList.add('hidden');
-
-                if (searchInput) {
-                    searchInput.placeholder = 'Search styles by name, description... (Ctrl+K)';
-                    searchInput.value = currentStyleSearchQuery;
-                }
-                if (btnSearch) {
-                    btnSearch.setAttribute('data-tooltip', 'Search Styles (Ctrl+K)');
-                    btnSearch.setAttribute('title', 'Search Styles');
-                }
-                if (btnRandom) {
-                    btnRandom.setAttribute('data-tooltip', 'Random Style');
-                    btnRandom.setAttribute('title', 'Random Style');
-                }
-                if (btnSelected) {
-                    btnSelected.setAttribute('data-tooltip', 'Go to Selected Style');
-                    btnSelected.setAttribute('title', 'Go to Selected Style');
-                }
-                if (btnClear) {
-                    btnClear.setAttribute('data-tooltip', 'Clear Style Selection');
-                    btnClear.setAttribute('title', 'Clear Style Selection');
-                }
-                buildStylesGallery();
-            } else {
-                document.getElementById('lora-gallery').classList.add('active');
-                hint.textContent = 'Click any LoRA to copy trigger words & view details';
-                if (stylesStyleSelector) stylesStyleSelector.classList.add('hidden');
-                if (styleCategoryFilters) styleCategoryFilters.classList.add('hidden');
-                if (loraStyleSelector) loraStyleSelector.classList.remove('hidden');
-                if (loraCategoryFilters) loraCategoryFilters.classList.remove('hidden');
-
-                if (searchInput) {
-                    searchInput.placeholder = 'Search LoRAs, trigger words, description... (Ctrl+K)';
-                    searchInput.value = currentLoraSearchQuery;
-                }
-                if (btnSearch) {
-                    btnSearch.setAttribute('data-tooltip', 'Search LoRAs (Ctrl+K)');
-                    btnSearch.setAttribute('title', 'Search LoRAs');
-                }
-                if (btnRandom) {
-                    btnRandom.setAttribute('data-tooltip', 'Random LoRA');
-                    btnRandom.setAttribute('title', 'Random LoRA');
-                }
-                if (btnSelected) {
-                    btnSelected.setAttribute('data-tooltip', 'Go to Selected LoRA');
-                    btnSelected.setAttribute('title', 'Go to Selected LoRA');
-                }
-                if (btnClear) {
-                    btnClear.setAttribute('data-tooltip', 'Clear LoRA Selection');
-                    btnClear.setAttribute('title', 'Clear LoRA Selection');
-                }
-                buildLoraGallery();
-            }
+    const stickyTabs = document.querySelectorAll('.sticky-tab-btn');
+    stickyTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            switchGalleryTab(tab.dataset.tab);
         });
     });
 }
@@ -3021,14 +3092,14 @@ function createCompareItem(type, index, item) {
         imagePath = getStyleImagePath(item);
         theme = currentStyleTheme;
         substyle = currentStyleSubstyle;
-        variationLabel = `${theme.charAt(0).toUpperCase() + theme.slice(1)} • ${substyle.charAt(0).toUpperCase() + substyle.slice(1)}`;
+        const themeDisplay = theme === 'sci-fi' ? 'Sci-Fi' : theme.charAt(0).toUpperCase() + theme.slice(1);
+        variationLabel = `${themeDisplay} • ${substyle.charAt(0).toUpperCase() + substyle.slice(1)}`;
     } else {
         imagePath = getLoraImagePath(item);
         theme = currentLoraStyle;
         substyle = currentLoraSubstyle;
-        const themeDisplay = theme === 'default' ? 'Default' : theme.charAt(0).toUpperCase() + theme.slice(1);
-        const substyleDisplay = theme === 'default' ? '' : ` • ${substyle.charAt(0).toUpperCase() + substyle.slice(1)}`;
-        variationLabel = `${themeDisplay}${substyleDisplay}`;
+        const themeDisplay = theme === 'sci-fi' ? 'Sci-Fi' : theme.charAt(0).toUpperCase() + theme.slice(1);
+        variationLabel = `${themeDisplay} • ${substyle.charAt(0).toUpperCase() + substyle.slice(1)}`;
     }
 
     return {
@@ -3488,6 +3559,7 @@ function initCompareDrawer() {
 document.addEventListener('DOMContentLoaded', async () => {
     const loaded = await loadDatasets();
     if (!loaded) return;
+    randomizeInitialVariation();
     buildStylesGallery();
     buildLoraGallery();
     initGalleryTabs();
