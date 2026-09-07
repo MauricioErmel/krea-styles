@@ -360,12 +360,6 @@
         "category": "Design"
     },
     {
-        "name": "Art Deco Gold Highlights",
-        "imageFile": "Art Deco Gold Highlights_00001_.jpg",
-        "prompt": "An elegant geometric-illustration style built on crisp, confidently bounded shape divisions arranged with rhythmic, symmetrical precision, sharp radiant linework tracing sunburst and stepped-motif patterning with meticulous graphic discipline, a luminous, reflective sheen concentrated along every decorative edge and contour, a poised, glamorous formality carried through balanced, deliberate composition, and a chic, opulent sophistication that feels streamlined, luxurious, and unmistakably interwar in spirit. Influenced by: Tamara de Lempicka, Art Deco decorative-design tradition, geometric ornamental-illustration technique.",
-        "category": "Design"
-    },
-    {
         "name": "Ashley Wood Illustration",
         "imageFile": "Ashley Wood Illustration_00001_.jpg",
         "prompt": "expressive mixed-media aesthetics combining energetic brushwork, sketch-like spontaneity, painterly abstraction, layered textures, and graphic novel sensibilities, blending raw artistic gesture with sophisticated visual design through atmospheric rendering, controlled chaos, and a distinctly handcrafted appearance that prioritizes mood, emotion, and visual impact over strict realism, reminiscent of Ashley Wood and Bill Sienkiewicz, inspired by World War Robot and Metal Gear Solid concept artwork.",
@@ -393,12 +387,6 @@
         "name": "Cinematic Final Fantasy 3D Render",
         "imageFile": "Cinematic Final Fantasy 3D Render_00001_.jpg",
         "prompt": "A richly cinematic 3D-illustration style built on meticulously detailed volumetric modeling rendered with near-photographic dimensional conviction, dramatic film-grade lighting establishing epic, emotionally charged mood within every frame, soft subsurface-scattered rendering giving skin a convincing, luminous depth, confident ambient occlusion and reflective response settling naturally into every contour, and a polished, blockbuster-grade rendering intensity built for sweeping, story-driven visual spectacle. Influenced by: Square Enix cinematic-rendering direction, real-time 3D-animation technique, subsurface-scattering character-design practice, cinematic three-point lighting method.",
-        "category": "Design"
-    },
-    {
-        "name": "Claymation",
-        "imageFile": "Claymation_00001_.jpg",
-        "prompt": "A charmingly tactile stop-motion illustration style built on soft, rounded forms carrying visible handcrafted imperfection, gentle fingerprint-like dents and subtle irregularity standing in for smooth digital finish, warm, even lighting that gives every contour a cozy, dimensional roundness, a slightly rigid, hand-manipulated quality to posing that carries endearing physical charm, and a nostalgic, cheerfully handmade warmth rooted in decades of stop-motion animation craft. Influenced by: Aardman Animations, stop-motion claymation technique, handcrafted figure-animation practice, British character-animation tradition.",
         "category": "Design"
     },
     {
@@ -528,12 +516,6 @@
         "category": "Design"
     },
     {
-        "name": "Stained Glass Flat Art",
-        "imageFile": "Stained Glass Flat Art_00001_.jpg",
-        "prompt": "decorative graphic aesthetics characterized by bold enclosed shapes, segmented composition, strong contour structures, ornamental patterning, and luminous mosaic-inspired design principles. The style builds imagery through interconnected flat regions separated by deliberate leading-like divisions, emphasizing symbolic clarity, visual rhythm, and harmonious decorative balance rather than volumetric realism. Rather than relying on shading or painterly texture, it communicates form through shape relationships, stylized silhouettes, and carefully arranged visual geometry, creating imagery that feels iconic, radiant, and timeless. The resulting aesthetic blends medieval craftsmanship, sacred decorative traditions, and modern graphic simplification into richly symbolic compositions with striking visual presence, reminiscent of Louis Comfort Tiffany and Alphonse Mucha, inspired by Chartres Cathedral stained glass and Tiffany Studios glass panels.",
-        "category": "Design"
-    },
-    {
         "name": "Toon Shader",
         "imageFile": "Toon Shader_00001_.jpg",
         "prompt": "A crisp, flat-shaded rendering style built on hard-edged tonal division that separates each plane of light and shadow into distinct, uniform steps rather than smooth gradation, confident bold outline holding every shape with graphic clarity, minimal color banding replacing any continuous blending, a clean, deliberate simplicity that mimics hand-drawn cel-animation logic within a fully dimensional render, and a punchy, graphic-meets-dimensional intensity that feels stylized, crisp, and instantly readable. Influenced by: cel-shading rendering technique, non-photorealistic 3D-rendering practice, anime-adjacent toon-shader method, stylized game-rendering tradition.",
@@ -555,12 +537,6 @@
         "name": "Wallace and Gromit",
         "imageFile": "Wallace and Gromit_00001_.jpg",
         "prompt": "A charmingly tactile stop-motion illustration style built on soft, rounded forms carrying visible handcrafted imperfection, gentle fingerprint-like dents and subtle irregularity standing in for smooth digital finish, warm, even lighting that gives every contour a cozy, dimensional roundness, exaggerated expressive proportions carrying subtle asymmetry and warm British whimsy, a hand-built, slightly wobbly charm that celebrates its own physical process, and a nostalgic, cheerfully eccentric handmade warmth. Influenced by: Aardman Animations, Nick Park, stop-motion claymation technique, British character-animation tradition.",
-        "category": "Design"
-    },
-    {
-        "name": "X-Ray",
-        "imageFile": "X-Ray_00001_.jpg",
-        "prompt": "A translucent anatomical rendering style built on layered internal visibility beneath an otherwise solid exterior, soft luminous glow radiating from within rather than reflecting off the outer plane, precise structural linework revealing underlying form with clinical exactness, a stark, high-contrast tonal separation between dense and translucent areas, and an eerie, revelatory clarity that treats the body as both solid and see-through simultaneously. Influenced by: medical radiography technique, scientific illustration tradition, digital x-ray rendering effects, anatomical cross-section illustration.",
         "category": "Design"
     },
     {
