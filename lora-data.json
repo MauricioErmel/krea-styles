@@ -160,14 +160,6 @@
         "category": "Comic and Western Mangas"
     },
     {
-        "name": "Engel-Middleton",
-        "file": "Engel-Middleton.jpg",
-        "triggerWords": "engmddltn.",
-        "description": "Joshua Middleton Art Style LoRA (KREA 2)\n    \n    Capture the striking, painterly elegance and iconic comic cover aesthetic of Joshua Middleton. This LoRA is trained to recreate his signature blend of clean graphic form, soft digital painting, high-contrast rim lighting, and elegant character rendering—reminiscent of his celebrated work on Batgirl, Aquaman, and NYX.\n    Recommended Settings\n    \n        Base Model: KREA 2\n    \n        LoRA Weight / Strength: 0.7 – 0.9 (Start at 0.8 for a balanced style blend)\n    \n        CFG Scale: 1\n    \n        Steps: 8\n    \n        I added a trigger word but I am not sure if it works so we'll see! And I totally did not AI that description.",
-        "civitaiLink": "https://civitai.red/models/2903018/engel-middleton-krea-2?modelVersionId=3282738",
-        "category": "Comic and Western Mangas"
-    },
-    {
         "name": "Frank Cho",
         "file": "Frank Cho.jpg",
         "triggerWords": "Frank Cho Style, A fantasy artwork.",

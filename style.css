@@ -3352,29 +3352,29 @@ body.lightbox-open {
 }
 
 .lightbox-close {
-    width: 36px;
-    height: 36px;
-    border-radius: 4px;
-    background: #181818;
+    background: transparent;
     border: 1px solid var(--border);
     color: var(--text-muted);
     font-family: var(--font-retro);
-    font-size: 24px;
+    font-size: 20px;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
     transition: all 0.2s ease;
     flex-shrink: 0;
     padding: 0;
-    align-self: flex-start;
+    order: 1;
+    margin-left: auto;
 }
 
 .lightbox-close:hover {
     color: var(--danger);
-    border-color: var(--danger);
+    border-color: rgba(255, 68, 68, 0.5);
     background: var(--danger-bg);
-    transform: rotate(90deg);
 }
 
 .lightbox-header-hint {
