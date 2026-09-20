@@ -10,11 +10,17 @@
 
 let builderState = {
     styles: [
-        { id: 'style-1', prompt: '', name: '' }
+        { id: 'style-1', prompt: '', name: '', type: 'style', weight: 1.0, defaultWeight: 1.0 }
     ],
     prompt: '',
     title: '',
-    includeStylesInTitle: true
+    includeStylesInTitle: true,
+    resolution: {
+        width: 1000,
+        height: 1000,
+        mp: '1',
+        aspectRatio: '1:1'
+    }
 };
 
 let styleIdCounter = 1;
@@ -66,7 +72,7 @@ function renderStyleBoxes() {
                 <div class="style-box-header">
                     <div class="style-box-header-left" ${total <= 1 ? 'style="display:none;"' : ''}>
                         <span class="style-box-number">Style ${boxNumber}</span>
-                        ${style.name ? `<span class="style-name-badge" title="Selected style: ${escapeHtml(style.name)}">${escapeHtml(style.name)}</span>` : ''}
+                        ${style.name ? `<span class="style-name-badge ${style.type === 'lora' ? 'is-lora' : ''}" title="${style.type === 'lora' ? 'Selected LoRA' : 'Selected style'}: ${escapeHtml(style.name)}">${escapeHtml(style.name)}</span>` : ''}
                         ${isLatest ? `<span class="style-target-badge" title="Card clicks from gallery will populate this box">Active</span>` : ''}
                     </div>
                     <div class="style-box-actions" ${total <= 1 ? 'style="margin-left: auto;"' : ''}>
@@ -146,6 +152,9 @@ function renderStyleBoxes() {
 
     // Initialize custom resize handles inside style boxes
     initResizeHandles(container);
+
+    // Sync LoRA weights section with active LoRAs
+    updateLoraWeightsSection();
 }
 
 /**
@@ -156,7 +165,10 @@ function addStyleBox() {
     const newStyle = {
         id: `style-${Date.now()}-${styleIdCounter}`,
         prompt: '',
-        name: ''
+        name: '',
+        type: 'style',
+        weight: 1.0,
+        defaultWeight: 1.0
     };
     builderState.styles.push(newStyle);
     renderStyleBoxes();
@@ -213,18 +225,28 @@ function moveStyleBox(index, direction) {
  * Append or update style in builder (invoked from gallery cards, LoRA cards, lightbox)
  * Only the latest scene-style text box is edited when clicking on any style or LoRA.
  */
-function appendStyleToBuilder(promptText, styleName = '') {
+function appendStyleToBuilder(promptText, styleName = '', styleType = 'style') {
     if (builderState.styles.length === 0) {
-        builderState.styles.push({ id: `style-${Date.now()}`, prompt: '', name: '' });
+        builderState.styles.push({ id: `style-${Date.now()}`, prompt: '', name: '', type: styleType, weight: 1.0, defaultWeight: 1.0 });
     }
 
     const lastIndex = builderState.styles.length - 1;
     builderState.styles[lastIndex].prompt = promptText;
     builderState.styles[lastIndex].name = styleName;
+    builderState.styles[lastIndex].type = styleType;
+
+    const isLora = styleType === 'lora' || isLoraEntry(builderState.styles[lastIndex]);
+    if (isLora) {
+        builderState.styles[lastIndex].type = 'lora';
+        const defWeight = getLoraDefaultWeight(styleName);
+        builderState.styles[lastIndex].weight = defWeight;
+        builderState.styles[lastIndex].defaultWeight = defWeight;
+    }
 
     renderStyleBoxes();
     updatePromptOutputPreview();
     updateTitleOutput();
+    updateLoraWeightsSection();
 
     // Scroll latest box into view on desktop or pulse drawer toggle on mobile
     const container = document.getElementById('style-boxes-container');
@@ -244,8 +266,23 @@ function appendStyleToBuilder(promptText, styleName = '') {
 // ==============================================
 
 /**
+ * Helper to determine if a style entry is a LoRA or a pre-trained style
+ */
+function isLoraEntry(styleEntry) {
+    if (!styleEntry) return false;
+    if (styleEntry.type === 'lora') return true;
+    const name = (styleEntry.name || '').trim();
+    if (name && window.LORA_DATA && Array.isArray(window.LORA_DATA)) {
+        return window.LORA_DATA.some(l => l.name === name);
+    }
+    return false;
+}
+
+/**
  * Formats the title string as:
  * 'Title typed by the user' - 'name of style or lora 1' - 'name of style or lora 2'
+ * When there is more than one style or lora on the prompt, appends a suffix:
+ * (PRE-TRAINED) if it is a pre-trained style, or (LoRA) if it is a lora.
  */
 function getFormattedTitle() {
     const parts = [];
@@ -255,11 +292,17 @@ function getFormattedTitle() {
     }
 
     if (builderState.includeStylesInTitle) {
-        // Collect all unique non-empty style/lora names in order
-        builderState.styles.forEach(s => {
-            const name = (s.name || '').trim();
-            if (name && !parts.includes(name)) {
-                parts.push(name);
+        const namedStyles = builderState.styles.filter(s => (s.name || '').trim().length > 0);
+        const hasMultiple = namedStyles.length > 1;
+
+        namedStyles.forEach(s => {
+            const rawName = s.name.trim();
+            const isLora = isLoraEntry(s);
+            const suffix = hasMultiple ? (isLora ? ' (LoRA)' : ' (PRE-TRAINED)') : '';
+            const displayName = rawName + suffix;
+
+            if (!parts.includes(displayName)) {
+                parts.push(displayName);
             }
         });
     }
@@ -276,15 +319,11 @@ function updateTitleOutput() {
 
     const title = getFormattedTitle();
     const userTitle = (builderState.title || '').trim();
-    const styleNames = [];
-    if (builderState.includeStylesInTitle) {
-        builderState.styles.forEach(s => {
-            const name = (s.name || '').trim();
-            if (name && !styleNames.includes(name) && name !== userTitle) {
-                styleNames.push(name);
-            }
-        });
-    }
+
+    const namedStyles = builderState.includeStylesInTitle
+        ? builderState.styles.filter(s => (s.name || '').trim().length > 0)
+        : [];
+    const hasMultiple = namedStyles.length > 1;
 
     if (!title) {
         outputElem.innerHTML = `<span class="title-placeholder">Type a custom title or select styles above...</span>`;
@@ -299,11 +338,24 @@ function updateTitleOutput() {
         hasPreceding = true;
     }
 
-    styleNames.forEach(name => {
+    const seenNames = new Set();
+    namedStyles.forEach(s => {
+        const rawName = s.name.trim();
+        const isLora = isLoraEntry(s);
+        const suffix = hasMultiple ? (isLora ? ' (LoRA)' : ' (PRE-TRAINED)') : '';
+        const fullDisplay = rawName + suffix;
+
+        if (seenNames.has(fullDisplay) || fullDisplay === userTitle) return;
+        seenNames.add(fullDisplay);
+
         if (hasPreceding) {
             html += `<span class="title-token-sep">-</span>`;
         }
-        html += `<span class="title-token title-token-style" title="Style / LoRA">${escapeHtml(name)}</span>`;
+
+        const tokenTypeClass = isLora ? 'title-token-lora' : 'title-token-style';
+        const typeLabel = isLora ? 'LoRA' : 'Pre-Trained Style';
+
+        html += `<span class="title-token ${tokenTypeClass}" title="${typeLabel}">${escapeHtml(rawName)}${suffix ? `<span class="title-token-suffix">${escapeHtml(suffix)}</span>` : ''}</span>`;
         hasPreceding = true;
     });
 
@@ -349,6 +401,358 @@ async function handleCopyTitle() {
 }
 
 // ==============================================
+// RESOLUTION LOOKUP TABLE & MANAGEMENT
+// ==============================================
+
+const RESOLUTION_TABLE = {
+    '0.5': {
+        '4:3':  { width: 816,  height: 612 },
+        '3:4':  { width: 612,  height: 816 },
+        '16:9': { width: 943,  height: 530 },
+        '9:16': { width: 530,  height: 943 },
+        '1:1':  { width: 707,  height: 707 },
+        '3:2':  { width: 866,  height: 577 },
+        '2:3':  { width: 577,  height: 866 }
+    },
+    '1': {
+        '4:3':  { width: 1155, height: 866 },
+        '3:4':  { width: 866,  height: 1155 },
+        '16:9': { width: 1333, height: 750 },
+        '9:16': { width: 750,  height: 1333 },
+        '1:1':  { width: 1000, height: 1000 },
+        '3:2':  { width: 1225, height: 816 },
+        '2:3':  { width: 816,  height: 1225 }
+    },
+    '1.5': {
+        '4:3':  { width: 1414, height: 1061 },
+        '3:4':  { width: 1061, height: 1414 },
+        '16:9': { width: 1633, height: 919 },
+        '9:16': { width: 919,  height: 1633 },
+        '1:1':  { width: 1225, height: 1225 },
+        '3:2':  { width: 1500, height: 1000 },
+        '2:3':  { width: 1000, height: 1500 }
+    },
+    '2': {
+        '4:3':  { width: 1633, height: 1225 },
+        '3:4':  { width: 1225, height: 1633 },
+        '16:9': { width: 1886, height: 1061 },
+        '9:16': { width: 1061, height: 1886 },
+        '1:1':  { width: 1414, height: 1414 },
+        '3:2':  { width: 1732, height: 1155 },
+        '2:3':  { width: 1155, height: 1732 }
+    },
+    '3': {
+        '4:3':  { width: 2000, height: 1500 },
+        '3:4':  { width: 1500, height: 2000 },
+        '16:9': { width: 2309, height: 1299 },
+        '9:16': { width: 1299, height: 2309 },
+        '1:1':  { width: 1732, height: 1732 },
+        '3:2':  { width: 2121, height: 1414 },
+        '2:3':  { width: 1414, height: 2121 }
+    },
+    '4': {
+        '4:3':  { width: 2309, height: 1732 },
+        '3:4':  { width: 1732, height: 2309 },
+        '16:9': { width: 2667, height: 1500 },
+        '9:16': { width: 1500, height: 2667 },
+        '1:1':  { width: 2000, height: 2000 },
+        '3:2':  { width: 2449, height: 1633 },
+        '2:3':  { width: 1633, height: 2449 }
+    },
+    '10': {
+        '4:3':  { width: 3651, height: 2739 },
+        '3:4':  { width: 2739, height: 3651 },
+        '16:9': { width: 4216, height: 2372 },
+        '9:16': { width: 2372, height: 4216 },
+        '1:1':  { width: 3162, height: 3162 },
+        '3:2':  { width: 3873, height: 2582 },
+        '2:3':  { width: 2582, height: 3873 }
+    }
+};
+
+/**
+ * Updates the resolution summary badge (e.g. "1.00 MP • 1000 × 1000")
+ */
+function updateResolutionSummary() {
+    const badge = document.getElementById('res-summary-badge');
+    if (!badge) return;
+
+    const w = parseInt(builderState.resolution.width, 10) || 0;
+    const h = parseInt(builderState.resolution.height, 10) || 0;
+    const mp = ((w * h) / 1000000).toFixed(2);
+
+    badge.textContent = `${mp} MP • ${w} × ${h}`;
+}
+
+/**
+ * Apply selected MP and Aspect Ratio from parameters table
+ */
+function applyResolutionParams(mp, ar) {
+    if (!RESOLUTION_TABLE[mp] || !RESOLUTION_TABLE[mp][ar]) return;
+
+    const { width, height } = RESOLUTION_TABLE[mp][ar];
+    builderState.resolution.mp = mp;
+    builderState.resolution.aspectRatio = ar;
+    builderState.resolution.width = width;
+    builderState.resolution.height = height;
+
+    const widthInput = document.getElementById('res-width-input');
+    const heightInput = document.getElementById('res-height-input');
+    if (widthInput) widthInput.value = width;
+    if (heightInput) heightInput.value = height;
+
+    updateResolutionChipStates();
+    updateResolutionSummary();
+}
+
+/**
+ * Sync active classes on MP and Aspect Ratio chip buttons
+ */
+function updateResolutionChipStates() {
+    const mpChips = document.querySelectorAll('#res-mp-chips .res-chip');
+    mpChips.forEach(chip => {
+        chip.classList.toggle('active', chip.dataset.mp === builderState.resolution.mp);
+    });
+
+    const arChips = document.querySelectorAll('#res-ar-chips .res-chip');
+    arChips.forEach(chip => {
+        chip.classList.toggle('active', chip.dataset.ar === builderState.resolution.aspectRatio);
+    });
+}
+
+/**
+ * Handle manual width or height typing by user
+ */
+function handleManualResolutionInput() {
+    const widthInput = document.getElementById('res-width-input');
+    const heightInput = document.getElementById('res-height-input');
+    if (!widthInput || !heightInput) return;
+
+    const w = parseInt(widthInput.value, 10) || 0;
+    const h = parseInt(heightInput.value, 10) || 0;
+
+    builderState.resolution.width = w;
+    builderState.resolution.height = h;
+
+    // Check if (w, h) matches any preset in RESOLUTION_TABLE
+    let matchedMp = null;
+    let matchedAr = null;
+
+    for (const [mpKey, arMap] of Object.entries(RESOLUTION_TABLE)) {
+        for (const [arKey, dims] of Object.entries(arMap)) {
+            if (dims.width === w && dims.height === h) {
+                matchedMp = mpKey;
+                matchedAr = arKey;
+                break;
+            }
+        }
+        if (matchedMp) break;
+    }
+
+    builderState.resolution.mp = matchedMp || '';
+    builderState.resolution.aspectRatio = matchedAr || '';
+
+    updateResolutionChipStates();
+    updateResolutionSummary();
+}
+
+/**
+ * Swap Width and Height
+ */
+function swapResolution() {
+    const widthInput = document.getElementById('res-width-input');
+    const heightInput = document.getElementById('res-height-input');
+    if (!widthInput || !heightInput) return;
+
+    const currentW = parseInt(widthInput.value, 10) || 0;
+    const currentH = parseInt(heightInput.value, 10) || 0;
+
+    widthInput.value = currentH;
+    heightInput.value = currentW;
+
+    // Invert aspect ratio if it exists in pair
+    const AR_INVERSIONS = {
+        '16:9': '9:16',
+        '9:16': '16:9',
+        '4:3': '3:4',
+        '3:4': '4:3',
+        '3:2': '2:3',
+        '2:3': '3:2',
+        '1:1': '1:1'
+    };
+
+    if (builderState.resolution.aspectRatio && AR_INVERSIONS[builderState.resolution.aspectRatio]) {
+        builderState.resolution.aspectRatio = AR_INVERSIONS[builderState.resolution.aspectRatio];
+    }
+
+    handleManualResolutionInput();
+}
+
+/**
+ * Initialize Resolution controls and event listeners
+ */
+function initResolutionSection() {
+    const widthInput = document.getElementById('res-width-input');
+    const heightInput = document.getElementById('res-height-input');
+    const swapBtn = document.getElementById('btn-swap-resolution');
+
+    if (widthInput) {
+        widthInput.addEventListener('input', handleManualResolutionInput);
+    }
+    if (heightInput) {
+        heightInput.addEventListener('input', handleManualResolutionInput);
+    }
+    if (swapBtn) {
+        swapBtn.addEventListener('click', swapResolution);
+    }
+
+    // MP chips
+    const mpContainer = document.getElementById('res-mp-chips');
+    if (mpContainer) {
+        mpContainer.addEventListener('click', (e) => {
+            const chip = e.target.closest('.res-chip');
+            if (!chip) return;
+            const mp = chip.dataset.mp;
+            const ar = builderState.resolution.aspectRatio || '1:1';
+            applyResolutionParams(mp, ar);
+        });
+    }
+
+    // Aspect Ratio chips
+    const arContainer = document.getElementById('res-ar-chips');
+    if (arContainer) {
+        arContainer.addEventListener('click', (e) => {
+            const chip = e.target.closest('.res-chip');
+            if (!chip) return;
+            const ar = chip.dataset.ar;
+            const mp = builderState.resolution.mp || '1';
+            applyResolutionParams(mp, ar);
+        });
+    }
+
+    // Random seed button
+    const randomSeedBtn = document.getElementById('btn-random-seed');
+    const seedInput = document.getElementById('seed-input');
+    if (randomSeedBtn && seedInput) {
+        randomSeedBtn.addEventListener('click', () => {
+            const randomSeed = Math.floor(Math.random() * 10000000000);
+            seedInput.value = randomSeed;
+        });
+    }
+
+    updateResolutionChipStates();
+    updateResolutionSummary();
+}
+
+// ==============================================
+// LORA WEIGHT SECTION & MANAGEMENT
+// ==============================================
+
+/**
+ * Returns default weight for a given LoRA name from window.LORA_DATA
+ */
+function getLoraDefaultWeight(loraName) {
+    if (window.LORA_DATA && Array.isArray(window.LORA_DATA)) {
+        const found = window.LORA_DATA.find(l => l.name === loraName);
+        if (found && typeof found.weight === 'number') {
+            return found.weight;
+        }
+    }
+    return 1.0;
+}
+
+/**
+ * Updates the LoRA Weight card visibility and renders rows for active LoRAs
+ */
+function updateLoraWeightsSection() {
+    const card = document.getElementById('lora-weight-card');
+    const container = document.getElementById('lora-weights-container');
+    if (!card || !container) return;
+
+    // Filter active styles that are LoRAs with a name or prompt
+    const activeLoras = builderState.styles.filter(s => {
+        const hasContent = (s.name || s.prompt || '').trim().length > 0;
+        return hasContent && isLoraEntry(s);
+    });
+
+    if (activeLoras.length === 0) {
+        card.style.display = 'none';
+        container.innerHTML = '';
+        return;
+    }
+
+    card.style.display = 'flex';
+
+    // Render rows for each active LoRA
+    container.innerHTML = activeLoras.map(style => {
+        const defWeight = (typeof style.defaultWeight === 'number') ? style.defaultWeight : getLoraDefaultWeight(style.name);
+        const curWeight = (typeof style.weight === 'number') ? style.weight : defWeight;
+        style.weight = curWeight;
+        style.defaultWeight = defWeight;
+
+        return `
+            <div class="lora-weight-row" data-style-id="${style.id}">
+                <div class="lora-weight-info">
+                    <span class="lora-weight-badge">LoRA</span>
+                    <span class="lora-weight-name" title="${escapeHtml(style.name || 'Custom LoRA')}">${escapeHtml(style.name || 'Custom LoRA')}</span>
+                </div>
+                <div class="lora-weight-controls">
+                    <input type="range" class="lora-weight-slider" data-style-id="${style.id}"
+                        min="0.1" max="2.0" step="0.05" value="${curWeight}">
+                    <input type="number" class="lora-weight-input" data-style-id="${style.id}"
+                        min="0.1" max="2.0" step="0.05" value="${curWeight}">
+                    <button type="button" class="btn-reset-weight" data-style-id="${style.id}" title="Reset to default (${defWeight})">↺</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    // Attach event listeners for each row
+    activeLoras.forEach(style => {
+        const row = container.querySelector(`.lora-weight-row[data-style-id="${style.id}"]`);
+        if (!row) return;
+
+        const slider = row.querySelector('.lora-weight-slider');
+        const numInput = row.querySelector('.lora-weight-input');
+        const resetBtn = row.querySelector('.btn-reset-weight');
+
+        if (slider && numInput) {
+            slider.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                numInput.value = val;
+                style.weight = val;
+            });
+
+            numInput.addEventListener('input', (e) => {
+                let val = parseFloat(e.target.value);
+                if (isNaN(val)) return;
+                val = Math.max(0.1, Math.min(2.0, val));
+                slider.value = val;
+                style.weight = val;
+            });
+
+            numInput.addEventListener('change', (e) => {
+                let val = parseFloat(e.target.value);
+                if (isNaN(val)) val = style.defaultWeight || 1.0;
+                val = Math.max(0.1, Math.min(2.0, val));
+                numInput.value = val;
+                slider.value = val;
+                style.weight = val;
+            });
+        }
+
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                const defVal = (typeof style.defaultWeight === 'number') ? style.defaultWeight : getLoraDefaultWeight(style.name);
+                style.weight = defVal;
+                if (slider) slider.value = defVal;
+                if (numInput) numInput.value = defVal;
+            });
+        }
+    });
+}
+
+// ==============================================
 // PROMPT OUTPUT CONCATENATION
 // ==============================================
 
@@ -377,6 +781,75 @@ function buildPromptText() {
 
     return lines.join("\n").trim();
 }
+
+/**
+ * Build a comfy_queue formatted string:
+ *
+ * title |||
+ * prompt content
+ * ||| WIDTHxHEIGHT
+ * ||| seed=N, steps=N
+ * ||| lora_ORDER=weight,
+ *     lora_ORDER=weight
+ */
+function buildComfyQueueText() {
+    // --- Title ---
+    const title = getFormattedTitle().trim();
+
+    // --- Prompt (styles + prompt content, no separator line) ---
+    const activeStyles = builderState.styles
+        .map(s => (s.prompt || '').trim())
+        .filter(p => p.length > 0);
+    const promptContent = (builderState.prompt || '').trim();
+
+    const promptParts = [];
+    if (activeStyles.length > 0) promptParts.push(activeStyles.join('\n'));
+    if (promptContent) promptParts.push(promptContent);
+    const fullPrompt = promptParts.join('\n');
+
+    // --- Resolution ---
+    const w = parseInt(builderState.resolution.width, 10) || 0;
+    const h = parseInt(builderState.resolution.height, 10) || 0;
+    const resStr = `${w}x${h}`;
+
+    // --- Seed & Steps ---
+    const seedInput  = document.getElementById('seed-input');
+    const stepsInput = document.getElementById('steps-input');
+    const seed  = (seedInput  && seedInput.value.trim()  !== '') ? parseInt(seedInput.value,  10) : '';
+    const steps = (stepsInput && stepsInput.value.trim() !== '') ? parseInt(stepsInput.value, 10) : 8;
+
+    let seedStepsParts = [];
+    if (seed !== '') seedStepsParts.push(`seed=${seed}`);
+    seedStepsParts.push(`steps=${steps}`);
+    const seedStepsStr = seedStepsParts.join(', ');
+
+    // --- LoRAs (only entries typed as lora, with order from LORA_DATA) ---
+    const loraEntries = builderState.styles.filter(s => isLoraEntry(s) && (s.name || '').trim());
+    let loraLines = '';
+    if (loraEntries.length > 0) {
+        const loraPairs = loraEntries.map(s => {
+            const loraRecord = (window.LORA_DATA && Array.isArray(window.LORA_DATA))
+                ? window.LORA_DATA.find(l => l.name === s.name.trim())
+                : null;
+            const order  = loraRecord ? loraRecord.order : s.name.trim();
+            const weight = typeof s.weight === 'number' ? s.weight : 1.0;
+            return `lora_${order}=${weight}`;
+        });
+        // First lora on same line as ||| separator, subsequent indented
+        loraLines = '\n||| ' + loraPairs[0];
+        for (let i = 1; i < loraPairs.length; i++) {
+            loraLines += ',\n    ' + loraPairs[i];
+        }
+    }
+
+    // --- Assemble ---
+    const titleLine  = title ? `${title} |||` : '|||';
+    const resLine    = `||| ${resStr}`;
+    const paramLine  = `||| ${seedStepsStr}`;
+
+    return `${titleLine}\n${fullPrompt}\n${resLine}\n${paramLine}${loraLines}`.trim();
+}
+
 
 /**
  * Update live preview output and badges
@@ -432,6 +905,7 @@ function clearAllFields() {
     renderStyleBoxes();
     updatePromptOutputPreview();
     updateTitleOutput();
+    applyResolutionParams('1', '1:1');
     updateClearButtonStates(document);
 
     if (typeof showToast === 'function') {
@@ -754,6 +1228,30 @@ function initPromptBuilder() {
     const copyBtnTop = document.getElementById('btn-copy-prompt-top');
     if (copyBtnTop) copyBtnTop.addEventListener('click', handleCopyPrompt);
 
+    // Bind Copy for ComfyQueue button
+    const comfyQueueBtn = document.getElementById('btn-copy-comfy-queue');
+    if (comfyQueueBtn) {
+        comfyQueueBtn.addEventListener('click', async () => {
+            const text = buildComfyQueueText();
+            if (!text) {
+                if (typeof showToast === 'function') showToast('NO PROMPT CONTENT TO COPY');
+                return;
+            }
+            let success = false;
+            if (typeof copyToClipboard === 'function') {
+                success = await copyToClipboard(text);
+            } else {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    success = true;
+                } catch { success = false; }
+            }
+            if (typeof showToast === 'function') {
+                showToast(success ? 'COMFYQUEUE PROMPT COPIED!' : 'COPY FAILED');
+            }
+        });
+    }
+
     // Bind Clear Buttons
     bindClearButtons(document, (targetId) => {
         const elem = document.getElementById(targetId);
@@ -770,6 +1268,12 @@ function initPromptBuilder() {
 
     // Custom bottom resize handles
     initResizeHandles(document);
+
+    // Initialize Resolution section
+    initResolutionSection();
+
+    // Initialize LoRA weights section
+    updateLoraWeightsSection();
 
     // Initial update
     updatePromptOutputPreview();
@@ -791,9 +1295,14 @@ window.updateTitleOutput = updateTitleOutput;
 window.updateDrawerBadge = updateDrawerBadge;
 window.clearAllFields = clearAllFields;
 window.generateRandomPrompt = generateRandomPrompt;
+window.applyResolutionParams = applyResolutionParams;
+window.swapResolution = swapResolution;
+window.getLoraDefaultWeight = getLoraDefaultWeight;
+window.updateLoraWeightsSection = updateLoraWeightsSection;
 window.initPromptBuilder = initPromptBuilder;
 window.initBuilderDrawer = initBuilderDrawer;
 window.openBuilderDrawer = openBuilderDrawer;
 window.closeBuilderDrawer = closeBuilderDrawer;
 window.toggleBuilderDrawer = toggleBuilderDrawer;
 window.pulseBuilderToggleBtn = pulseBuilderToggleBtn;
+window.buildComfyQueueText = buildComfyQueueText;

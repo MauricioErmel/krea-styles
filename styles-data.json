@@ -6,7 +6,7 @@
         "category": "Anime and Manga"
     },
     {
-        "name": "Akira Style",
+        "name": "Akira",
         "imageFile": "Akira Style_00001_.jpg",
         "prompt": "A meticulously detailed retro-futurist anime illustration style built on dense, precise linework rendering technology and urban decay with obsessive mechanical accuracy, flat cel-shaded color fields laid beneath sharp confident outline, dramatic neon and shadow contrast that carves gritty cyberpunk atmosphere across every surface, kinetic motion conveyed through bold speed-line dynamism, and a gritty, dystopian animation gravitas that feels both hand-crafted and technologically obsessive. Influenced by: Katsuhiro Otomo, 1980s cel-animation technique, cyberpunk anime tradition, retro-futurist manga illustration.",
         "category": "Anime and Manga"
@@ -27,12 +27,6 @@
         "name": "Anime Key Visual",
         "imageFile": "Anime Key Visual_00001_.jpg",
         "prompt": "A polished, high-production anime-illustration style built on crisp, confident linework merged with meticulously blended cel-to-gradient shading, dramatic promotional-grade lighting establishing bold mood within a single striking composition, richly detailed costume and character rendering balanced against clean, poster-ready silhouette clarity, dynamic yet composed posing calibrated for maximum visual impact at a glance, and a polished, franchise-defining illustration intensity built for instant recognition and promotional impact. Influenced by: contemporary anime-production key-visual tradition, promotional illustration technique, franchise-defining character-art practice, high-production anime-studio rendering method.",
-        "category": "Anime and Manga"
-    },
-    {
-        "name": "Anime Style",
-        "imageFile": "Anime Style_00001_.jpg",
-        "prompt": "A clean, expressive illustration style built on confident, simplified linework defining stylized, appealing proportions, flat-to-cel-based shading applied with straightforward graphic clarity, large expressive eyes carrying the primary emotional weight of the design, a bright, approachable simplicity that favors instant readability over rendering complexity, and a versatile, universally recognizable animated charm rooted in broad contemporary Japanese animation convention. Influenced by: contemporary anime illustration tradition, cel-shaded character-design technique, Japanese animation studio practice, mainstream manga-adaptation method.",
         "category": "Anime and Manga"
     },
     {

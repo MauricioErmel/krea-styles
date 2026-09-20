@@ -25,6 +25,8 @@ async function loadDatasets() {
 
         STYLES_DATA = await stylesRes.json();
         LORA_DATA = await loraRes.json();
+        window.STYLES_DATA = STYLES_DATA;
+        window.LORA_DATA = LORA_DATA;
         return true;
     } catch (err) {
         console.error('Error fetching datasets:', err);
@@ -714,7 +716,8 @@ function initLightbox() {
         applyBuilderBtn.addEventListener('click', () => {
             const text = getActiveLightboxPromptText();
             if (!text) return;
-            appendStyleToBuilder(text, currentLightboxState.item ? currentLightboxState.item.name : '');
+            const styleType = currentLightboxState.type === 'lora' ? 'lora' : 'style';
+            appendStyleToBuilder(text, currentLightboxState.item ? currentLightboxState.item.name : '', styleType);
             showToast(`ADDED TO BUILDER: ${currentLightboxState.item ? currentLightboxState.item.name : ''}`);
         });
     }
@@ -939,7 +942,7 @@ function handleStyleCardClick(index) {
             showToast(`COPIED & APPLIED: ${style.name}`);
         }
     });
-    appendStyleToBuilder(style.prompt, style.name);
+    appendStyleToBuilder(style.prompt, style.name, 'style');
 
     // Create the style-info-panel
     const panel = createStyleInfoPanel(style, index);
@@ -1012,7 +1015,7 @@ function createStyleInfoPanel(style, index) {
         if (success) {
             showToast(`STYLE PROMPT COPIED TO CLIPBOARD!`);
         }
-        appendStyleToBuilder(style.prompt, style.name);
+        appendStyleToBuilder(style.prompt, style.name, 'style');
     });
 
     actions.appendChild(copyBtn);
@@ -1414,7 +1417,7 @@ function handleLoraCardClick(index) {
             showToast(`COPIED & APPLIED: ${lora.name}`);
         }
     });
-    appendStyleToBuilder(lora.triggerWords, lora.name);
+    appendStyleToBuilder(lora.triggerWords, lora.name, 'lora');
 
     const panel = createLoraInfoPanel(lora, index);
 
@@ -1478,7 +1481,7 @@ function createLoraInfoPanel(lora, index) {
         if (success) {
             showToast(`TRIGGER WORDS COPIED: ${lora.triggerWords.substring(0, 40)}${lora.triggerWords.length > 40 ? '...' : ''}`);
         }
-        appendStyleToBuilder(lora.triggerWords, lora.name);
+        appendStyleToBuilder(lora.triggerWords, lora.name, 'lora');
     });
     triggerSection.appendChild(triggerWord);
     panel.appendChild(triggerSection);
