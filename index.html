@@ -463,6 +463,23 @@
                 </div>
             </div>
 
+            <!-- Passive LoRAs (Permanent bypass & slider LoRAs for ComfyQueue) -->
+            <div id="passive-loras-card" class="form-card passive-loras-card">
+                <div class="card-section-title">
+                    <div class="card-title-left">
+                        <span>PASSIVE LORAS</span>
+                        <span class="tag-badge">ComfyUI Bypass &amp; Sliders</span>
+                    </div>
+                    <div class="passive-loras-header-right">
+                        <span id="passive-loras-count-badge" class="passive-loras-count-badge">1/8 ACTIVE</span>
+                        <button type="button" id="btn-reset-all-passive-loras" class="btn-reset-passive-all" title="Reset all passive LoRAs to default settings">↺</button>
+                    </div>
+                </div>
+                <div id="passive-loras-container" class="passive-loras-container">
+                    <!-- Dynamically generated 8 rows for passive LoRAs -->
+                </div>
+            </div>
+
             <!-- Live Formatted Output Preview -->
             <div class="prompt-output-card">
                 <div class="output-header">

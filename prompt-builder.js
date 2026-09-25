@@ -5,13 +5,89 @@
  */
 
 // ==============================================
-// PROMPT BUILDER STATE
+// PASSIVE LORAS CONFIGURATION
 // ==============================================
+
+const DEFAULT_PASSIVE_LORAS = [
+    {
+        id: 'lora_1',
+        order: 1,
+        on: true,
+        lora: 'krea2.bypass\\krea2filterbypass3.safetensors',
+        displayName: 'krea2filterbypass3',
+        strength: 1,
+        defaultStrength: 1
+    },
+    {
+        id: 'lora_2',
+        order: 2,
+        on: false,
+        lora: 'krea2.bypass\\Krea2_TextFusion_Refusal_Reduction.safetensors',
+        displayName: 'Krea2_TextFusion_Refusal_Reduction',
+        strength: 1,
+        defaultStrength: 1
+    },
+    {
+        id: 'lora_3',
+        order: 3,
+        on: false,
+        lora: 'krea2.bypass\\Detailer-KREA2.safetensors',
+        displayName: 'Detailer-KREA2',
+        strength: -0.5,
+        defaultStrength: -0.5
+    },
+    {
+        id: 'lora_4',
+        order: 4,
+        on: false,
+        lora: 'krea2.bypass\\BreastSlider-KREA2.safetensors',
+        displayName: 'BreastSlider-KREA2',
+        strength: 3,
+        defaultStrength: 3
+    },
+    {
+        id: 'lora_5',
+        order: 5,
+        on: false,
+        lora: 'krea2.bypass\\Detailer - beauty for Krea2.safetensors',
+        displayName: 'Detailer - beauty for Krea2',
+        strength: 1,
+        defaultStrength: 1
+    },
+    {
+        id: 'lora_6',
+        order: 6,
+        on: false,
+        lora: 'krea2.bypass\\WarmLightSlider-KREA2_v1.safetensors',
+        displayName: 'WarmLightSlider-KREA2_v1',
+        strength: 1,
+        defaultStrength: 1
+    },
+    {
+        id: 'lora_7',
+        order: 7,
+        on: false,
+        lora: 'krea2.bypass\\WeightSlider-KREA2_v2.safetensors',
+        displayName: 'WeightSlider-KREA2_v2',
+        strength: 1,
+        defaultStrength: 1
+    },
+    {
+        id: 'lora_8',
+        order: 8,
+        on: false,
+        lora: 'krea2.bypass\\color_temp_krea2_loraholic.safetensors',
+        displayName: 'color_temp_krea2_loraholic',
+        strength: 1,
+        defaultStrength: 1
+    }
+];
 
 let builderState = {
     styles: [
         { id: 'style-1', prompt: '', name: '', type: 'style', weight: 1.0, defaultWeight: 1.0 }
     ],
+    passiveLoras: DEFAULT_PASSIVE_LORAS.map(l => ({ ...l })),
     prompt: '',
     title: '',
     includeStylesInTitle: true,
@@ -744,6 +820,260 @@ function updateLoraWeightsSection() {
 }
 
 // ==============================================
+// PASSIVE LORAS SECTION
+// ==============================================
+
+function loadPassiveLorasState() {
+    try {
+        const saved = localStorage.getItem('krea_passive_loras');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed)) {
+                return DEFAULT_PASSIVE_LORAS.map(def => {
+                    const match = parsed.find(p => p.id === def.id);
+                    if (match) {
+                        return {
+                            ...def,
+                            on: typeof match.on === 'boolean' ? match.on : def.on,
+                            strength: typeof match.strength === 'number' ? match.strength : def.strength
+                        };
+                    }
+                    return { ...def };
+                });
+            }
+        }
+    } catch {
+        // Fallback to defaults
+    }
+    return DEFAULT_PASSIVE_LORAS.map(l => ({ ...l }));
+}
+
+function savePassiveLorasState() {
+    try {
+        if (builderState.passiveLoras) {
+            const dataToSave = builderState.passiveLoras.map(l => ({
+                id: l.id,
+                on: l.on,
+                strength: l.strength
+            }));
+            localStorage.setItem('krea_passive_loras', JSON.stringify(dataToSave));
+        }
+    } catch {
+        // Ignore
+    }
+}
+
+/**
+ * Initialize and render Passive LoRAs section into #passive-loras-container
+ */
+function initPassiveLorasSection() {
+    const container = document.getElementById('passive-loras-container');
+    const countBadge = document.getElementById('passive-loras-count-badge');
+    const resetAllBtn = document.getElementById('btn-reset-all-passive-loras');
+    if (!container) return;
+
+    builderState.passiveLoras = loadPassiveLorasState();
+
+    const updateCountBadge = () => {
+        if (!countBadge) return;
+        const activeCount = builderState.passiveLoras.filter(l => l.on).length;
+        countBadge.textContent = `${activeCount}/${builderState.passiveLoras.length} ACTIVE`;
+    };
+
+    const renderRows = () => {
+        const sliderMin = -5;
+        const sliderMax = 5;
+
+        container.innerHTML = builderState.passiveLoras.map(lora => {
+            const sliderVal = Math.max(sliderMin, Math.min(sliderMax, lora.strength));
+
+            return `
+                <div class="passive-lora-row ${lora.on ? 'is-active' : ''}" data-lora-id="${lora.id}">
+                    <div class="passive-lora-info">
+                        <label class="passive-lora-switch" title="${lora.on ? 'Active in ComfyQueue (click to turn off)' : 'Inactive in ComfyQueue (click to turn on)'}">
+                            <input type="checkbox" class="passive-lora-toggle" data-lora-id="${lora.id}" ${lora.on ? 'checked' : ''} aria-label="Toggle ${escapeHtml(lora.displayName)}">
+                            <span class="toggle-track">
+                                <span class="toggle-thumb"></span>
+                            </span>
+                        </label>
+                        <span class="passive-lora-badge">LoRA ${lora.order}</span>
+                        <div class="passive-lora-name-wrap" title="${escapeHtml(lora.lora)}">
+                            <span class="passive-lora-name">${escapeHtml(lora.displayName)}</span>
+                        </div>
+                    </div>
+                    <div class="passive-lora-controls">
+                        <input type="range" class="passive-lora-slider" data-lora-id="${lora.id}"
+                            min="${sliderMin}" max="${sliderMax}" step="0.05" value="${sliderVal}">
+                        <input type="number" class="passive-lora-input" data-lora-id="${lora.id}"
+                            step="any" value="${lora.strength}" title="Type any strength value">
+                        <button type="button" class="btn-reset-passive-lora" data-lora-id="${lora.id}" title="Reset to default (${lora.defaultStrength})">↺</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        updateCountBadge();
+        bindRowListeners();
+        setupPassiveLoraSlideAnimations();
+    };
+
+    const bindRowListeners = () => {
+        builderState.passiveLoras.forEach(lora => {
+            const row = container.querySelector(`.passive-lora-row[data-lora-id="${lora.id}"]`);
+            if (!row) return;
+
+            const toggle = row.querySelector('.passive-lora-toggle');
+            const slider = row.querySelector('.passive-lora-slider');
+            const numInput = row.querySelector('.passive-lora-input');
+            const resetBtn = row.querySelector('.btn-reset-passive-lora');
+
+            if (toggle) {
+                toggle.addEventListener('change', (e) => {
+                    lora.on = e.target.checked;
+                    row.classList.toggle('is-active', lora.on);
+                    toggle.parentElement.title = lora.on
+                        ? 'Active in ComfyQueue (click to turn off)'
+                        : 'Inactive in ComfyQueue (click to turn on)';
+                    updateCountBadge();
+                    savePassiveLorasState();
+                });
+            }
+
+            if (slider && numInput) {
+                slider.addEventListener('input', (e) => {
+                    const val = parseFloat(e.target.value);
+                    numInput.value = val;
+                    lora.strength = val;
+                    savePassiveLorasState();
+                });
+
+                numInput.addEventListener('input', () => {
+                    const raw = numInput.value;
+                    if (raw === '' || raw === '-' || raw === '-.' || raw === '.') return;
+                    const val = parseFloat(raw);
+                    if (isNaN(val)) return;
+                    lora.strength = val;
+                    const sMin = parseFloat(slider.min);
+                    const sMax = parseFloat(slider.max);
+                    slider.value = Math.max(sMin, Math.min(sMax, val));
+                    savePassiveLorasState();
+                });
+
+                numInput.addEventListener('change', () => {
+                    let val = parseFloat(numInput.value);
+                    if (isNaN(val)) {
+                        val = lora.defaultStrength;
+                        numInput.value = val;
+                    }
+                    lora.strength = val;
+                    const sMin = parseFloat(slider.min);
+                    const sMax = parseFloat(slider.max);
+                    slider.value = Math.max(sMin, Math.min(sMax, val));
+                    savePassiveLorasState();
+                });
+
+                numInput.addEventListener('blur', () => {
+                    if (isNaN(parseFloat(numInput.value))) {
+                        numInput.value = lora.strength;
+                    }
+                });
+            }
+
+            if (resetBtn) {
+                resetBtn.addEventListener('click', () => {
+                    lora.strength = lora.defaultStrength;
+                    if (numInput) numInput.value = lora.defaultStrength;
+                    if (slider) {
+                        const sMin = parseFloat(slider.min);
+                        const sMax = parseFloat(slider.max);
+                        slider.value = Math.max(sMin, Math.min(sMax, lora.defaultStrength));
+                    }
+                    savePassiveLorasState();
+                });
+            }
+        });
+    };
+
+    if (resetAllBtn) {
+        resetAllBtn.addEventListener('click', () => {
+            builderState.passiveLoras = DEFAULT_PASSIVE_LORAS.map(l => ({ ...l }));
+            savePassiveLorasState();
+            renderRows();
+            if (typeof showToast === 'function') {
+                showToast('PASSIVE LORAS RESET TO DEFAULTS');
+            }
+        });
+    }
+
+    renderRows();
+}
+
+let passiveLoraResizeObserver = null;
+
+/**
+ * Calculates overflow and sets up smooth back-and-forth sliding animation
+ * for any passive LoRA names that exceed their container width.
+ */
+function updatePassiveLoraSlideAnimations() {
+    const container = document.getElementById('passive-loras-container');
+    if (!container) return;
+
+    const wraps = container.querySelectorAll('.passive-lora-name-wrap');
+    wraps.forEach(wrap => {
+        const nameSpan = wrap.querySelector('.passive-lora-name');
+        if (!nameSpan) return;
+
+        const wrapWidth = wrap.clientWidth;
+        if (wrapWidth <= 0) return;
+
+        // Temporarily remove sliding class to measure natural width
+        const wasSliding = nameSpan.classList.contains('is-sliding');
+        if (wasSliding) {
+            nameSpan.classList.remove('is-sliding');
+        }
+
+        const textWidth = nameSpan.scrollWidth;
+        const overflow = textWidth - wrapWidth;
+
+        if (overflow > 4) {
+            const dist = -(overflow + 8);
+            nameSpan.style.setProperty('--slide-dist', `${dist}px`);
+            const duration = Math.min(8.5, Math.max(4.0, 3.5 + overflow / 24));
+            nameSpan.style.setProperty('--slide-duration', `${duration.toFixed(2)}s`);
+            nameSpan.classList.add('is-sliding');
+            wrap.classList.add('is-overflowing');
+        } else {
+            nameSpan.style.removeProperty('--slide-dist');
+            nameSpan.style.removeProperty('--slide-duration');
+            nameSpan.classList.remove('is-sliding');
+            wrap.classList.remove('is-overflowing');
+        }
+    });
+}
+
+function setupPassiveLoraSlideAnimations() {
+    if (passiveLoraResizeObserver) {
+        passiveLoraResizeObserver.disconnect();
+        passiveLoraResizeObserver = null;
+    }
+
+    updatePassiveLoraSlideAnimations();
+
+    const container = document.getElementById('passive-loras-container');
+    if (!container) return;
+
+    if (typeof ResizeObserver !== 'undefined') {
+        passiveLoraResizeObserver = new ResizeObserver(() => {
+            updatePassiveLoraSlideAnimations();
+        });
+        const card = document.getElementById('passive-loras-card');
+        if (card) passiveLoraResizeObserver.observe(card);
+        const drawer = document.getElementById('builder-section');
+        if (drawer) passiveLoraResizeObserver.observe(drawer);
+    }
+}
+
+// ==============================================
 // PROMPT OUTPUT CONCATENATION
 // ==============================================
 
@@ -814,22 +1144,30 @@ function buildComfyQueueText() {
     seedStepsParts.push(`steps=${steps}`);
     const seedStepsStr = seedStepsParts.join(', ');
 
-    // --- LoRAs (only entries typed as lora, with order from LORA_DATA) ---
+    // --- Passive LoRAs (enabled fixed bypass & slider LoRAs) ---
+    const passivePairs = (builderState.passiveLoras || [])
+        .filter(l => l.on)
+        .map(l => `lora_${l.order}=${l.strength}`);
+
+    // --- Gallery LoRAs (selected styles typed as lora, with order from LORA_DATA) ---
     const loraEntries = builderState.styles.filter(s => isLoraEntry(s) && (s.name || '').trim());
+    const galleryPairs = loraEntries.map(s => {
+        const loraRecord = (window.LORA_DATA && Array.isArray(window.LORA_DATA))
+            ? window.LORA_DATA.find(l => l.name === s.name.trim())
+            : null;
+        const order  = loraRecord ? loraRecord.order : s.name.trim();
+        const weight = typeof s.weight === 'number' ? s.weight : 1.0;
+        return `lora_${order}=${weight}`;
+    });
+
+    const allLoraPairs = [...passivePairs, ...galleryPairs];
+
     let loraLines = '';
-    if (loraEntries.length > 0) {
-        const loraPairs = loraEntries.map(s => {
-            const loraRecord = (window.LORA_DATA && Array.isArray(window.LORA_DATA))
-                ? window.LORA_DATA.find(l => l.name === s.name.trim())
-                : null;
-            const order  = loraRecord ? loraRecord.order : s.name.trim();
-            const weight = typeof s.weight === 'number' ? s.weight : 1.0;
-            return `lora_${order}=${weight}`;
-        });
+    if (allLoraPairs.length > 0) {
         // First lora on same line as ||| separator, subsequent indented
-        loraLines = '\n||| ' + loraPairs[0];
-        for (let i = 1; i < loraPairs.length; i++) {
-            loraLines += ',\n    ' + loraPairs[i];
+        loraLines = '\n||| ' + allLoraPairs[0];
+        for (let i = 1; i < allLoraPairs.length; i++) {
+            loraLines += ',\n    ' + allLoraPairs[i];
         }
     }
 
@@ -1006,6 +1344,9 @@ function openBuilderDrawer() {
     if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'true');
     if (headerBtn) headerBtn.setAttribute('aria-expanded', 'true');
     document.body.classList.add('drawer-open');
+
+    // Recalculate sliding lettering once drawer transition completes
+    setTimeout(updatePassiveLoraSlideAnimations, 360);
 }
 
 function closeBuilderDrawer() {
@@ -1233,6 +1574,9 @@ function initPromptBuilder() {
     // Initialize LoRA weights section
     updateLoraWeightsSection();
 
+    // Initialize Passive LoRAs section
+    initPassiveLorasSection();
+
     // Initial update
     updatePromptOutputPreview();
     updateTitleOutput();
@@ -1257,6 +1601,9 @@ window.swapResolution = swapResolution;
 window.getLoraDefaultWeight = getLoraDefaultWeight;
 window.updateLoraWeightsSection = updateLoraWeightsSection;
 window.initPromptBuilder = initPromptBuilder;
+window.initPassiveLorasSection = initPassiveLorasSection;
+window.updatePassiveLoraSlideAnimations = updatePassiveLoraSlideAnimations;
+window.DEFAULT_PASSIVE_LORAS = DEFAULT_PASSIVE_LORAS;
 window.initBuilderDrawer = initBuilderDrawer;
 window.openBuilderDrawer = openBuilderDrawer;
 window.closeBuilderDrawer = closeBuilderDrawer;
