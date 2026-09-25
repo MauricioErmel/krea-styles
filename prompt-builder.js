@@ -25,15 +25,6 @@ let builderState = {
 
 let styleIdCounter = 1;
 
-const RANDOM_PROMPT_PRESETS = [
-    "A female elf wearing an intricate embroidered kirtle, holding an ancient brass lantern with floating blue wisp, wading through still marsh water at night under dense moonlit fog.",
-    "A cyberpunk bounty hunter in a weathered high-collar duster jacket, standing atop a rain-soaked neon-lit skyscraper terrace, overlooking a sprawling megacity skyline at midnight.",
-    "A battle-hardened knight with scarred plate armor resting by a roaring campfire in a ruined gothic cathedral courtyard, dusk sky with aurora borealis streaks.",
-    "An eccentric alchemist in a cluttered laboratory filled with glowing potions, brass astrolabes, and floating crystal shards, inspecting a glowing mystical scroll.",
-    "A cosmic explorer in a white-and-gold EVA exploration suit discovering a giant bioluminescent alien flora cavern on a twilight exoplanet with dual moons.",
-    "A samurai in dark lacquered armor meditating beneath falling crimson autumn maple leaves in a misty bamboo grove, early dawn light filtering through trees."
-];
-
 // ==============================================
 // HELPER UTILITIES
 // ==============================================
@@ -253,7 +244,7 @@ function appendStyleToBuilder(promptText, styleName = '', styleType = 'style') {
     if (container) {
         const textareas = container.querySelectorAll('.style-textarea');
         const lastTextarea = textareas[textareas.length - 1];
-        if (lastTextarea && window.innerWidth > 1100) {
+        if (lastTextarea && isBuilderDrawerOpen()) {
             lastTextarea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         } else {
             pulseBuilderToggleBtn();
@@ -913,39 +904,6 @@ function clearAllFields() {
     }
 }
 
-/**
- * Generate a random style and demonstration prompt
- */
-function generateRandomPrompt() {
-    let randPrompt = '';
-    let randName = '';
-    if (window.stylesData && window.stylesData.length > 0) {
-        const randItem = window.stylesData[Math.floor(Math.random() * window.stylesData.length)];
-        randPrompt = randItem.prompt || '';
-        randName = randItem.name || '';
-    }
-
-    const chosenPreset = RANDOM_PROMPT_PRESETS[Math.floor(Math.random() * RANDOM_PROMPT_PRESETS.length)];
-
-    styleIdCounter = 1;
-    builderState.styles = [
-        { id: 'style-1', prompt: randPrompt, name: randName }
-    ];
-    builderState.prompt = chosenPreset;
-
-    const promptElem = document.getElementById('prompt-content');
-    if (promptElem) promptElem.value = chosenPreset;
-
-    renderStyleBoxes();
-    updatePromptOutputPreview();
-    updateTitleOutput();
-    updateClearButtonStates(document);
-
-    if (typeof showToast === 'function') {
-        showToast('RANDOM PROMPT GENERATED');
-    }
-}
-
 // ==============================================
 // UTILITIES: CLEAR BUTTONS & RESIZE HANDLES
 // ==============================================
@@ -1196,9 +1154,6 @@ function initPromptBuilder() {
     const clearBtn = document.getElementById('btn-clear-all');
     if (clearBtn) clearBtn.addEventListener('click', clearAllFields);
 
-    const randomBtn = document.getElementById('btn-random-prompt');
-    if (randomBtn) randomBtn.addEventListener('click', generateRandomPrompt);
-
     const handleCopyPrompt = async () => {
         const promptText = buildPromptText();
         if (!promptText) {
@@ -1228,29 +1183,32 @@ function initPromptBuilder() {
     const copyBtnTop = document.getElementById('btn-copy-prompt-top');
     if (copyBtnTop) copyBtnTop.addEventListener('click', handleCopyPrompt);
 
-    // Bind Copy for ComfyQueue button
+    // Bind Copy for ComfyQueue buttons
+    const handleCopyComfyQueue = async () => {
+        const text = buildComfyQueueText();
+        if (!text) {
+            if (typeof showToast === 'function') showToast('NO PROMPT CONTENT TO COPY');
+            return;
+        }
+        let success = false;
+        if (typeof copyToClipboard === 'function') {
+            success = await copyToClipboard(text);
+        } else {
+            try {
+                await navigator.clipboard.writeText(text);
+                success = true;
+            } catch { success = false; }
+        }
+        if (typeof showToast === 'function') {
+            showToast(success ? 'COMFYQUEUE PROMPT COPIED!' : 'COPY FAILED');
+        }
+    };
+
     const comfyQueueBtn = document.getElementById('btn-copy-comfy-queue');
-    if (comfyQueueBtn) {
-        comfyQueueBtn.addEventListener('click', async () => {
-            const text = buildComfyQueueText();
-            if (!text) {
-                if (typeof showToast === 'function') showToast('NO PROMPT CONTENT TO COPY');
-                return;
-            }
-            let success = false;
-            if (typeof copyToClipboard === 'function') {
-                success = await copyToClipboard(text);
-            } else {
-                try {
-                    await navigator.clipboard.writeText(text);
-                    success = true;
-                } catch { success = false; }
-            }
-            if (typeof showToast === 'function') {
-                showToast(success ? 'COMFYQUEUE PROMPT COPIED!' : 'COPY FAILED');
-            }
-        });
-    }
+    if (comfyQueueBtn) comfyQueueBtn.addEventListener('click', handleCopyComfyQueue);
+
+    const comfyQueueBtnTop = document.getElementById('btn-copy-comfy-queue-top');
+    if (comfyQueueBtnTop) comfyQueueBtnTop.addEventListener('click', handleCopyComfyQueue);
 
     // Bind Clear Buttons
     bindClearButtons(document, (targetId) => {
@@ -1294,7 +1252,6 @@ window.updatePromptOutputPreview = updatePromptOutputPreview;
 window.updateTitleOutput = updateTitleOutput;
 window.updateDrawerBadge = updateDrawerBadge;
 window.clearAllFields = clearAllFields;
-window.generateRandomPrompt = generateRandomPrompt;
 window.applyResolutionParams = applyResolutionParams;
 window.swapResolution = swapResolution;
 window.getLoraDefaultWeight = getLoraDefaultWeight;

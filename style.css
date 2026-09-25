@@ -37,6 +37,7 @@
 
 html {
     scroll-behavior: smooth;
+    scrollbar-gutter: stable;
 }
 
 body {
@@ -46,6 +47,7 @@ body {
     font-size: 14px;
     line-height: 1.5;
     min-height: 100vh;
+    transition: padding-right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* --- Header --- */
@@ -82,6 +84,11 @@ body {
     padding: 24px 20px 60px;
     display: block;
     width: 100%;
+    transition: max-width 0.35s cubic-bezier(0.16, 1, 0.3, 1), padding 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#gallery-section {
+    transition: padding 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* --- Section Headers --- */
@@ -95,12 +102,20 @@ body {
     border-bottom: 1px dashed var(--border);
 }
 
-.section-header h2,
-.builder-header h2 {
+.section-header h2 {
     font-family: var(--font-retro);
     font-size: 24px;
     color: var(--accent);
     letter-spacing: 2px;
+}
+
+.builder-header h2,
+.builder-header-title-wrap h2 {
+    font-family: var(--font-retro);
+    font-size: 24px;
+    color: #fbbf24;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(251, 191, 36, 0.35);
 }
 
 .section-header-left {
@@ -140,6 +155,14 @@ body {
 #btn-header-builder-drawer:active,
 .section-header-builder-btn:active {
     transform: translateY(0);
+}
+
+body.drawer-open #btn-header-builder-drawer,
+#btn-header-builder-drawer[aria-expanded="true"] {
+    background: rgba(251, 191, 36, 0.22) !important;
+    border-color: #fbbf24 !important;
+    color: #fef08a !important;
+    box-shadow: 0 0 14px rgba(251, 191, 36, 0.35);
 }
 
 #btn-header-builder-drawer svg,
@@ -656,12 +679,14 @@ body {
     font-weight: bold;
 }
 
-/* --- LoRA Style Selector Bar (Sticky Top Navigation) --- */
-.lora-style-selector {
+/* --- LoRA & Pre-Trained Style Selector Bar (Sticky Top Navigation) --- */
+.lora-style-selector,
+#styles-style-selector,
+#lora-style-selector {
     position: sticky;
     top: 0;
     z-index: 150;
-    background: rgba(10, 10, 10, 0.95);
+    background: rgba(10, 10, 10, 0.98);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     display: flex;
@@ -1362,18 +1387,37 @@ body {
     }
 }
 
-/* --- Body Lock When Drawer Open --- */
-body.drawer-open {
-    overflow: hidden;
+/* --- Drawer Width Variable & Breakpoints --- */
+:root {
+    --builder-drawer-width: min(540px, 94vw);
 }
 
-/* --- Prompt Builder Slide-Out Drawer (Default for All Screen Sizes) --- */
+@media (min-width: 1400px) and (max-width: 1599px) {
+    :root {
+        --builder-drawer-width: 500px;
+    }
+}
+
+@media (min-width: 1600px) {
+    :root {
+        --builder-drawer-width: 540px;
+    }
+}
+
+/* --- Body Lock When Drawer Open (Overlay Mode on Screens < 1400px) --- */
+@media (max-width: 1399px) {
+    body.drawer-open {
+        overflow: hidden;
+    }
+}
+
+/* --- Prompt Builder Slide-Out Drawer --- */
 #builder-section {
     position: fixed;
     top: 0;
     right: 0;
     bottom: 0;
-    width: min(580px, 94vw);
+    width: var(--builder-drawer-width);
     max-width: 100vw;
     height: 100vh;
     height: 100dvh;
@@ -1387,7 +1431,7 @@ body.drawer-open {
     overscroll-behavior: contain;
     transform: translateX(105%);
     visibility: hidden;
-    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s ease, box-shadow 0.35s ease;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s ease, box-shadow 0.35s ease, width 0.35s ease;
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -1396,6 +1440,35 @@ body.drawer-open {
 #builder-section.drawer-open {
     transform: translateX(0);
     visibility: visible;
+}
+
+/* --- Prompt Builder Side-by-Side Push Mode (Screens >= 1400px: 3 Cards + Drawer fit together) --- */
+@media (min-width: 1400px) {
+    body.drawer-open {
+        padding-right: var(--builder-drawer-width);
+    }
+
+    body.drawer-open .main-layout {
+        max-width: 1650px;
+    }
+
+    body.drawer-open #gallery-section {
+        padding-left: 48px;
+    }
+
+    body.drawer-open .gallery-nav-rail {
+        left: max(10px, calc((100vw - var(--builder-drawer-width) - 1500px) / 2 - 50px));
+    }
+
+    /* In push mode, do not show backdrop overlay so gallery cards remain visible & interactive */
+    body.drawer-open .builder-backdrop {
+        display: none !important;
+    }
+
+    /* Reposition compare toggle when builder drawer is open so it's not obscured */
+    body.drawer-open .compare-drawer-toggle {
+        right: calc(var(--builder-drawer-width) + 24px);
+    }
 }
 
 .builder-header {
@@ -1409,8 +1482,9 @@ body.drawer-open {
     padding: 20px 20px 14px;
     border-bottom: 1px dashed var(--border);
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
 }
 
 .builder-header-title-wrap {
@@ -1419,31 +1493,34 @@ body.drawer-open {
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 6px;
+    color: #fbbf24;
 }
 
-/* Close Drawer Button */
+/* Close Drawer Button - copied from lightbox-close without animation */
 .btn-close-drawer {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: var(--font-retro);
+    font-size: 20px;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
-    background: #181818;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    color: var(--text-muted);
-    cursor: pointer;
     transition: all 0.2s ease;
-    padding: 0;
     flex-shrink: 0;
+    padding: 0;
+    margin-left: auto;
+    line-height: 1;
 }
 
 .btn-close-drawer:hover {
     color: var(--danger);
-    border-color: var(--danger);
+    border-color: rgba(255, 68, 68, 0.5);
     background: var(--danger-bg);
-    transform: rotate(90deg);
 }
 
 /* Floating Prompt Builder Drawer Toggle Button */
@@ -1468,8 +1545,15 @@ body.drawer-open {
     cursor: pointer;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8), 0 0 18px rgba(251, 191, 36, 0.25);
     text-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, opacity 0.25s ease;
     user-select: none;
+}
+
+/* Hide floating toggle button when the builder drawer is open */
+body.drawer-open .builder-drawer-toggle {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(20px) scale(0.9);
 }
 
 .builder-drawer-toggle:hover {
@@ -1553,6 +1637,8 @@ body.drawer-open {
 .builder-actions {
     display: flex;
     gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
 }
 
 /* --- Buttons --- */
@@ -3227,7 +3313,7 @@ body.drawer-open {
     letter-spacing: 1.5px;
     cursor: pointer;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8), 0 0 14px var(--accent-glow);
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, background-color 0.25s ease, border-color 0.25s ease;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, right 0.35s ease, bottom 0.25s ease, opacity 0.25s ease;
     user-select: none;
 }
 
@@ -3246,6 +3332,11 @@ body:has(#compare-drawer.open) .compare-drawer-toggle {
 /* When builder toggle also exists, stack compare above it */
 body:has(.builder-drawer-toggle) .compare-drawer-toggle {
     bottom: 80px;
+}
+
+/* When builder drawer is open, builder toggle is hidden, so drop compare toggle back down to 24px */
+body.drawer-open:has(.builder-drawer-toggle) .compare-drawer-toggle {
+    bottom: 24px;
 }
 
 .compare-drawer-toggle:hover {
