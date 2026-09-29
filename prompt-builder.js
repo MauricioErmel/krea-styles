@@ -80,6 +80,15 @@ const DEFAULT_PASSIVE_LORAS = [
         displayName: 'color_temp_krea2_loraholic',
         strength: 1,
         defaultStrength: 1
+    },
+    {
+        id: 'lora_108',
+        order: 108,
+        on: false,
+        lora: 'krea2\\THE age slider.safetensors',
+        displayName: 'THE age slider',
+        strength: 1,
+        defaultStrength: 1
     }
 ];
 
@@ -473,67 +482,67 @@ async function handleCopyTitle() {
 
 const RESOLUTION_TABLE = {
     '0.5': {
-        '4:3':  { width: 816,  height: 612 },
-        '3:4':  { width: 612,  height: 816 },
-        '16:9': { width: 943,  height: 530 },
-        '9:16': { width: 530,  height: 943 },
-        '1:1':  { width: 707,  height: 707 },
-        '3:2':  { width: 866,  height: 577 },
-        '2:3':  { width: 577,  height: 866 }
+        '4:3': { width: 816, height: 612 },
+        '3:4': { width: 612, height: 816 },
+        '16:9': { width: 943, height: 530 },
+        '9:16': { width: 530, height: 943 },
+        '1:1': { width: 707, height: 707 },
+        '3:2': { width: 866, height: 577 },
+        '2:3': { width: 577, height: 866 }
     },
     '1': {
-        '4:3':  { width: 1155, height: 866 },
-        '3:4':  { width: 866,  height: 1155 },
+        '4:3': { width: 1155, height: 866 },
+        '3:4': { width: 866, height: 1155 },
         '16:9': { width: 1333, height: 750 },
-        '9:16': { width: 750,  height: 1333 },
-        '1:1':  { width: 1000, height: 1000 },
-        '3:2':  { width: 1225, height: 816 },
-        '2:3':  { width: 816,  height: 1225 }
+        '9:16': { width: 750, height: 1333 },
+        '1:1': { width: 1000, height: 1000 },
+        '3:2': { width: 1225, height: 816 },
+        '2:3': { width: 816, height: 1225 }
     },
     '1.5': {
-        '4:3':  { width: 1414, height: 1061 },
-        '3:4':  { width: 1061, height: 1414 },
+        '4:3': { width: 1414, height: 1061 },
+        '3:4': { width: 1061, height: 1414 },
         '16:9': { width: 1633, height: 919 },
-        '9:16': { width: 919,  height: 1633 },
-        '1:1':  { width: 1225, height: 1225 },
-        '3:2':  { width: 1500, height: 1000 },
-        '2:3':  { width: 1000, height: 1500 }
+        '9:16': { width: 919, height: 1633 },
+        '1:1': { width: 1225, height: 1225 },
+        '3:2': { width: 1500, height: 1000 },
+        '2:3': { width: 1000, height: 1500 }
     },
     '2': {
-        '4:3':  { width: 1633, height: 1225 },
-        '3:4':  { width: 1225, height: 1633 },
+        '4:3': { width: 1633, height: 1225 },
+        '3:4': { width: 1225, height: 1633 },
         '16:9': { width: 1886, height: 1061 },
         '9:16': { width: 1061, height: 1886 },
-        '1:1':  { width: 1414, height: 1414 },
-        '3:2':  { width: 1732, height: 1155 },
-        '2:3':  { width: 1155, height: 1732 }
+        '1:1': { width: 1414, height: 1414 },
+        '3:2': { width: 1732, height: 1155 },
+        '2:3': { width: 1155, height: 1732 }
     },
     '3': {
-        '4:3':  { width: 2000, height: 1500 },
-        '3:4':  { width: 1500, height: 2000 },
+        '4:3': { width: 2000, height: 1500 },
+        '3:4': { width: 1500, height: 2000 },
         '16:9': { width: 2309, height: 1299 },
         '9:16': { width: 1299, height: 2309 },
-        '1:1':  { width: 1732, height: 1732 },
-        '3:2':  { width: 2121, height: 1414 },
-        '2:3':  { width: 1414, height: 2121 }
+        '1:1': { width: 1732, height: 1732 },
+        '3:2': { width: 2121, height: 1414 },
+        '2:3': { width: 1414, height: 2121 }
     },
     '4': {
-        '4:3':  { width: 2309, height: 1732 },
-        '3:4':  { width: 1732, height: 2309 },
+        '4:3': { width: 2309, height: 1732 },
+        '3:4': { width: 1732, height: 2309 },
         '16:9': { width: 2667, height: 1500 },
         '9:16': { width: 1500, height: 2667 },
-        '1:1':  { width: 2000, height: 2000 },
-        '3:2':  { width: 2449, height: 1633 },
-        '2:3':  { width: 1633, height: 2449 }
+        '1:1': { width: 2000, height: 2000 },
+        '3:2': { width: 2449, height: 1633 },
+        '2:3': { width: 1633, height: 2449 }
     },
     '10': {
-        '4:3':  { width: 3651, height: 2739 },
-        '3:4':  { width: 2739, height: 3651 },
+        '4:3': { width: 3651, height: 2739 },
+        '3:4': { width: 2739, height: 3651 },
         '16:9': { width: 4216, height: 2372 },
         '9:16': { width: 2372, height: 4216 },
-        '1:1':  { width: 3162, height: 3162 },
-        '3:2':  { width: 3873, height: 2582 },
-        '2:3':  { width: 2582, height: 3873 }
+        '1:1': { width: 3162, height: 3162 },
+        '3:2': { width: 3873, height: 2582 },
+        '2:3': { width: 2582, height: 3873 }
     }
 };
 
@@ -881,10 +890,12 @@ function initPassiveLorasSection() {
     };
 
     const renderRows = () => {
-        const sliderMin = -5;
-        const sliderMax = 5;
+        const defaultMin = -10;
+        const defaultMax = 10;
 
         container.innerHTML = builderState.passiveLoras.map(lora => {
+            const sliderMin = (typeof lora.min === 'number') ? lora.min : defaultMin;
+            const sliderMax = (typeof lora.max === 'number') ? lora.max : defaultMax;
             const sliderVal = Math.max(sliderMin, Math.min(sliderMax, lora.strength));
 
             return `
@@ -896,7 +907,6 @@ function initPassiveLorasSection() {
                                 <span class="toggle-thumb"></span>
                             </span>
                         </label>
-                        <span class="passive-lora-badge">LoRA ${lora.order}</span>
                         <div class="passive-lora-name-wrap" title="${escapeHtml(lora.lora)}">
                             <span class="passive-lora-name">${escapeHtml(lora.displayName)}</span>
                         </div>
@@ -1134,9 +1144,9 @@ function buildComfyQueueText() {
     const resStr = `${w}x${h}`;
 
     // --- Seed & Steps ---
-    const seedInput  = document.getElementById('seed-input');
+    const seedInput = document.getElementById('seed-input');
     const stepsInput = document.getElementById('steps-input');
-    const seed  = (seedInput  && seedInput.value.trim()  !== '') ? parseInt(seedInput.value,  10) : '';
+    const seed = (seedInput && seedInput.value.trim() !== '') ? parseInt(seedInput.value, 10) : '';
     const steps = (stepsInput && stepsInput.value.trim() !== '') ? parseInt(stepsInput.value, 10) : 8;
 
     let seedStepsParts = [];
@@ -1155,7 +1165,7 @@ function buildComfyQueueText() {
         const loraRecord = (window.LORA_DATA && Array.isArray(window.LORA_DATA))
             ? window.LORA_DATA.find(l => l.name === s.name.trim())
             : null;
-        const order  = loraRecord ? loraRecord.order : s.name.trim();
+        const order = loraRecord ? loraRecord.order : s.name.trim();
         const weight = typeof s.weight === 'number' ? s.weight : 1.0;
         return `lora_${order}=${weight}`;
     });
@@ -1172,9 +1182,9 @@ function buildComfyQueueText() {
     }
 
     // --- Assemble ---
-    const titleLine  = title ? `${title} |||` : '|||';
-    const resLine    = `||| ${resStr}`;
-    const paramLine  = `||| ${seedStepsStr}`;
+    const titleLine = title ? `${title} |||` : '|||';
+    const resLine = `||| ${resStr}`;
+    const paramLine = `||| ${seedStepsStr}`;
 
     return `${titleLine}\n${fullPrompt}\n${resLine}\n${paramLine}${loraLines}`.trim();
 }
