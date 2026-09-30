@@ -33,6 +33,9 @@
     --danger-bg: rgba(255, 68, 68, 0.1);
     --font-mono: 'Share Tech Mono', 'Courier New', monospace;
     --font-retro: 'VT323', monospace;
+    --header-main: #F2EBD5;
+    --header-secondary: #F2C288;
+    --header-dark: #4A678C;
 }
 
 html {
@@ -52,29 +55,244 @@ body {
 
 /* --- Header --- */
 #site-header {
+    position: relative;
     text-align: center;
-    padding: 30px 20px 20px;
-    border-bottom: 1px solid var(--border);
-    background: radial-gradient(circle at top, rgba(0, 255, 136, 0.03) 0%, transparent 70%);
+    padding: 34px 20px 24px;
+    background:
+        radial-gradient(ellipse 65% 100% at 50% 0%, rgba(74, 103, 140, 0.14) 0%, rgba(74, 103, 140, 0.02) 65%, transparent 100%),
+        linear-gradient(180deg, rgba(74, 103, 140, 0.06) 0%, transparent 100%),
+        var(--bg);
+    border-bottom: 1px solid rgba(74, 103, 140, 0.32);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
 }
 
-#site-header h1 {
+/* Subtle top hairline accent bar */
+#site-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(74, 103, 140, 0.35) 15%,
+        var(--header-dark) 35%,
+        var(--header-secondary) 50%,
+        var(--header-dark) 65%,
+        rgba(74, 103, 140, 0.35) 85%,
+        transparent 100%
+    );
+    z-index: 1;
+}
+
+/* Geometric prism marker centered on the bottom border */
+#site-header::after {
+    content: '◆';
+    position: absolute;
+    bottom: -7px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    line-height: 1;
+    color: var(--header-secondary);
+    background: var(--bg);
+    padding: 0 8px;
+    letter-spacing: 0;
+    z-index: 2;
+}
+
+.site-header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+}
+
+/* Brand Lockup: Logo on the left of title + subtitle */
+.site-header-brand {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    max-width: 100%;
+}
+
+/* Logo: Borderless, no hover animation, with subtle, tight brightness behind */
+.site-logo-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Subtle, smaller brightness closely centered behind the logo (#F2EBD5) */
+.site-logo-wrap::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    height: 90%;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        rgba(242, 235, 213, 0.35) 0%,
+        rgba(242, 235, 213, 0.14) 45%,
+        transparent 70%
+    );
+    filter: blur(6px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.site-header-logo {
+    position: relative;
+    z-index: 1;
+    width: clamp(54px, 5.5vw, 68px);
+    height: clamp(54px, 5.5vw, 68px);
+    object-fit: contain;
+    display: block;
+    flex-shrink: 0;
+    user-select: none;
+    -webkit-user-drag: none;
+    border: none;
+    filter: drop-shadow(0 0 6px rgba(242, 235, 213, 0.28)) drop-shadow(0 3px 8px rgba(0, 0, 0, 0.4));
+}
+
+/* Header Text Container (title + subtitle stacked) */
+.site-header-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+}
+
+/* Title Typography — Keep Font, Remove Glow, Main color #F2EBD5, Secondary #F2C288 */
+#site-header h1,
+.site-title {
     font-family: var(--font-retro);
-    font-size: clamp(28px, 5vw, 50px);
-    color: var(--accent);
-    letter-spacing: 4px;
+    font-size: clamp(26px, 4.2vw, 46px);
+    line-height: 1.05;
+    letter-spacing: 3.5px;
     text-transform: uppercase;
-    text-shadow:
-        0 0 10px var(--accent-glow),
-        0 0 30px var(--accent-glow);
-    margin-bottom: 6px;
+    color: var(--header-main); /* Main color #F2EBD5 */
+    text-shadow: none; /* Glow effect removed */
+    margin: 0 0 5px 0;
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0 8px;
 }
 
+.site-title-primary {
+    color: var(--header-main);
+}
+
+.site-title-sep {
+    color: var(--header-secondary); /* Secondary color #F2C288 */
+    font-size: 0.9em;
+    opacity: 0.92;
+    padding: 0 2px;
+}
+
+.site-title-secondary {
+    color: var(--header-main);
+}
+
+/* Subtitle */
 .subtitle {
+    font-family: var(--font-mono);
     font-size: 13px;
-    color: var(--text-muted);
-    letter-spacing: 2px;
+    color: rgba(242, 235, 213, 0.72); /* Refined main palette tint */
+    letter-spacing: 1.8px;
     text-transform: uppercase;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    line-height: 1.5;
+}
+
+/* Subtle badge chips for subtitle — BORDER REMOVED */
+.sub-chip {
+    color: var(--header-secondary); /* Secondary color #F2C288 */
+    background: rgba(74, 103, 140, 0.22); /* Dark color #4A678C used with caution */
+    border: none; /* Border removed */
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 12px;
+    letter-spacing: 1px;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.sub-chip:hover {
+    background: rgba(74, 103, 140, 0.38);
+    color: var(--header-main);
+}
+
+@media (max-width: 680px) {
+    #site-header {
+        padding: 24px 16px 20px;
+    }
+
+    .site-header-brand {
+        gap: 14px;
+    }
+
+    .site-header-logo {
+        width: 46px;
+        height: 46px;
+    }
+
+    #site-header h1,
+    .site-title {
+        font-size: clamp(21px, 5.5vw, 30px);
+        letter-spacing: 2px;
+        margin-bottom: 4px;
+    }
+
+    .subtitle {
+        font-size: 11px;
+        letter-spacing: 1px;
+        gap: 4px;
+    }
+
+    .sub-chip {
+        padding: 1px 5px;
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 520px) {
+    .site-header-brand {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 12px;
+    }
+
+    .site-header-content {
+        align-items: center;
+        text-align: center;
+    }
+
+    #site-header h1,
+    .site-title {
+        justify-content: center;
+    }
+
+    .subtitle {
+        justify-content: center;
+    }
 }
 
 /* --- Main Split-Screen Layout --- */

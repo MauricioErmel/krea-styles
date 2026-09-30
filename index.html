@@ -12,8 +12,22 @@
 
 <body>
     <header id="site-header">
-        <h1>KREA STYLES & PROMPT BUILDER</h1>
-        <p class="subtitle">A list of pre-trained styles and LoRAs from Krea2 model curated by Me.</p>
+        <div class="site-header-inner">
+            <div class="site-header-brand">
+                <div class="site-logo-wrap">
+                    <img src="img/prisminha.svg" alt="Krea Styles Logo" class="site-header-logo" width="80" height="80">
+                </div>
+                <div class="site-header-content">
+                    <h1 class="site-title">
+                        <span class="site-title-primary">KREA STYLES</span>
+                        <span class="site-title-sep">&amp;</span>
+                        <span class="site-title-secondary">PROMPT BUILDER</span>
+                    </h1>
+                    <p class="subtitle">A list of pre-trained styles and LoRAs from <span class="sub-chip">Krea2</span>
+                        model curated by <span class="sub-chip">Me</span>.</p>
+                </div>
+            </div>
+        </div>
     </header>
 
     <main class="main-layout">
@@ -271,8 +285,11 @@
                 </div>
                 <div class="builder-actions">
                     <button type="button" id="btn-copy-prompt-top" class="btn btn-accent">Copy Complete Prompt</button>
-                    <button type="button" id="btn-copy-comfy-queue-top" class="btn btn-comfy-queue" title="Copy prompt formatted for comfy_queue">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:4px;">
+                    <button type="button" id="btn-copy-comfy-queue-top" class="btn btn-comfy-queue"
+                        title="Copy prompt formatted for comfy_queue">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            style="vertical-align:-1px;margin-right:4px;">
                             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                         </svg>
@@ -290,7 +307,8 @@
                         <span class="tag-badge">Free text or click any style from gallery</span>
                     </div>
                     <div class="card-title-actions">
-                        <button type="button" id="btn-add-style" class="btn btn-sm btn-accent" title="Add another style / LoRA box">+1</button>
+                        <button type="button" id="btn-add-style" class="btn btn-sm btn-accent"
+                            title="Add another style / LoRA box">+1</button>
                     </div>
                 </div>
                 <div id="style-boxes-container" class="style-boxes-container">
@@ -326,15 +344,18 @@
                         <span class="tag-badge">Image naming helper (not added to prompt)</span>
                     </div>
                     <div class="card-title-actions">
-                        <button type="button" id="btn-copy-title" class="btn btn-sm btn-accent" title="Copy generated title">Copy Title</button>
+                        <button type="button" id="btn-copy-title" class="btn btn-sm btn-accent"
+                            title="Copy generated title">Copy Title</button>
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="title-user-input">
                         <span>Custom Title</span>
-                        <button type="button" class="btn-clear-field" data-clear-target="title-user-input" title="Clear title">Clear</button>
+                        <button type="button" class="btn-clear-field" data-clear-target="title-user-input"
+                            title="Clear title">Clear</button>
                     </label>
-                    <input type="text" id="title-user-input" class="title-input-field" placeholder="e.g. Cyberpunk Warrior">
+                    <input type="text" id="title-user-input" class="title-input-field"
+                        placeholder="e.g. Cyberpunk Warrior">
                 </div>
                 <div class="form-group">
                     <div class="title-output-header-row">
@@ -352,7 +373,8 @@
                             <span class="title-placeholder">Type a custom title or select styles above...</span>
                         </div>
                         <span class="title-copy-badge">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                             </svg>
@@ -378,16 +400,19 @@
                 <div class="res-inputs-row">
                     <div class="res-input-group">
                         <label for="res-width-input">WIDTH (PX)</label>
-                        <input type="number" id="res-width-input" class="res-number-input" value="1000" min="64" max="16384" step="1">
+                        <input type="number" id="res-width-input" class="res-number-input" value="1000" min="64"
+                            max="16384" step="1">
                     </div>
                     <button type="button" id="btn-swap-resolution" class="btn-res-swap" title="Swap Width and Height">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M7 16V4m0 0L3 8m4-4l4 4m6 4v12m0 0l4-4m-4 4l-4-4"/>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M7 16V4m0 0L3 8m4-4l4 4m6 4v12m0 0l4-4m-4 4l-4-4" />
                         </svg>
                     </button>
                     <div class="res-input-group">
                         <label for="res-height-input">HEIGHT (PX)</label>
-                        <input type="number" id="res-height-input" class="res-number-input" value="1000" min="64" max="16384" step="1">
+                        <input type="number" id="res-height-input" class="res-number-input" value="1000" min="64"
+                            max="16384" step="1">
                     </div>
                 </div>
 
@@ -432,8 +457,10 @@
                         <div class="seed-field-wrap">
                             <input type="number" id="seed-input" class="res-number-input seed-number-input"
                                 placeholder="e.g. 42" min="0" max="9999999999" step="1">
-                            <button type="button" id="btn-random-seed" class="btn-random-seed" title="Generate random seed">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <button type="button" id="btn-random-seed" class="btn-random-seed"
+                                title="Generate random seed">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <polyline points="17 1 21 5 17 9"></polyline>
                                     <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
                                     <polyline points="7 23 3 19 7 15"></polyline>
@@ -445,7 +472,8 @@
                     </div>
                     <div class="steps-input-group">
                         <label for="steps-input">STEPS</label>
-                        <input type="number" id="steps-input" class="res-number-input" value="8" min="1" max="150" step="1">
+                        <input type="number" id="steps-input" class="res-number-input" value="8" min="1" max="150"
+                            step="1">
                     </div>
                 </div>
             </div>
@@ -472,7 +500,8 @@
                     </div>
                     <div class="passive-loras-header-right">
                         <span id="passive-loras-count-badge" class="passive-loras-count-badge">2/9 ACTIVE</span>
-                        <button type="button" id="btn-reset-all-passive-loras" class="btn-reset-passive-all" title="Reset all passive LoRAs to default settings">↺</button>
+                        <button type="button" id="btn-reset-all-passive-loras" class="btn-reset-passive-all"
+                            title="Reset all passive LoRAs to default settings">↺</button>
                     </div>
                 </div>
                 <div id="passive-loras-container" class="passive-loras-container">
@@ -486,8 +515,11 @@
                     <h3>CONCATENATED PROMPT OUTPUT</h3>
                     <div class="output-actions">
                         <button type="button" id="btn-copy-prompt" class="btn btn-accent">Copy Complete Prompt</button>
-                        <button type="button" id="btn-copy-comfy-queue" class="btn btn-comfy-queue" title="Copy prompt formatted for comfy_queue">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:4px;">
+                        <button type="button" id="btn-copy-comfy-queue" class="btn btn-comfy-queue"
+                            title="Copy prompt formatted for comfy_queue">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                style="vertical-align:-1px;margin-right:4px;">
                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                             </svg>
